@@ -2274,15 +2274,23 @@ function checkEquationSymbols(symbols){
       else if(t.type !== 'op') return { valid:false, message:'รูปแบบสมการไม่ถูกต้อง' };
     }
   }
-  if(eqCount !== 1){
-    return { valid:false, message:'สมการต้องมีเครื่องหมาย "=" เพียงหนึ่งเดียว' };
+  if(eqCount < 1){
+    return { valid:false, message:'สมการต้องมีเครื่องหมาย "=" อย่างน้อยหนึ่งตัว' };
   }
 
-  const eqIndex = finalTokens.findIndex(t => t.type === 'eq');
-  const leftTokens = finalTokens.slice(0, eqIndex);
-  const rightTokens = finalTokens.slice(eqIndex + 1);
-  if(leftTokens.length === 0 || rightTokens.length === 0){
-    return { valid:false, message:'ต้องมีตัวเลขทั้งสองฝั่งของเครื่องหมาย "="' };
+  // แบ่งเป็นหลายท่อนตามจำนวน "=" ที่มี (รองรับสมการต่อกันหลายตัว เช่น 2+1=3=6÷2)
+  const segments = [];
+  let segStart = 0;
+  for(let i = 0; i < finalTokens.length; i++){
+    if(finalTokens[i].type === 'eq'){
+      segments.push(finalTokens.slice(segStart, i));
+      segStart = i + 1;
+    }
+  }
+  segments.push(finalTokens.slice(segStart));
+
+  if(segments.some(seg => seg.length === 0)){
+    return { valid:false, message:'ต้องมีตัวเลขอยู่ทุกฝั่งของเครื่องหมาย "="' };
   }
 
   function evalSide(tokens){
@@ -2314,17 +2322,16 @@ function checkEquationSymbols(symbols){
     return result;
   }
 
-  const leftVal = evalSide(leftTokens);
-  const rightVal = evalSide(rightTokens);
-
-  if(leftVal === null || rightVal === null){
+  const segmentValues = segments.map(evalSide);
+  if(segmentValues.some(v => v === null)){
     return { valid:false, message:'ห้ามหารด้วย 0' };
   }
-  if(Math.abs(leftVal - rightVal) > 1e-9){
-    return { valid:false, message:`สมการไม่ถูกต้อง (${leftVal} ≠ ${rightVal})` };
+  const allEqual = segmentValues.every(v => Math.abs(v - segmentValues[0]) <= 1e-9);
+  if(!allEqual){
+    return { valid:false, message:`สมการไม่ถูกต้อง (${segmentValues.join(' ≠ ')})` };
   }
 
-  return { valid:true, leftVal, rightVal };
+  return { valid:true, leftVal: segmentValues[0], rightVal: segmentValues[0] };
 }
 
 /* คำนวณคะแนนของการลงสมการหนึ่งครั้ง ตามกติกา A-Math:
