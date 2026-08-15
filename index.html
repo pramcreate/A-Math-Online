@@ -4102,7 +4102,6 @@ function applyOnlineRoomUpdate(data){
 
   // sync เทิร์น
   const isMyTurn = data.turn === mySlot;
-  const turnJustBecameMine = isMyTurn && lastKnownOnlineTurn !== data.turn;
   lastKnownOnlineTurn = data.turn;
 
   currentTurn = isMyTurn ? 'player' : 'opponent';
@@ -4113,8 +4112,21 @@ function applyOnlineRoomUpdate(data){
 
   updateOpponentPresenceDot();
 
-  // เติมแป้นเบี้ยของเราใหม่เฉพาะตอนเทิร์นเพิ่งเปลี่ยนมาเป็นของเรา (หรือโหลดครั้งแรก)
-  if(turnJustBecameMine || rackSlots.every(s => s.children.length === 0)){
+  // เติมแป้นเบี้ยของเราใหม่เฉพาะตอนที่ยังไม่เคยมีเบี้ยเลย (โหลดครั้งแรก)
+  // หรือชุดเบี้ยที่ Firestore เก็บไว้ไม่ตรงกับที่แสดงอยู่จริง (เพิ่งลง/เปลี่ยนเบี้ยไปแล้วแต่จอยังไม่อัปเดต)
+  // ไม่ยึดจังหวะ "เทิร์นเพิ่งเปลี่ยนมาเป็นของเรา" อีกต่อไป กันไม่ให้การสลับเบี้ยในถาดระหว่างรอคู่ต่อสู้หายไป
+  const currentRackValues = rackSlots
+    .map(s => s.firstElementChild?.dataset.value)
+    .filter(Boolean)
+    .sort()
+    .join(',');
+  const firestoreRackValues = (data[mySlot]?.rack || [])
+    .map(t => t.value)
+    .sort()
+    .join(',');
+  const rackIsEmpty = rackSlots.every(s => s.children.length === 0);
+
+  if(rackIsEmpty || currentRackValues !== firestoreRackValues){
     rackSlots.forEach(s => s.innerHTML = '');
     (data[mySlot]?.rack || []).forEach((tileData, idx) => {
       if(idx < rackSlots.length) rackSlots[idx].appendChild(buildTileEl(tileData));
