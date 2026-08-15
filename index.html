@@ -123,18 +123,22 @@
   }
 
   .reset-zoom-btn{
-    margin-top: 8px;
+    position: fixed;
+    top: 14px;
+    right: 14px;
+    z-index: 600;
     font-family: 'Kanit', sans-serif;
     font-weight: 600;
-    font-size: 12px;
+    font-size: 12.5px;
     color: var(--board-green-dark);
     background: #fff;
     border: 1.5px solid var(--cream-deep);
     border-radius: 999px;
-    padding: 6px 14px;
+    padding: 8px 14px;
     cursor: pointer;
-    box-shadow: 0 2px 8px -2px rgba(0,0,0,0.15);
+    box-shadow: 0 3px 10px -3px rgba(60,45,20,0.25);
   }
+  .reset-zoom-btn:active{ transform: translateY(1px); }
 
   .board{
     display: grid;
@@ -1038,6 +1042,38 @@
   .start-diff-btn:active{ transform: scale(0.96); }
   .start-diff-btn .sdb-emoji{ font-size: 22px; }
 
+  .start-tileset-buttons{
+    display: flex;
+    gap: 8px;
+    margin-bottom: 4px;
+  }
+  .start-tileset-btn{
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    font-family: 'Kanit', sans-serif;
+    font-weight: 600;
+    font-size: 12.5px;
+    color: var(--ink);
+    background: var(--cream);
+    border: 2px solid var(--cream-deep);
+    border-radius: 12px;
+    padding: 12px 4px;
+    cursor: pointer;
+    transition: transform 0.1s ease, border-color 0.15s ease, background 0.15s ease;
+  }
+  .start-tileset-btn small{ font-weight: 400; opacity: 0.8; }
+  .start-tileset-btn:hover{ border-color: var(--blue-tile-lt); }
+  .start-tileset-btn:active{ transform: scale(0.96); }
+  .start-tileset-btn .sdb-emoji{ font-size: 20px; }
+  .start-tileset-btn.active{
+    background: linear-gradient(150deg, var(--blue-tile-lt), var(--blue-tile-dk));
+    border-color: var(--blue-tile-dk);
+    color: #fff;
+  }
+
   /* ---- online matchmaking panel ---- */
   .start-online-wrap{ margin-top: 4px; }
   .online-status-text{
@@ -1327,6 +1363,17 @@
 
     <div class="start-diff-wrap" id="startDiffWrap" style="display:none;">
       <button class="start-back-btn" id="soloBackBtn">← กลับ</button>
+
+      <div class="start-diff-title">เลือกชุดเบี้ย</div>
+      <div class="start-tileset-buttons">
+        <button class="start-tileset-btn active" data-tileset="secondary">
+          <span class="sdb-emoji">🎓</span>มัธยม<br><small>100 ตัว</small>
+        </button>
+        <button class="start-tileset-btn" data-tileset="elementary">
+          <span class="sdb-emoji">✏️</span>ประถม<br><small>70 ตัว</small>
+        </button>
+      </div>
+
       <div class="start-diff-title">เลือกระดับความยากของบอท</div>
       <div class="start-diff-buttons">
         <button class="start-diff-btn" data-diff="easy">
@@ -1458,7 +1505,7 @@
         <div class="board" id="board"></div>
       </div>
     </div>
-    <button class="reset-zoom-btn" id="resetZoomBtn" style="display:none;">↺ รีเซ็ตซูม</button>
+    <button class="reset-zoom-btn" id="resetZoomBtn" style="display:none;">↺ กลับขนาดเดิม</button>
     <div class="stats" id="statsLine"></div>
   </div>
 
@@ -1910,6 +1957,43 @@ const AMATH_TILE_DEFINITIONS = [
   { value: 'BLANK', type: 'blank', score: 0, count: 4 },
 ];
 
+/* ชุดเบี้ยระดับประถมศึกษา — 70 ตัว (เล็กกว่า/ง่ายกว่าชุดมัธยม 100 ตัว)
+   อ้างอิงกติกาทางการ A-Math ระดับประถม: ไม่มีเลข 17-19, ไม่มีเครื่องหมาย × / ÷ เดี่ยวๆ
+   (มีเฉพาะ ×/÷ รวม), = เหลือ 8 ตัว */
+const AMATH_TILE_DEFINITIONS_ELEMENTARY = [
+  { value: '0',  type: 'number', score: 1, count: 4 },
+  { value: '1',  type: 'number', score: 1, count: 4 },
+  { value: '2',  type: 'number', score: 1, count: 4 },
+  { value: '3',  type: 'number', score: 1, count: 4 },
+  { value: '4',  type: 'number', score: 2, count: 4 },
+  { value: '5',  type: 'number', score: 2, count: 3 },
+  { value: '6',  type: 'number', score: 2, count: 3 },
+  { value: '7',  type: 'number', score: 2, count: 2 },
+  { value: '8',  type: 'number', score: 2, count: 3 },
+  { value: '9',  type: 'number', score: 2, count: 2 },
+  { value: '10', type: 'number', score: 3, count: 1 },
+  { value: '11', type: 'number', score: 4, count: 1 },
+  { value: '12', type: 'number', score: 3, count: 1 },
+  { value: '13', type: 'number', score: 6, count: 1 },
+  { value: '14', type: 'number', score: 4, count: 1 },
+  { value: '15', type: 'number', score: 4, count: 1 },
+  { value: '16', type: 'number', score: 4, count: 1 },
+  { value: '20', type: 'number', score: 5, count: 1 },
+  { value: '+',   type: 'operator', score: 2, count: 4 },
+  { value: '−',   type: 'operator', score: 2, count: 4 },
+  { value: '+/−', type: 'operator', score: 1, count: 5 },
+  { value: '×/÷', type: 'operator', score: 1, count: 4 },
+  { value: '=',   type: 'operator', score: 1, count: 8 },
+  { value: 'BLANK', type: 'blank', score: 0, count: 4 },
+];
+
+// BLANK ระดับประถม แทนเลขได้แค่ 0-16 และ 20 (แทน 17,18,19 ไม่ได้ เพราะชุดประถมไม่มีเบี้ยเลขพวกนี้ให้เล่น)
+const BLANK_NUMBERS_SECONDARY = ['0','1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20'];
+const BLANK_NUMBERS_ELEMENTARY = ['0','1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','20'];
+
+let activeTileDefinitions = AMATH_TILE_DEFINITIONS; // เปลี่ยนตามชุดเบี้ยที่เลือกตอนเริ่มเกม (โหมดบอทเท่านั้น)
+let activeBlankNumbers = BLANK_NUMBERS_SECONDARY;
+
 function shuffleArray(arr){
   for(let i=arr.length-1;i>0;i--){
     const j = Math.floor(Math.random()*(i+1));
@@ -1919,9 +2003,10 @@ function shuffleArray(arr){
 }
 
 let tileIdCounter = 0;
-function createTileBag(){
+function createTileBag(defs){
+  const defsToUse = defs || AMATH_TILE_DEFINITIONS;
   const bag = [];
-  AMATH_TILE_DEFINITIONS.forEach(def => {
+  defsToUse.forEach(def => {
     for(let i=0;i<def.count;i++){
       bag.push({ id:'t'+(tileIdCounter++), value:def.value, type:def.type, score:def.score });
     }
@@ -3104,13 +3189,13 @@ function showValueStep(kind){
 
   if(kind === 'number'){
     modalTitle.textContent = 'เลือกตัวเลข';
-    for(let n = 0; n <= 20; n++){
+    activeBlankNumbers.forEach(n => {
       const btn = document.createElement('button');
       btn.className = 'value-btn';
       btn.textContent = n;
-      btn.addEventListener('click', () => selectBlankValue(String(n)));
+      btn.addEventListener('click', () => selectBlankValue(n));
       valueGrid.appendChild(btn);
-    }
+    });
   } else {
     modalTitle.textContent = 'เลือกเครื่องหมาย';
     const ops = ['+', '−', '×', '÷', '='];
@@ -3165,8 +3250,8 @@ let botBingoCount = 0;
 
 const DIFFICULTY_CONFIG = {
   easy:   { sizeRange: [2, 6], scoreRange: [80, 150],  searchIntensity: 0.6, thinkMs: 500 },
-  medium: { sizeRange: [2, 7], scoreRange: [150, 200], searchIntensity: 1.5, thinkMs: 900 },
-  hard:   { sizeRange: [2, 8], scoreRange: null,       searchIntensity: 4,   thinkMs: 1600 }, // null = ไม่จำกัดช่วงคะแนน เอาสูงสุดเท่าที่หาได้
+  medium: { sizeRange: [2, 7], scoreRange: [150, 200], searchIntensity: 2.2, thinkMs: 1100 },
+  hard:   { sizeRange: [2, 8], scoreRange: null,       searchIntensity: 6.5, thinkMs: 2000 }, // null = ไม่จำกัดช่วงคะแนน เอาสูงสุดเท่าที่หาได้
 };
 
 const turnIndicatorEl = document.getElementById('turnIndicator');
@@ -3221,7 +3306,10 @@ function updateEndTurnState(){
 /* ---- ค่าที่เป็นไปได้ของเบี้ยแต่ละใบ (บอทลองสุ่มเลือกให้ BLANK / +− / ×÷) ---- */
 function possibleValuesForTile(tile){
   if(tile.type === 'blank'){
-    return ['0','1','2','3','4','5','6','7','8','9','10','+','−','×','÷','='];
+    // จำกัดตัวเลขที่ลองไว้ไม่เกิน 10 เพื่อความเร็วในการค้นหา (ของเดิม)
+    // แต่ยังเคารพขอบเขตของชุดเบี้ยที่เลือกอยู่ (ประถมตัดเลข 17-19 ออกไปแล้วอยู่แล้ว)
+    const numOptions = activeBlankNumbers.filter(n => Number(n) <= 10);
+    return [...numOptions, '+', '−', '×', '÷', '='];
   }
   if(tile.value === '+/−') return ['+','−'];
   if(tile.value === '×/÷') return ['×','÷'];
@@ -3515,7 +3603,7 @@ function findBotMoveCandidates(newCountsToTry, attemptsPerWindow, maxCandidates,
     .filter(Boolean);
   shuffleArray(lockedCells);
 
-  const candidateCells = lockedCells.slice(0, 40); // จำกัดจำนวนจุดยึดที่ลอง กันช้าเกินไป
+  const candidateCells = lockedCells.slice(0, 60); // จำกัดจำนวนจุดยึดที่ลอง กันช้าเกินไป
 
   for(const L of candidateCells){
     const r = Number(L.dataset.row);
@@ -3735,7 +3823,7 @@ function executeBotTurn(){
   }
 
   // ตาถัดไป: ต้องทับเบี้ยเดิมบนกระดานแค่ 1 ตัวพอดี (ครอสเวิร์ด) — ลองหลายๆ ทางแล้วเลือกคะแนนดีที่สุด
-  const exhaustiveUpTo = botDifficulty === 'hard' ? 8 : (botDifficulty === 'medium' ? 6 : 5);
+  const exhaustiveUpTo = botDifficulty === 'hard' ? 8 : (botDifficulty === 'medium' ? 7 : 5);
   const moveCandidates = findBotMoveCandidates(newCountsToTry, moveAttempts, moveMaxCandidates, exhaustiveUpTo);
 
   if(moveCandidates.length === 0){
@@ -4190,6 +4278,17 @@ document.getElementById('soloBackBtn').addEventListener('click', () => {
   startSub.style.display = '';
 });
 
+let selectedTileSet = 'secondary'; // 'secondary' (มัธยม 100 ตัว) | 'elementary' (ประถม 70 ตัว)
+
+document.querySelectorAll('.start-tileset-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    selectedTileSet = btn.dataset.tileset;
+    document.querySelectorAll('.start-tileset-btn').forEach(b => {
+      b.classList.toggle('active', b.dataset.tileset === selectedTileSet);
+    });
+  });
+});
+
 document.querySelectorAll('.start-diff-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     botDifficulty = btn.dataset.diff;
@@ -4197,6 +4296,8 @@ document.querySelectorAll('.start-diff-btn').forEach(btn => {
       b.classList.toggle('active', b.dataset.diff === botDifficulty);
     });
     gameMode = 'bot';
+    activeTileDefinitions = selectedTileSet === 'elementary' ? AMATH_TILE_DEFINITIONS_ELEMENTARY : AMATH_TILE_DEFINITIONS;
+    activeBlankNumbers = selectedTileSet === 'elementary' ? BLANK_NUMBERS_ELEMENTARY : BLANK_NUMBERS_SECONDARY;
     startOverlay.remove();
       document.body.classList.remove('pre-game');
     startGame();
@@ -4264,6 +4365,8 @@ document.getElementById('onlineRandomModeBtn').addEventListener('click', () => {
     (roomId, uid) => {
       clearInterval(onlineWaitTimer);
       gameMode = 'online';
+    activeBlankNumbers = BLANK_NUMBERS_SECONDARY;
+      activeBlankNumbers = BLANK_NUMBERS_SECONDARY;
       onlineRoomId = roomId;
       myOnlineUid = uid;
       startOverlay.remove();
@@ -4308,6 +4411,9 @@ document.getElementById('createRoomBtn').addEventListener('click', async () => {
       if(data.status === 'active' && data.p2){
         window.AmathOnline.unsubscribeRoom();
         gameMode = 'online';
+    activeBlankNumbers = BLANK_NUMBERS_SECONDARY;
+        activeBlankNumbers = BLANK_NUMBERS_SECONDARY;
+      activeBlankNumbers = BLANK_NUMBERS_SECONDARY;
         onlineRoomId = roomId;
         myOnlineUid = window.AmathOnline.getMyUid();
         startOverlay.remove();
@@ -4359,6 +4465,7 @@ document.getElementById('joinRoomBtn').addEventListener('click', async () => {
   try {
     const roomId = await window.AmathOnline.joinFriendRoom(code);
     gameMode = 'online';
+    activeBlankNumbers = BLANK_NUMBERS_SECONDARY;
     onlineRoomId = roomId;
     myOnlineUid = window.AmathOnline.getMyUid();
     startOverlay.remove();
@@ -4373,6 +4480,7 @@ document.getElementById('joinRoomBtn').addEventListener('click', async () => {
 });
 
 function startGame(){
+  bag = createTileBag(activeTileDefinitions);
   fillRackFromBag(RACK_SIZE);
   fillBotRack(RACK_SIZE);
   updateSubmitState();
