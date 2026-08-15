@@ -97,6 +97,15 @@
   }
 
   /* ================= BOARD ================= */
+  /* ห่อกระดานไว้ในกล่องที่ scroll/clip ได้ เผื่อซูมแล้วล้นออกนอกจอ */
+  .board-zoom-wrap{
+    max-width: 100%;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+    touch-action: none; /* กันเบราว์เซอร์แย่งจัดการ gesture ไปทำ native zoom/scroll เอง */
+    overscroll-behavior: contain;
+  }
+
   .board-frame{
     background: linear-gradient(160deg, var(--wood) 0%, var(--wood-dark) 100%);
     padding: 12px;
@@ -104,6 +113,22 @@
     box-shadow:
       0 2px 0 rgba(255,255,255,0.25) inset,
       0 16px 30px -12px rgba(60, 45, 20, 0.4);
+    transform-origin: center center;
+    will-change: transform;
+  }
+
+  .reset-zoom-btn{
+    margin-top: 8px;
+    font-family: 'Kanit', sans-serif;
+    font-weight: 600;
+    font-size: 12px;
+    color: var(--board-green-dark);
+    background: #fff;
+    border: 1.5px solid var(--cream-deep);
+    border-radius: 999px;
+    padding: 6px 14px;
+    cursor: pointer;
+    box-shadow: 0 2px 8px -2px rgba(0,0,0,0.15);
   }
 
   .board{
@@ -1422,9 +1447,12 @@
 
 <div class="play-area">
   <div class="board-column">
-    <div class="board-frame">
-      <div class="board" id="board"></div>
+    <div class="board-zoom-wrap" id="boardZoomWrap">
+      <div class="board-frame" id="boardFrame">
+        <div class="board" id="board"></div>
+      </div>
     </div>
+    <button class="reset-zoom-btn" id="resetZoomBtn" style="display:none;">↺ รีเซ็ตซูม</button>
     <div class="stats" id="statsLine"></div>
   </div>
 
@@ -2250,6 +2278,71 @@ function resetDrag(){
   dragTileData = null;
   dragSource = null;
 }
+
+/* =========================================================
+   PINCH-ZOOM เฉพาะกระดาน (ไม่ซูมถาดเบี้ย/ปุ่มอื่นๆ)
+   ใช้สองนิ้วบีบ/ขยายบน .board-zoom-wrap เพื่อซูมเฉพาะ .board-frame
+   ========================================================= */
+const boardZoomWrapEl = document.getElementById('boardZoomWrap');
+const boardFrameEl = document.getElementById('boardFrame');
+const resetZoomBtn = document.getElementById('resetZoomBtn');
+
+const MIN_BOARD_SCALE = 1;
+const MAX_BOARD_SCALE = 2.5;
+let boardScale = 1;
+const activeBoardPointers = new Map(); // pointerId -> {x,y}
+let pinchStartDistance = 0;
+let pinchStartScale = 1;
+
+function getBoardPointerDistance(){
+  const pts = [...activeBoardPointers.values()];
+  if(pts.length < 2) return 0;
+  return Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
+}
+
+function applyBoardScale(scale){
+  boardScale = Math.min(MAX_BOARD_SCALE, Math.max(MIN_BOARD_SCALE, scale));
+  boardFrameEl.style.transform = `scale(${boardScale})`;
+  resetZoomBtn.style.display = boardScale > 1.02 ? '' : 'none';
+}
+
+function cancelInProgressTileDrag(){
+  if(!dragTileEl) return;
+  dragTileEl.style.visibility = '';
+  if(dragGhost){ dragGhost.remove(); dragGhost = null; }
+  window.removeEventListener('pointermove', onPointerMove);
+  window.removeEventListener('pointerup', onPointerUp);
+  resetDrag();
+}
+
+boardZoomWrapEl.addEventListener('pointerdown', (e) => {
+  activeBoardPointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  if(activeBoardPointers.size === 2){
+    cancelInProgressTileDrag(); // นิ้วที่สองแตะ = ตั้งใจซูม ไม่ใช่ลากเบี้ย ยกเลิกการลากที่ค้างอยู่
+    pinchStartDistance = getBoardPointerDistance();
+    pinchStartScale = boardScale;
+  }
+});
+
+boardZoomWrapEl.addEventListener('pointermove', (e) => {
+  if(!activeBoardPointers.has(e.pointerId)) return;
+  activeBoardPointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  if(activeBoardPointers.size === 2 && pinchStartDistance > 0){
+    e.preventDefault();
+    const currentDistance = getBoardPointerDistance();
+    applyBoardScale(pinchStartScale * (currentDistance / pinchStartDistance));
+  }
+});
+
+function releaseBoardPointer(e){
+  activeBoardPointers.delete(e.pointerId);
+  if(activeBoardPointers.size < 2) pinchStartDistance = 0;
+}
+boardZoomWrapEl.addEventListener('pointerup', releaseBoardPointer);
+boardZoomWrapEl.addEventListener('pointercancel', releaseBoardPointer);
+boardZoomWrapEl.addEventListener('pointerleave', releaseBoardPointer);
+
+resetZoomBtn.addEventListener('click', () => applyBoardScale(1));
 
 /* =========================================================
    SUBMIT EQUATION + VALIDATION + SCORING
