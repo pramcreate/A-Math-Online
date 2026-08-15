@@ -2512,10 +2512,18 @@ function unlockedPlacedCells(){
 
 const pullAllBtn = document.getElementById('pullAllBtn');
 
-function updateSubmitState(){
+/* รวมการอัปเดตปุ่มทั้ง 4 (ลงสมการ/ดึงเบี้ย/จบตา) ไว้ที่เดียว
+   กันปัญหาปุ่มบางปุ่มถูกอัปเดต แต่บางปุ่มไม่ถูกอัปเดตตาม ทำให้ค้างไม่ตรงกัน */
+function refreshActionButtons(){
+  const isMyTurn = currentTurn === 'player';
   const n = unlockedPlacedCells().length;
-  submitBtn.disabled = n === 0;
-  pullAllBtn.disabled = n === 0;
+  submitBtn.disabled = !isMyTurn || n === 0;
+  pullAllBtn.disabled = !isMyTurn || n === 0;
+  endTurnBtn.disabled = !isMyTurn || exchangeMode;
+}
+
+function updateSubmitState(){
+  refreshActionButtons();
 }
 
 function clearInvalidHighlights(){
@@ -3349,7 +3357,7 @@ endTurnBtn.addEventListener('click', () => {
 });
 
 function updateEndTurnState(){
-  endTurnBtn.disabled = currentTurn !== 'player' || exchangeMode;
+  refreshActionButtons();
 }
 
 /* ---- ค่าที่เป็นไปได้ของเบี้ยแต่ละใบ (บอทลองสุ่มเลือกให้ BLANK / +− / ×÷) ---- */
