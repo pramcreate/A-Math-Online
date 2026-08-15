@@ -2926,15 +2926,61 @@ function reshuffleBothRacksBotMode(){
 }
 
 /* เรียกหลังทุกครั้งที่มีการ "ผ่าน/เปลี่ยนเบี้ย" หรือ "ลงเบี้ยสำเร็จ" ในโหมดบอท */
+/* รวมคะแนนของเบี้ยที่เหลืออยู่ในถาด (array ของ tile data หรือ NodeList ของ rack-slot ก็ได้) */
+function sumRackTileData(tiles){
+  return (tiles || []).reduce((sum, t) => sum + (Number(t?.score) || 0), 0);
+}
+function sumRackSlotsScore(){
+  return rackSlots.reduce((sum, s) => {
+    const t = s.firstElementChild;
+    return sum + (t ? Number(t.dataset.score) || 0 : 0);
+  }, 0);
+}
+
 function checkBotModePassStreak(){
   if(gameMode !== 'bot' || gameEnded) return;
   if(noPlacementStreak < 6) return;
 
   if(everAnyPlacement){
-    showGameOverModal(scorePlayer, scoreBot, '🤖 บอท');
+    // กติกา: จบเกมเพราะเดินต่อไม่ได้ (ผ่าน/เปลี่ยนครบ 3 ตาทั้งสองฝั่ง)
+    // -> หักคะแนนของเบี้ยที่เหลืออยู่ในแป้นของตัวเอง ออกจากคะแนนของตัวเอง (คนละฝั่ง ไม่เกี่ยวกัน)
+    const myRackPenalty = sumRackSlotsScore();
+    const botRackPenalty = sumRackTileData(botRack);
+    const finalMy = scorePlayer - myRackPenalty;
+    const finalBot = scoreBot - botRackPenalty;
+    let reason = 'ทั้งสองฝ่ายผ่าน/เปลี่ยนเบี้ยติดต่อกัน 3 ตา';
+    if(myRackPenalty > 0 || botRackPenalty > 0){
+      reason += ` (หักเบี้ยเหลือในแป้น: คุณ -${myRackPenalty}, บอท -${botRackPenalty})`;
+    }
+    showGameOverModal(finalMy, finalBot, '🤖 บอท', undefined, reason);
   } else {
     reshuffleBothRacksBotMode();
   }
+}
+
+/* กติกา: ถ้ามีฝ่ายใดลงเบี้ยจนหมดแป้นเป็นคนแรก (และไม่มีเบี้ยเหลือในถุงให้จั่วแล้ว)
+   -> เอาคะแนนเบี้ยที่เหลือของอีกฝ่าย คูณ 2 บวกให้ฝ่ายที่หมดก่อน แล้วจบเกมทันที */
+function checkRackEmptyEndBotMode(emptiedSide){
+  if(gameMode !== 'bot' || gameEnded) return false;
+  if(bag.length > 0) return false;
+
+  if(emptiedSide === 'player' && rackSlots.every(s => s.children.length === 0)){
+    const bonus = sumRackTileData(botRack) * 2;
+    showGameOverModal(
+      scorePlayer + bonus, scoreBot, '🤖 บอท', undefined,
+      `คุณลงเบี้ยหมดก่อน ได้คะแนนเบี้ยที่เหลือของบอท ×2 เพิ่ม (+${bonus})`
+    );
+    return true;
+  }
+  if(emptiedSide === 'bot' && botRack.length === 0){
+    const bonus = sumRackSlotsScore() * 2;
+    showGameOverModal(
+      scorePlayer, scoreBot + bonus, '🤖 บอท', undefined,
+      `บอทลงเบี้ยหมดก่อน ได้คะแนนเบี้ยที่เหลือของคุณ ×2 เพิ่ม (+${bonus})`
+    );
+    return true;
+  }
+  return false;
 }
 
 submitBtn.addEventListener('click', () => {
@@ -2978,7 +3024,9 @@ submitBtn.addEventListener('click', () => {
     addScoreEntry(result, 'player');
     noPlacementStreak = 0;
     everAnyPlacement = true;
-    triggerBotTurn();
+    if(!checkRackEmptyEndBotMode('player')){
+      triggerBotTurn();
+    }
   }
 });
 
@@ -3276,6 +3324,7 @@ function setPlayerControlsEnabled(enabled){
   if(enabled){
     updateSubmitState();
     exchangeBtn.disabled = false;
+    updateEndTurnState();
   } else {
     submitBtn.disabled = true;
     pullAllBtn.disabled = true;
@@ -3882,6 +3931,7 @@ function placeBotTiles(newCells, newSymbols, tiles, allRunCellsForReference){
 
 
 function endBotTurn(){
+  if(checkRackEmptyEndBotMode('bot')) return;
   checkBotModePassStreak();
   if(gameEnded) return;
   currentTurn = 'player';
@@ -4033,14 +4083,43 @@ function applyOnlineRoomUpdate(data){
   }
 
   if(data.status === 'finished' && !gameEnded){
-    const myScore = data[mySlot]?.score || 0;
-    const oppScore = data[opponentSlot]?.score || 0;
+    let myScore = data[mySlot]?.score || 0;
+    let oppScore = data[opponentSlot]?.score || 0;
     const oppLabel = opponentSlot === 'p1' ? 'ผู้เล่น 1' : 'ผู้เล่น 2';
+    let reason;
+
+    if(data.emptiedBy){
+      // กติกา 1: มีฝ่ายหนึ่งลงเบี้ยหมดแป้นก่อน (เบี้ยในถุงหมดแล้วด้วย)
+      // -> เอาคะแนนเบี้ยที่เหลือของอีกฝ่าย คูณ 2 บวกให้ฝ่ายที่หมดก่อน
+      const p1RackSum = sumRackTileData(data.p1?.rack);
+      const p2RackSum = sumRackTileData(data.p2?.rack);
+      if(data.emptiedBy === mySlot){
+        const bonus = (opponentSlot === 'p1' ? p1RackSum : p2RackSum) * 2;
+        myScore += bonus;
+        reason = `คุณลงเบี้ยหมดก่อน ได้คะแนนเบี้ยที่เหลือของ${oppLabel} ×2 เพิ่ม (+${bonus})`;
+      } else {
+        const bonus = (mySlot === 'p1' ? p1RackSum : p2RackSum) * 2;
+        oppScore += bonus;
+        reason = `${oppLabel}ลงเบี้ยหมดก่อน ได้คะแนนเบี้ยที่เหลือของคุณ ×2 เพิ่ม (+${bonus})`;
+      }
+    } else {
+      // กติกา 2: จบเกมเพราะเดินต่อไม่ได้ (ผ่าน/เปลี่ยนเบี้ยครบ 3 ตาทั้งสองฝั่ง)
+      // -> หักคะแนนเบี้ยที่เหลือในแป้นของตัวเอง ออกจากคะแนนของตัวเอง (คนละฝั่ง)
+      const myRackPenalty = sumRackTileData(data[mySlot]?.rack);
+      const oppRackPenalty = sumRackTileData(data[opponentSlot]?.rack);
+      myScore -= myRackPenalty;
+      oppScore -= oppRackPenalty;
+      reason = 'ทั้งสองฝ่ายผ่าน/เปลี่ยนเบี้ยติดต่อกัน 3 ตา';
+      if(myRackPenalty > 0 || oppRackPenalty > 0){
+        reason += ` (หักเบี้ยเหลือในแป้น: คุณ -${myRackPenalty}, ${oppLabel} -${oppRackPenalty})`;
+      }
+    }
+
     const myTimeFinal = data[mySlot + 'Time'] ?? GAME_TIME_SECONDS;
     const oppTimeFinal = data[opponentSlot + 'Time'] ?? GAME_TIME_SECONDS;
     const myPenalty = computeOvertimePenalty(myTimeFinal);
     const oppPenalty = computeOvertimePenalty(oppTimeFinal);
-    showGameOverModal(myScore, oppScore, oppLabel, undefined, undefined, myPenalty, oppPenalty);
+    showGameOverModal(myScore, oppScore, oppLabel, undefined, reason, myPenalty, oppPenalty);
     return;
   }
 
@@ -4181,7 +4260,7 @@ function pushOnlineSubmit(placed, result, equationText){
   };
   const newHistory = [...(lastOnlineData?.scoreHistory || []), historyEntry];
 
-  window.AmathOnline.updateRoom(onlineRoomRef, {
+  const roomUpdate = {
     ...boardUpdates,
     bag: bag,
     [mySlot + '.rack']: myNewRack,
@@ -4192,7 +4271,16 @@ function pushOnlineSubmit(placed, result, equationText){
     [mySlot + 'Time']: computeMyRemainingTime(),
     turnStartedAt: window.AmathOnline.getServerTimestamp(),
     scoreHistory: newHistory,
-  });
+  };
+
+  // กติกา: ถ้าลงเบี้ยหมดแป้นพอดี และไม่มีเบี้ยเหลือในถุงให้จั่วแล้ว -> จบเกมทันที
+  // (คะแนนโบนัสจากเบี้ยที่เหลือของอีกฝ่ายจะคำนวณตอนแสดงผลจบเกม ไม่ต้องคำนวณล่วงหน้าตรงนี้)
+  if(bag.length === 0 && myNewRack.length === 0){
+    roomUpdate.status = 'finished';
+    roomUpdate.emptiedBy = mySlot;
+  }
+
+  window.AmathOnline.updateRoom(onlineRoomRef, roomUpdate);
 }
 
 /* ผลักการ "เปลี่ยนเบี้ย"/"ผ่าน" ของเราขึ้น Firestore
