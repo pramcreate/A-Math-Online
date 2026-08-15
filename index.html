@@ -49,10 +49,7 @@
   body{
     margin: 0;
     min-height: 100vh;
-    background:
-      radial-gradient(ellipse at top left, #fffaf0 0%, transparent 55%),
-      radial-gradient(ellipse at bottom right, #fbeed6 0%, transparent 55%),
-      var(--cream);
+    background: #ffffff;
     font-family: 'Sarabun', sans-serif;
     color: var(--ink);
     display: flex;
@@ -194,6 +191,22 @@
     box-shadow: 0 2px 0 var(--locked-dk), inset 0 1px 2px rgba(255,255,255,0.4);
     cursor: default;
   }
+  /* เบี้ย BLANK ที่ถูกล็อกแล้ว ต้องยังคงสีม่วงไว้ ไม่โดนสีเขียว/เทาของ .locked ทับ
+     (ใส่ทีหลังเพื่อให้ specificity สูงกว่า .placed-tile.locked เฉยๆ) */
+  .placed-tile.blank.locked{
+    background: linear-gradient(150deg, var(--blank-lt) 0%, var(--blank) 55%, var(--blank-dk) 100%);
+    box-shadow: 0 2px 0 var(--blank-dk), inset 0 1px 2px rgba(255,255,255,0.5);
+  }
+  .placed-tile.blank::before{
+    content: '✦';
+    position: absolute;
+    top: -6px;
+    right: -5px;
+    font-size: 9px;
+    color: var(--blank-dk);
+    line-height: 1;
+    z-index: 2;
+  }
   .placed-tile .pscore{
     position: absolute;
     bottom: 1px;
@@ -207,6 +220,9 @@
   }
   .placed-tile.bot-tile.locked{
     box-shadow: 0 0 0 2px #7c6fc9, 0 2px 0 var(--locked-dk);
+  }
+  .placed-tile.blank.bot-tile.locked{
+    box-shadow: 0 0 0 2px #7c6fc9, 0 2px 0 var(--blank-dk);
   }
   .placed-tile.bot-tile::after{
     content: '🤖';
@@ -300,6 +316,14 @@
     font-size: 9px;
     color: #b3a688;
     display: block;
+  }
+  .score-entry .turn-equation{
+    font-family: 'Kanit', sans-serif;
+    font-weight: 600;
+    font-size: 12px;
+    color: var(--ink);
+    margin: 2px 0;
+    letter-spacing: 0.3px;
   }
   .score-entry .turn-points{
     font-family: 'Kanit', sans-serif;
@@ -433,6 +457,27 @@
     line-height: 1.3;
   }
   .score-box.bot .score-box-total{ color: #5b4fb3; }
+
+  .score-box-timer{
+    font-family: 'Kanit', sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    color: #8a7c63;
+    margin-top: 4px;
+    padding: 3px 6px;
+    border-radius: 6px;
+    display: inline-block;
+  }
+  .score-box-timer.active{
+    background: #d8f0e2;
+    color: #2f8f63;
+  }
+  .score-box-timer.low{
+    background: #fdeceb;
+    color: #c0392b;
+    animation: timerPulse 1s ease-in-out infinite;
+  }
+  @keyframes timerPulse{ 50%{ opacity: 0.5; } }
 
   @media (max-width: 640px){
     .score-panel{
@@ -741,6 +786,58 @@
   }
   .confirm-btn.ok:active{ transform: translateY(2px); box-shadow: 0 1px 0 var(--red-ink); }
 
+  /* ---- game over modal ---- */
+  .gameover-panel{ width: min(90vw, 340px); }
+  .gameover-emoji{ font-size: 46px; margin-bottom: 6px; }
+  .gameover-reason{
+    font-family: 'Kanit', sans-serif;
+    font-size: 12.5px;
+    color: #8a7c63;
+    margin-bottom: 18px;
+  }
+  .gameover-score-row{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    margin-bottom: 20px;
+  }
+  .gameover-score-box{
+    flex: 1;
+    background: var(--cream);
+    border-radius: 12px;
+    padding: 12px 6px;
+  }
+  .gameover-score-label{
+    font-family: 'Kanit', sans-serif;
+    font-size: 11.5px;
+    color: #8a7c63;
+    margin-bottom: 4px;
+  }
+  .gameover-penalty{
+    font-family: 'Kanit', sans-serif;
+    font-size: 10.5px;
+    color: var(--red-ink);
+    margin-top: 3px;
+  }
+  .gameover-score-value{
+    font-family: 'Kanit', sans-serif;
+    font-weight: 700;
+    font-size: 30px;
+    color: var(--board-green-dark);
+  }
+  .gameover-score-vs{
+    font-family: 'Kanit', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    color: #b3a688;
+  }
+  #gameOverHomeBtn{
+    background: linear-gradient(150deg, var(--blue-tile-lt), var(--blue-tile-dk));
+    box-shadow: 0 3px 0 var(--blue-tile-dk);
+  }
+  #gameOverHomeBtn:active{ transform: translateY(2px); box-shadow: 0 1px 0 var(--blue-tile-dk); }
+
   /* ================= HOME BUTTON ================= */
   .home-btn{
     position: fixed;
@@ -761,10 +858,36 @@
   .home-btn:active{ transform: translateY(1px); }
 
   /* ================= START SCREEN ================= */
+  /* ================= PRE-GAME STATE (ก่อนเริ่มเกม) =================
+     ซ่อนทุกอย่างยกเว้นตัวกระดาน ให้กระดานเป็นพื้นหลังตกแต่งของหน้าเริ่มต้น
+     และบังคับให้พอดีจอเดียว ไม่ต้องเลื่อนดู */
+  body.pre-game{
+    overflow: hidden;
+    height: 100vh;
+    padding-top: 8px;
+    padding-bottom: 8px !important;
+  }
+  body.pre-game .home-btn,
+  body.pre-game header,
+  body.pre-game .stats,
+  body.pre-game .score-panel,
+  body.pre-game .rack-area{
+    display: none;
+  }
+  body.pre-game .play-area{
+    height: 100vh;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+  }
+  body.pre-game .board{
+    width: min(88vw, 82vh, 700px);
+  }
+
   .start-overlay{
     position: fixed;
     inset: 0;
-    background: rgba(36, 71, 61, 0.55);
+    background: rgba(255, 255, 255, 0.72);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -772,12 +895,11 @@
     padding: 16px;
   }
   .start-panel{
-    background: #fff;
+    background: transparent;
     border-radius: 22px;
     padding: 32px 26px 28px;
     width: min(92vw, 380px);
     text-align: center;
-    box-shadow: 0 24px 50px -12px rgba(30, 20, 10, 0.4);
   }
   .start-eyebrow{
     font-family: 'Kanit', sans-serif;
@@ -787,19 +909,31 @@
     text-transform: uppercase;
     margin-bottom: 4px;
   }
+  .start-header-box{
+    background: #fff;
+    border-radius: 16px;
+    padding: 16px 20px;
+    margin-bottom: 22px;
+    box-shadow: 0 10px 26px -10px rgba(30,20,10,0.25);
+  }
+  .start-buttons-box{
+    background: #fff;
+    border-radius: 16px;
+    padding: 16px;
+    box-shadow: 0 10px 26px -10px rgba(30,20,10,0.25);
+  }
   .start-title{
     font-family: 'Mali', cursive;
     font-weight: 700;
-    font-size: 34px;
+    font-size: clamp(24px, 7vw, 34px);
     color: var(--board-green-dark);
     margin-bottom: 4px;
   }
-  .start-title span{ color: var(--red-ink); }
   .start-sub{
     font-family: 'Kanit', sans-serif;
     font-size: 13px;
-    color: #8a7c63;
-    margin-bottom: 22px;
+    color: #6b5f4d;
+    margin-bottom: 0;
   }
   .start-solo-btn{
     width: 100%;
@@ -1144,17 +1278,20 @@
   .value-btn.operator-btn:active{ box-shadow: 0 1px 0 var(--slate-dk); }
 </style>
 </head>
-<body>
+<body class="pre-game">
 
 <div class="start-overlay" id="startOverlay">
   <div class="start-panel">
-    <div class="start-eyebrow">A-MATH GAME</div>
-    <div class="start-title">เอแม็<span>ท</span></div>
-    <div class="start-sub" id="startSub">เลือกโหมดการเล่น</div>
+    <div class="start-header-box">
+      <div class="start-title">A-Math Online</div>
+      <div class="start-sub" id="startSub">เลือกโหมดการเล่น</div>
+    </div>
 
-    <div class="start-mode-row" id="startModeRow">
-      <button class="start-solo-btn" id="startSoloBtn">🎮 เล่นคนเดียว<br><small>แข่งกับบอท</small></button>
-      <button class="start-solo-btn online-btn" id="startOnlineBtn">🌐 จับคู่ออนไลน์<br><small>แข่งกับคนแปลกหน้า</small></button>
+    <div class="start-buttons-box">
+      <div class="start-mode-row" id="startModeRow">
+        <button class="start-solo-btn" id="startSoloBtn">🎮 เล่นคนเดียว<br><small>แข่งกับบอท</small></button>
+        <button class="start-solo-btn online-btn" id="startOnlineBtn">🌐 จับคู่ออนไลน์<br><small>แข่งกับคนแปลกหน้า</small></button>
+      </div>
     </div>
 
     <div class="start-diff-wrap" id="startDiffWrap" style="display:none;">
@@ -1232,6 +1369,30 @@
   </div>
 </div>
 
+<div class="modal-backdrop confirm-backdrop" id="gameOverModal">
+  <div class="confirm-panel gameover-panel">
+    <div class="gameover-emoji" id="gameOverEmoji">🏁</div>
+    <div class="confirm-title" id="gameOverTitle">จบเกม</div>
+    <div class="gameover-reason" id="gameOverReason">ทั้งสองฝ่ายผ่าน/เปลี่ยนเบี้ยติดต่อกัน 3 ตา</div>
+    <div class="gameover-score-row">
+      <div class="gameover-score-box">
+        <div class="gameover-score-label">คุณ</div>
+        <div class="gameover-score-value" id="gameOverMyScore">0</div>
+        <div class="gameover-penalty" id="gameOverMyPenalty" style="display:none;"></div>
+      </div>
+      <div class="gameover-score-vs">VS</div>
+      <div class="gameover-score-box">
+        <div class="gameover-score-label" id="gameOverOppLabel">คู่ต่อสู้</div>
+        <div class="gameover-score-value" id="gameOverOppScore">0</div>
+        <div class="gameover-penalty" id="gameOverOppPenalty" style="display:none;"></div>
+      </div>
+    </div>
+    <div class="confirm-buttons">
+      <button class="confirm-btn ok" id="gameOverHomeBtn">🏠 กลับหน้าหลัก</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-backdrop" id="blankModal">
   <div class="modal-panel" id="modalPanel">
     <div class="modal-header">
@@ -1256,9 +1417,7 @@
 <button class="home-btn" id="homeBtn" title="กลับหน้าหลัก">🏠 หน้าหลัก</button>
 
 <header>
-  <div class="eyebrow">A-MATH GAME · STEP 3</div>
-
-  <h1>เล่นบนกระ<span>ดาน</span></h1>
+  <h1>A-Math Online</h1>
 </header>
 
 <div class="play-area">
@@ -1294,10 +1453,12 @@
       <div class="score-box you">
         <div class="score-box-label">คุณ</div>
         <div class="score-box-total" id="scoreTotalPlayer">0</div>
+        <div class="score-box-timer" id="myTimerDisplay" style="display:none;">22:00</div>
       </div>
       <div class="score-box bot" id="opponentScoreBox">
         <div class="score-box-label" id="opponentScoreLabel">🤖 บอท</div>
         <div class="score-box-total" id="scoreTotalBot">0</div>
+        <div class="score-box-timer" id="oppTimerDisplay" style="display:none;">22:00</div>
       </div>
     </div>
 
@@ -1449,6 +1610,10 @@ async function startMatchmaking(onMatched, onError){
             tx.set(roomRef, {
               status: 'active',
               turn: 'p1',
+              passStreak: 0,
+              p1Time: 1320,
+              p2Time: 1320,
+              turnStartedAt: serverTimestamp(),
               createdAt: serverTimestamp(),
               lastActivity: serverTimestamp(),
               p1: { uid: myUid, score: 0, lastSeen: Date.now() },
@@ -1509,6 +1674,10 @@ async function createFriendRoom(){
     mode: 'friend',
     code,
     turn: 'p1',
+    passStreak: 0,
+    p1Time: 1320,
+    p2Time: 1320,
+    turnStartedAt: null, // เริ่มจับเวลาจริงตอนเพื่อนเข้าร่วมห้องแล้วเท่านั้น
     createdAt: serverTimestamp(),
     lastActivity: serverTimestamp(),
     p1: { uid: myUid, score: 0, lastSeen: Date.now() },
@@ -1543,6 +1712,7 @@ async function joinFriendRoom(code){
     tx.update(roomRef, {
       p2: { uid: myUid, score: 0, lastSeen: Date.now() },
       status: 'active',
+      turnStartedAt: serverTimestamp(),
       lastActivity: serverTimestamp(),
     });
     return true;
@@ -1594,6 +1764,7 @@ async function leaveRoom(roomRef){
 window.AmathOnline = {
   isConfigured: () => configValid,
   getMyUid: () => myUid,
+  getServerTimestamp: () => serverTimestamp(),
   startMatchmaking,
   cancelMatchmaking,
   createFriendRoom,
@@ -1881,6 +2052,9 @@ const selectedForExchange = new Set();
 
 function onPointerDown(e){
   const el = e.currentTarget;
+
+  // เกมจบแล้ว -> ล็อกทุกอย่าง
+  if(gameEnded) return;
 
   // ไม่ใช่ตาของผู้เล่น -> ห้ามโต้ตอบกับกระดาน แต่ยังสลับเบี้ยในถาดตัวเองได้
   if(currentTurn !== 'player'){
@@ -2248,6 +2422,9 @@ function checkEquationSymbols(symbols){
       if(!next || next.type !== 'num'){
         return { valid:false, message:'เครื่องหมายลบนำหน้าต้องตามด้วยตัวเลข' };
       }
+      if(next.value === '0'){
+        return { valid:false, message:'ห้ามใส่เครื่องหมายลบนำหน้าเลข 0' };
+      }
       finalTokens.push({ type:'num', value: '-' + next.value });
       i++;
       continue;
@@ -2373,7 +2550,6 @@ const scoreHistoryEl = document.getElementById('scoreHistory');
 const scoreEmptyEl = document.getElementById('scoreEmpty');
 
 function addScoreEntry(result, owner){
-  turnNumber++;
   if(owner === 'bot'){
     scoreBot += result.total;
     scoreTotalBotEl.textContent = scoreBot;
@@ -2382,24 +2558,134 @@ function addScoreEntry(result, owner){
     scoreTotalPlayerEl.textContent = scorePlayer;
   }
 
-  if(scoreEmptyEl) scoreEmptyEl.remove();
-
-  const entry = document.createElement('div');
-  entry.className = 'score-entry' + (result.isBingo ? ' bingo' : '') + (owner === 'bot' ? ' owner-bot' : '');
-
   let detail = `${result.tileCount} ตัว`;
   if(result.equationMultiplier > 1) detail += ` · ${result.subtotal}×${result.equationMultiplier}`;
   if(result.isBingo) detail += ` · บิงโก +40`;
 
+  renderHistoryEntry({
+    isMine: owner !== 'bot',
+    playerLabel: owner === 'bot' ? '🤖 บอท' : 'คุณ',
+    equationText: result.equationText || null,
+    detail,
+    total: result.total,
+    isBingo: result.isBingo,
+  });
+}
+
+/* วาดแถวประวัติคะแนน 1 แถว — ใช้ร่วมกันทั้งโหมดบอท (เรียกจาก addScoreEntry)
+   และโหมดออนไลน์ (เรียกจากลิสต์ scoreHistory ที่ sync มาจาก Firestore) */
+function renderHistoryEntry({ isMine, playerLabel, equationText, detail, total, isBingo }){
+  turnNumber++;
+  if(scoreEmptyEl && scoreEmptyEl.isConnected) scoreEmptyEl.remove();
+
+  const entry = document.createElement('div');
+  entry.className = 'score-entry' + (isBingo ? ' bingo' : '') + (!isMine ? ' owner-bot' : '');
+
   entry.innerHTML = `
     <div>
       <span class="turn-label">ตาที่ ${turnNumber}</span>
-      <span class="owner-tag">${owner === 'bot' ? ' · 🤖 บอท' : ' · คุณ'}</span>
+      <span class="owner-tag"> · ${playerLabel}</span>
+      ${equationText ? `<div class="turn-equation">${equationText}</div>` : ''}
       <span class="turn-detail">${detail}</span>
     </div>
-    <div class="turn-points">+${result.total}</div>
+    <div class="turn-points">+${total}</div>
   `;
   scoreHistoryEl.prepend(entry);
+}
+
+/* =========================================================
+   END GAME: ผ่าน/เปลี่ยนเบี้ยติดกัน 3 ตาทั้งสองฝั่ง (รวม 6 ตาติดกัน)
+   ========================================================= */
+let noPlacementStreak = 0;   // ใช้เฉพาะโหมดบอท (โหมดออนไลน์ใช้ passStreak ที่ sync ผ่าน Firestore แทน)
+let everAnyPlacement = false;
+let gameEnded = false;
+
+const gameOverModal = document.getElementById('gameOverModal');
+
+/* หักคะแนน 5 แต้มต่อ 1 นาทีที่ใช้เวลาเกิน 22 นาที (เวลาติดลบ) */
+function computeOvertimePenalty(timeValue){
+  const overtimeSec = Math.max(0, -(timeValue ?? 0));
+  const overtimeMin = Math.ceil(overtimeSec / 60); // เศษวินาทีที่เกิน นับเป็น 1 นาทีทันที
+  return overtimeMin * 5;
+}
+
+function showGameOverModal(myScore, oppScore, oppLabel, forcedResult, reasonText, myPenalty = 0, oppPenalty = 0){
+  gameEnded = true;
+  clearInterval(onlineTimerInterval);
+  setPlayerControlsEnabled(false);
+  submitBtn.disabled = true;
+
+  const emojiEl = document.getElementById('gameOverEmoji');
+  const titleEl = document.getElementById('gameOverTitle');
+  const reasonEl = document.getElementById('gameOverReason');
+  const myPenaltyEl = document.getElementById('gameOverMyPenalty');
+  const oppPenaltyEl = document.getElementById('gameOverOppPenalty');
+
+  const myFinalScore = myScore - myPenalty;
+  const oppFinalScore = oppScore - oppPenalty;
+
+  document.getElementById('gameOverMyScore').textContent = myFinalScore;
+  document.getElementById('gameOverOppScore').textContent = oppFinalScore;
+  document.getElementById('gameOverOppLabel').textContent = oppLabel;
+
+  if(myPenalty > 0){
+    myPenaltyEl.textContent = `−${myPenalty} (ใช้เวลาเกิน ${myPenalty / 5} นาที)`;
+    myPenaltyEl.style.display = '';
+  } else {
+    myPenaltyEl.style.display = 'none';
+  }
+  if(oppPenalty > 0){
+    oppPenaltyEl.textContent = `−${oppPenalty} (ใช้เวลาเกิน ${oppPenalty / 5} นาที)`;
+    oppPenaltyEl.style.display = '';
+  } else {
+    oppPenaltyEl.style.display = 'none';
+  }
+
+  if(reasonText) reasonEl.textContent = reasonText;
+
+  const result = forcedResult || (myFinalScore > oppFinalScore ? 'win' : (myFinalScore < oppFinalScore ? 'lose' : 'draw'));
+  if(result === 'win'){ emojiEl.textContent = '🏆'; titleEl.textContent = 'คุณชนะ!'; }
+  else if(result === 'lose'){ emojiEl.textContent = '😢'; titleEl.textContent = 'คุณแพ้'; }
+  else { emojiEl.textContent = '🤝'; titleEl.textContent = 'เสมอกัน'; }
+
+  gameOverModal.classList.add('open');
+}
+
+document.getElementById('gameOverHomeBtn').addEventListener('click', () => {
+  location.reload();
+});
+
+/* คืนเบี้ยทั้งหมด (ถุง + แป้นทั้งสองฝั่ง) มารวมกันแล้วแจกใหม่ 8:8 — ใช้เมื่อยังไม่มีใครลงเบี้ยเลย */
+function reshuffleBothRacksBotMode(){
+  const myTiles = rackSlots.map(s => s.firstElementChild).filter(Boolean).map(t => ({
+    value: t.dataset.value, type: t.dataset.type, score: Number(t.dataset.score),
+  }));
+  const combined = [...bag, ...myTiles, ...botRack];
+  shuffleArray(combined);
+
+  const newMyRack = combined.splice(0, RACK_SIZE);
+  const newBotRack = combined.splice(0, RACK_SIZE);
+  bag = combined;
+  botRack = newBotRack;
+
+  rackSlots.forEach(s => s.innerHTML = '');
+  newMyRack.forEach((t, i) => { if(rackSlots[i]) rackSlots[i].appendChild(buildTileEl(t)); });
+  updateBagCount();
+
+  noPlacementStreak = 0;
+  statsLine.textContent = 'ยังไม่มีใครลงเบี้ยเลย 3 ตาติดกัน — สุ่มแจกเบี้ยทั้งสองฝั่งใหม่';
+}
+
+/* เรียกหลังทุกครั้งที่มีการ "ผ่าน/เปลี่ยนเบี้ย" หรือ "ลงเบี้ยสำเร็จ" ในโหมดบอท */
+function checkBotModePassStreak(){
+  if(gameMode !== 'bot' || gameEnded) return;
+  if(noPlacementStreak < 6) return;
+
+  if(everAnyPlacement){
+    showGameOverModal(scorePlayer, scoreBot, '🤖 บอท');
+  } else {
+    reshuffleBothRacksBotMode();
+  }
 }
 
 submitBtn.addEventListener('click', () => {
@@ -2423,6 +2709,7 @@ submitBtn.addEventListener('click', () => {
 
   clearInvalidHighlights();
   const result = computeScoreForCells(placed, lineResult.run);
+  const equationText = lineResult.run.map(c => actualCellValue(c)).join('');
 
   placed.forEach(cell => {
     const t = cell.querySelector('.placed-tile');
@@ -2430,7 +2717,6 @@ submitBtn.addEventListener('click', () => {
   });
 
   fillRackFromBag(placed.length);
-  addScoreEntry(result, 'player');
 
   statsLine.textContent = result.isBingo
     ? `✅ บิงโก! ลง ${placed.length} ตัว ได้ ${result.total} แต้ม (รวมโบนัส +40)`
@@ -2438,8 +2724,11 @@ submitBtn.addEventListener('click', () => {
   updateSubmitState();
 
   if(gameMode === 'online'){
-    pushOnlineSubmit(placed, result);
+    pushOnlineSubmit(placed, result, equationText);
   } else if(botEnabled){
+    addScoreEntry(result, 'player');
+    noPlacementStreak = 0;
+    everAnyPlacement = true;
     triggerBotTurn();
   }
 });
@@ -2498,7 +2787,10 @@ function enterExchangeMode(){
   updateExchangeBtnLabel();
   cancelExchangeBtn.style.display = '';
   submitBtn.disabled = true;
+  submitBtn.style.display = 'none';
   pullAllBtn.disabled = true;
+  pullAllBtn.style.display = 'none';
+  endTurnBtn.style.display = 'none';
   updateEndTurnState();
   statsLine.textContent = 'แตะเบี้ยในถาดที่ต้องการเปลี่ยน แล้วกดยืนยัน';
 }
@@ -2512,6 +2804,9 @@ function exitExchangeMode(){
   exchangeBtn.textContent = '🔁 เปลี่ยนเบี้ย';
   exchangeBtn.disabled = false;
   cancelExchangeBtn.style.display = 'none';
+  submitBtn.style.display = '';
+  pullAllBtn.style.display = '';
+  endTurnBtn.style.display = '';
   updateSubmitState();
   updateEndTurnState();
 }
@@ -2549,6 +2844,7 @@ function confirmExchange(){
   if(gameMode === 'online'){
     pushOnlineExchange();
   } else if(botEnabled){
+    noPlacementStreak++;
     triggerBotTurn();
   }
 }
@@ -2749,6 +3045,7 @@ endTurnBtn.addEventListener('click', () => {
     statsLine.textContent = 'ข้ามตา · ส่งให้คู่ต่อสู้เล่นต่อ';
     pushOnlineExchange(); // ไม่มีการเปลี่ยนเบี้ย แค่ส่งสถานะเดิม + สลับเทิร์น
   } else if(botEnabled){
+    noPlacementStreak++;
     triggerBotTurn();
   }
 });
@@ -3225,6 +3522,7 @@ function executeBotTurn(){
       statsLine.textContent = exchanged
         ? '🤖 บอทหาสมการเปิดเกมไม่ได้ ขอเปลี่ยนเบี้ยแทน'
         : '🤖 บอทหาสมการเปิดเกมไม่ได้ และเบี้ยในถุงเหลือน้อยกว่า 5 ตัว ขอผ่าน';
+      noPlacementStreak++;
       endBotTurn();
       return;
     }
@@ -3243,6 +3541,7 @@ function executeBotTurn(){
       statsLine.textContent = exchanged
         ? '🤖 บอทหาที่ทับช่องดาวไม่ได้ ขอเปลี่ยนเบี้ยแทน'
         : '🤖 บอทหาที่ทับช่องดาวไม่ได้ และเบี้ยในถุงเหลือน้อยกว่า 5 ตัว ขอผ่าน';
+      noPlacementStreak++;
       endBotTurn();
       return;
     }
@@ -3259,11 +3558,14 @@ function executeBotTurn(){
     fillBotRack(best.tiles.length);
 
     const result = computeScoreForCells(best.cells, best.cells);
+    result.equationText = best.symbols.join('');
     if(result.isBingo) botBingoCount++;
     addScoreEntry(result, 'bot');
     statsLine.textContent = result.isBingo
       ? `🤖 บอทบิงโก! ลง ${best.tiles.length} ตัว ได้ ${result.total} แต้ม`
       : `🤖 บอทลงสมการ ${best.tiles.length} ตัว ได้ ${result.total} แต้ม`;
+    noPlacementStreak = 0;
+    everAnyPlacement = true;
     endBotTurn();
     return;
   }
@@ -3277,6 +3579,7 @@ function executeBotTurn(){
     statsLine.textContent = exchanged
       ? '🤖 บอทหาจุดต่อสมการไม่ได้ ขอเปลี่ยนเบี้ยแทน'
       : '🤖 บอทหาจุดต่อสมการไม่ได้ และเบี้ยในถุงเหลือน้อยกว่า 5 ตัว ขอผ่าน';
+    noPlacementStreak++;
     endBotTurn();
     return;
   }
@@ -3297,6 +3600,7 @@ function executeBotTurn(){
   fillBotRack(move.tiles.length);
 
   const result = computeScoreForCells(newCells, move.cells);
+  result.equationText = move.symbols.join('');
   if(result.isBingo) botBingoCount++;
   addScoreEntry(result, 'bot');
 
@@ -3304,6 +3608,8 @@ function executeBotTurn(){
     ? `🤖 บอทบิงโก! ลง ${move.tiles.length} ตัว ได้ ${result.total} แต้ม`
     : `🤖 บอทลงสมการต่อ ${move.tiles.length} ตัว ได้ ${result.total} แต้ม`;
 
+  noPlacementStreak = 0;
+  everAnyPlacement = true;
   endBotTurn();
 }
 
@@ -3324,6 +3630,8 @@ function placeBotTiles(newCells, newSymbols, tiles, allRunCellsForReference){
 
 
 function endBotTurn(){
+  checkBotModePassStreak();
+  if(gameEnded) return;
   currentTurn = 'player';
   setTurnIndicator('🎮 ตาของคุณ', false);
   setPlayerControlsEnabled(true);
@@ -3371,6 +3679,7 @@ function beginOnlineRoom(roomId){
   onlinePanel.style.display = '';
   opponentScoreLabel.textContent = '🧑 คู่ต่อสู้';
   statsLine.textContent = 'เชื่อมต่อห้องออนไลน์แล้ว กำลังรอข้อมูลเกม...';
+  renderedHistoryCount = 0;
 
   onlineRoomRef = window.AmathOnline.subscribeRoom(roomId, (data, roomRef) => {
     onlineRoomRef = roomRef;
@@ -3384,6 +3693,7 @@ function beginOnlineRoom(roomId){
 
 let onlinePresenceTimer = null;
 let lastOnlineData = null;
+let renderedHistoryCount = 0;
 
 function updateOpponentPresenceDot(){
   if(!lastOnlineData || !opponentSlot) return;
@@ -3393,6 +3703,65 @@ function updateOpponentPresenceDot(){
   if(ageSec > 45) opponentDot.classList.add('offline');
   else if(ageSec > 15) opponentDot.classList.add('stale');
 }
+
+/* =========================================================
+   ONLINE TIME CONTROL: ฝั่งละ 22 นาที (1320 วินาที)
+   ========================================================= */
+const GAME_TIME_SECONDS = 22 * 60;
+const myTimerDisplay = document.getElementById('myTimerDisplay');
+const oppTimerDisplay = document.getElementById('oppTimerDisplay');
+
+let onlineTimerInterval = null;
+
+function formatClock(sec){
+  const negative = sec < 0;
+  const s = Math.ceil(Math.abs(sec));
+  const m = Math.floor(s / 60);
+  const r = s % 60;
+  return (negative ? '-' : '') + `${m}:${String(r).padStart(2, '0')}`;
+}
+
+/* คำนวณเวลาที่เหลือของแต่ละฝั่ง ณ ขณะนี้ (ฝั่งที่กำลังเล่นอยู่จะเดินนาฬิกาลดลงเรื่อยๆ
+   ปล่อยให้ติดลบได้เลยถ้าใช้เวลาเกิน ไม่ตัดที่ 0 — หมดเวลาไม่ทำให้แพ้ทันที) */
+function computeLiveTimes(data){
+  const p1Base = data.p1Time ?? GAME_TIME_SECONDS;
+  const p2Base = data.p2Time ?? GAME_TIME_SECONDS;
+  const turnStartedMs = data.turnStartedAt && data.turnStartedAt.toMillis ? data.turnStartedAt.toMillis() : null;
+
+  if(!turnStartedMs){
+    return { p1: p1Base, p2: p2Base };
+  }
+  const elapsed = (Date.now() - turnStartedMs) / 1000;
+  if(data.turn === 'p1') return { p1: p1Base - elapsed, p2: p2Base };
+  return { p1: p1Base, p2: p2Base - elapsed };
+}
+
+function syncOnlineTimers(data){
+  if(!mySlot || !opponentSlot) return;
+
+  myTimerDisplay.style.display = '';
+  oppTimerDisplay.style.display = '';
+
+  clearInterval(onlineTimerInterval);
+
+  function tick(){
+    const live = computeLiveTimes(data);
+    const myTime = live[mySlot];
+    const oppTime = live[opponentSlot];
+
+    myTimerDisplay.textContent = '⏱️ ' + formatClock(myTime);
+    oppTimerDisplay.textContent = '⏱️ ' + formatClock(oppTime);
+
+    myTimerDisplay.classList.toggle('active', data.turn === mySlot);
+    oppTimerDisplay.classList.toggle('active', data.turn === opponentSlot);
+    myTimerDisplay.classList.toggle('low', myTime <= 60);
+    oppTimerDisplay.classList.toggle('low', oppTime <= 60);
+  }
+
+  tick();
+  onlineTimerInterval = setInterval(tick, 1000);
+}
+
 
 function applyOnlineRoomUpdate(data){
   lastOnlineData = data;
@@ -3408,6 +3777,18 @@ function applyOnlineRoomUpdate(data){
     setPlayerControlsEnabled(false);
     setTurnIndicator('🔌 คู่ต่อสู้ออกจากห้องแล้ว', true);
     statsLine.textContent = 'คู่ต่อสู้ออกจากห้อง — กด "🏠 หน้าหลัก" เพื่อเริ่มใหม่';
+    return;
+  }
+
+  if(data.status === 'finished' && !gameEnded){
+    const myScore = data[mySlot]?.score || 0;
+    const oppScore = data[opponentSlot]?.score || 0;
+    const oppLabel = opponentSlot === 'p1' ? 'ผู้เล่น 1' : 'ผู้เล่น 2';
+    const myTimeFinal = data[mySlot + 'Time'] ?? GAME_TIME_SECONDS;
+    const oppTimeFinal = data[opponentSlot + 'Time'] ?? GAME_TIME_SECONDS;
+    const myPenalty = computeOvertimePenalty(myTimeFinal);
+    const oppPenalty = computeOvertimePenalty(oppTimeFinal);
+    showGameOverModal(myScore, oppScore, oppLabel, undefined, undefined, myPenalty, oppPenalty);
     return;
   }
 
@@ -3445,6 +3826,28 @@ function applyOnlineRoomUpdate(data){
   scoreTotalPlayerEl.textContent = scorePlayer;
   scoreTotalBotEl.textContent = scoreBot;
 
+  // sync ประวัติการลงสมการ (ของทั้งสองฝั่ง) — แสดงเฉพาะแถวที่ยังไม่เคยเรนเดอร์
+  const hist = data.scoreHistory || [];
+  if(hist.length > renderedHistoryCount){
+    for(let i = renderedHistoryCount; i < hist.length; i++){
+      const entry = hist[i];
+      const isMine = entry.owner === mySlot;
+      const playerLabel = isMine ? 'คุณ' : (opponentSlot === 'p1' ? 'ผู้เล่น 1' : 'ผู้เล่น 2');
+      let detail = `${entry.tileCount} ตัว`;
+      if(entry.equationMultiplier > 1) detail += ` · ${entry.subtotal}×${entry.equationMultiplier}`;
+      if(entry.isBingo) detail += ` · บิงโก +40`;
+      renderHistoryEntry({
+        isMine,
+        playerLabel,
+        equationText: entry.equationText || null,
+        detail,
+        total: entry.total,
+        isBingo: entry.isBingo,
+      });
+    }
+    renderedHistoryCount = hist.length;
+  }
+
   // sync เทิร์น
   const isMyTurn = data.turn === mySlot;
   const turnJustBecameMine = isMyTurn && lastKnownOnlineTurn !== data.turn;
@@ -3453,6 +3856,8 @@ function applyOnlineRoomUpdate(data){
   currentTurn = isMyTurn ? 'player' : 'opponent';
   setTurnIndicator(isMyTurn ? '🎮 ตาของคุณ' : '⏳ รอคู่ต่อสู้เดินหมาก...', !isMyTurn);
   setPlayerControlsEnabled(isMyTurn);
+
+  syncOnlineTimers(data);
 
   updateOpponentPresenceDot();
 
@@ -3472,7 +3877,16 @@ leaveRoomBtn.addEventListener('click', () => {
 });
 
 /* ผลักการเปลี่ยนแปลงจากการ "ลงสมการ" ของเราขึ้น Firestore ให้อีกฝั่งเห็น */
-function pushOnlineSubmit(placed, result){
+/* คำนวณเวลาที่เหลือของ "ฉัน" ณ ตอนจบตานี้ (หักเวลาที่ใช้ไปตั้งแต่ turnStartedAt) */
+function computeMyRemainingTime(){
+  const myBase = lastOnlineData?.[mySlot + 'Time'] ?? GAME_TIME_SECONDS;
+  const turnStartedMs = lastOnlineData?.turnStartedAt?.toMillis ? lastOnlineData.turnStartedAt.toMillis() : null;
+  if(!turnStartedMs || lastOnlineData?.turn !== mySlot) return myBase;
+  const elapsed = (Date.now() - turnStartedMs) / 1000;
+  return Math.max(0, myBase - elapsed);
+}
+
+function pushOnlineSubmit(placed, result, equationText){
   if(gameMode !== 'online' || !onlineRoomRef) return;
   const boardUpdates = {};
   placed.forEach(cell => {
@@ -3491,17 +3905,34 @@ function pushOnlineSubmit(placed, result){
     return t ? { value: t.dataset.value, type: t.dataset.type, score: Number(t.dataset.score) } : null;
   }).filter(Boolean);
 
+  const newScorePlayerTotal = (lastOnlineData?.[mySlot]?.score || 0) + result.total;
+  const historyEntry = {
+    owner: mySlot,
+    equationText: equationText || '',
+    tileCount: result.tileCount,
+    total: result.total,
+    isBingo: !!result.isBingo,
+    equationMultiplier: result.equationMultiplier,
+    subtotal: result.subtotal,
+  };
+  const newHistory = [...(lastOnlineData?.scoreHistory || []), historyEntry];
+
   window.AmathOnline.updateRoom(onlineRoomRef, {
     ...boardUpdates,
     bag: bag,
     [mySlot + '.rack']: myNewRack,
-    [mySlot + '.score']: scorePlayer,
+    [mySlot + '.score']: newScorePlayerTotal,
     [mySlot + '.lastSeen']: Date.now(),
     turn: opponentSlot,
+    passStreak: 0,
+    [mySlot + 'Time']: computeMyRemainingTime(),
+    turnStartedAt: window.AmathOnline.getServerTimestamp(),
+    scoreHistory: newHistory,
   });
 }
 
-/* ผลักการ "เปลี่ยนเบี้ย" ของเราขึ้น Firestore */
+/* ผลักการ "เปลี่ยนเบี้ย"/"ผ่าน" ของเราขึ้น Firestore
+   พร้อมเช็คกติกาจบเกม: ผ่าน/เปลี่ยนเบี้ยติดกัน 3 ตาทั้งสองฝั่ง (รวม 6 ตาติดกัน) */
 function pushOnlineExchange(){
   if(gameMode !== 'online' || !onlineRoomRef) return;
   const myNewRack = rackSlots.map(s => {
@@ -3509,11 +3940,54 @@ function pushOnlineExchange(){
     return t ? { value: t.dataset.value, type: t.dataset.type, score: Number(t.dataset.score) } : null;
   }).filter(Boolean);
 
+  const newStreak = (lastOnlineData?.passStreak || 0) + 1;
+  const boardHasEverBeenPlayed = Object.keys(lastOnlineData?.board || {}).length > 0;
+  const myRemainingTime = computeMyRemainingTime();
+
+  if(newStreak >= 6 && !boardHasEverBeenPlayed){
+    // ยังไม่มีใครลงเบี้ยเลย 3 ตาติดกันทั้งสองฝั่ง -> สุ่มแจกเบี้ยทั้งสองฝั่งใหม่แทนการจบเกม
+    const opponentRack = lastOnlineData?.[opponentSlot]?.rack || [];
+    const combined = [...bag, ...myNewRack, ...opponentRack];
+    shuffleArray(combined);
+    const newMyRack = combined.splice(0, RACK_SIZE);
+    const newOppRack = combined.splice(0, RACK_SIZE);
+    bag = combined;
+
+    statsLine.textContent = 'ยังไม่มีใครลงเบี้ยเลย 3 ตาติดกัน — สุ่มแจกเบี้ยทั้งสองฝั่งใหม่';
+    window.AmathOnline.updateRoom(onlineRoomRef, {
+      bag: bag,
+      [mySlot + '.rack']: newMyRack,
+      [opponentSlot + '.rack']: newOppRack,
+      [mySlot + '.lastSeen']: Date.now(),
+      turn: opponentSlot,
+      passStreak: 0,
+      [mySlot + 'Time']: myRemainingTime,
+      turnStartedAt: window.AmathOnline.getServerTimestamp(),
+    });
+    return;
+  }
+
+  if(newStreak >= 6 && boardHasEverBeenPlayed){
+    window.AmathOnline.updateRoom(onlineRoomRef, {
+      bag: bag,
+      [mySlot + '.rack']: myNewRack,
+      [mySlot + '.lastSeen']: Date.now(),
+      turn: opponentSlot,
+      passStreak: newStreak,
+      status: 'finished',
+      [mySlot + 'Time']: myRemainingTime,
+    });
+    return;
+  }
+
   window.AmathOnline.updateRoom(onlineRoomRef, {
     bag: bag,
     [mySlot + '.rack']: myNewRack,
     [mySlot + '.lastSeen']: Date.now(),
     turn: opponentSlot,
+    passStreak: newStreak,
+    [mySlot + 'Time']: myRemainingTime,
+    turnStartedAt: window.AmathOnline.getServerTimestamp(),
   });
 }
 
@@ -3560,6 +4034,7 @@ document.querySelectorAll('.start-diff-btn').forEach(btn => {
     });
     gameMode = 'bot';
     startOverlay.remove();
+      document.body.classList.remove('pre-game');
     startGame();
   });
 });
@@ -3628,6 +4103,7 @@ document.getElementById('onlineRandomModeBtn').addEventListener('click', () => {
       onlineRoomId = roomId;
       myOnlineUid = uid;
       startOverlay.remove();
+      document.body.classList.remove('pre-game');
       beginOnlineRoom(roomId);
     },
     (message) => {
@@ -3671,6 +4147,7 @@ document.getElementById('createRoomBtn').addEventListener('click', async () => {
         onlineRoomId = roomId;
         myOnlineUid = window.AmathOnline.getMyUid();
         startOverlay.remove();
+      document.body.classList.remove('pre-game');
         beginOnlineRoom(roomId);
       }
     });
@@ -3721,6 +4198,7 @@ document.getElementById('joinRoomBtn').addEventListener('click', async () => {
     onlineRoomId = roomId;
     myOnlineUid = window.AmathOnline.getMyUid();
     startOverlay.remove();
+      document.body.classList.remove('pre-game');
     beginOnlineRoom(roomId);
   } catch(e){
     joinRoomError.textContent = e.message === 'not-found' || e.message === 'taken'
