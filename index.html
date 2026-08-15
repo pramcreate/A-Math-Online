@@ -99,14 +99,19 @@
   /* ================= BOARD ================= */
   /* ห่อกระดานไว้ในกล่องที่ scroll/clip ได้ เผื่อซูมแล้วล้นออกนอกจอ */
   .board-zoom-wrap{
-    max-width: 100%;
-    overflow: auto;
+    width: min(96vw, 700px);
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
     -webkit-overflow-scrolling: touch;
     touch-action: none; /* กันเบราว์เซอร์แย่งจัดการ gesture ไปทำ native zoom/scroll เอง */
     overscroll-behavior: contain;
+    border-radius: 18px;
   }
 
   .board-frame{
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
     background: linear-gradient(160deg, var(--wood) 0%, var(--wood-dark) 100%);
     padding: 12px;
     border-radius: 18px;
@@ -139,8 +144,9 @@
     background: var(--board-green);
     padding: 6px;
     border-radius: 10px;
-    width: min(96vw, 700px);
-    aspect-ratio: 1 / 1;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
     box-shadow: 0 0 0 3px var(--board-green-dark) inset;
   }
 
@@ -905,7 +911,7 @@
     align-items: center;
     justify-content: center;
   }
-  body.pre-game .board{
+  body.pre-game .board-zoom-wrap{
     width: min(88vw, 82vh, 700px);
   }
 
@@ -2282,6 +2288,7 @@ function resetDrag(){
 /* =========================================================
    PINCH-ZOOM เฉพาะกระดาน (ไม่ซูมถาดเบี้ย/ปุ่มอื่นๆ)
    ใช้สองนิ้วบีบ/ขยายบน .board-zoom-wrap เพื่อซูมเฉพาะ .board-frame
+   พอซูมแล้วลากนิ้วเดียว (บนพื้นที่ว่าง ไม่ใช่ตัวเบี้ย) เพื่อเลื่อนดูรอบกระดานได้อิสระ
    ========================================================= */
 const boardZoomWrapEl = document.getElementById('boardZoomWrap');
 const boardFrameEl = document.getElementById('boardFrame');
@@ -2290,9 +2297,18 @@ const resetZoomBtn = document.getElementById('resetZoomBtn');
 const MIN_BOARD_SCALE = 1;
 const MAX_BOARD_SCALE = 2.5;
 let boardScale = 1;
+let panX = 0;
+let panY = 0;
 const activeBoardPointers = new Map(); // pointerId -> {x,y}
 let pinchStartDistance = 0;
 let pinchStartScale = 1;
+
+let isPanning = false;
+let panPointerId = null;
+let panStartClientX = 0;
+let panStartClientY = 0;
+let panStartX = 0;
+let panStartY = 0;
 
 function getBoardPointerDistance(){
   const pts = [...activeBoardPointers.values()];
@@ -2300,9 +2316,25 @@ function getBoardPointerDistance(){
   return Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
 }
 
+/* กันลาก/ซูมจนกระดานหลุดออกนอกกรอบไปไกลเกินจะดึงกลับ */
+function clampPan(){
+  const wrapRect = boardZoomWrapEl.getBoundingClientRect();
+  const naturalW = boardFrameEl.offsetWidth;
+  const naturalH = boardFrameEl.offsetHeight;
+  const maxPanX = Math.max(0, (naturalW * boardScale - wrapRect.width) / 2 + naturalW * 0.15);
+  const maxPanY = Math.max(0, (naturalH * boardScale - wrapRect.height) / 2 + naturalH * 0.15);
+  panX = Math.min(maxPanX, Math.max(-maxPanX, panX));
+  panY = Math.min(maxPanY, Math.max(-maxPanY, panY));
+}
+
+function updateBoardTransform(){
+  clampPan();
+  boardFrameEl.style.transform = `translate(${panX}px, ${panY}px) scale(${boardScale})`;
+}
+
 function applyBoardScale(scale){
   boardScale = Math.min(MAX_BOARD_SCALE, Math.max(MIN_BOARD_SCALE, scale));
-  boardFrameEl.style.transform = `scale(${boardScale})`;
+  updateBoardTransform();
   resetZoomBtn.style.display = boardScale > 1.02 ? '' : 'none';
 }
 
@@ -2317,32 +2349,71 @@ function cancelInProgressTileDrag(){
 
 boardZoomWrapEl.addEventListener('pointerdown', (e) => {
   activeBoardPointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
   if(activeBoardPointers.size === 2){
-    cancelInProgressTileDrag(); // นิ้วที่สองแตะ = ตั้งใจซูม ไม่ใช่ลากเบี้ย ยกเลิกการลากที่ค้างอยู่
+    // สองนิ้ว = ตั้งใจซูม ไม่ใช่ลากเบี้ยหรือแพน ยกเลิกสิ่งที่ค้างอยู่
+    cancelInProgressTileDrag();
+    isPanning = false;
+    panPointerId = null;
     pinchStartDistance = getBoardPointerDistance();
     pinchStartScale = boardScale;
+  } else if(activeBoardPointers.size === 1 && boardScale > 1.02){
+    // นิ้วเดียวตอนซูมอยู่ + ไม่ได้แตะโดนตัวเบี้ย -> เริ่มแพนดูรอบกระดาน
+    const isTileTarget = e.target.closest('.tile, .placed-tile');
+    if(!isTileTarget){
+      isPanning = true;
+      panPointerId = e.pointerId;
+      panStartClientX = e.clientX;
+      panStartClientY = e.clientY;
+      panStartX = panX;
+      panStartY = panY;
+    }
   }
 });
 
 boardZoomWrapEl.addEventListener('pointermove', (e) => {
   if(!activeBoardPointers.has(e.pointerId)) return;
   activeBoardPointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
   if(activeBoardPointers.size === 2 && pinchStartDistance > 0){
     e.preventDefault();
     const currentDistance = getBoardPointerDistance();
     applyBoardScale(pinchStartScale * (currentDistance / pinchStartDistance));
+  } else if(isPanning && e.pointerId === panPointerId){
+    e.preventDefault();
+    panX = panStartX + (e.clientX - panStartClientX);
+    panY = panStartY + (e.clientY - panStartClientY);
+    updateBoardTransform();
   }
 });
 
 function releaseBoardPointer(e){
   activeBoardPointers.delete(e.pointerId);
   if(activeBoardPointers.size < 2) pinchStartDistance = 0;
+  if(e.pointerId === panPointerId){
+    isPanning = false;
+    panPointerId = null;
+  }
 }
 boardZoomWrapEl.addEventListener('pointerup', releaseBoardPointer);
 boardZoomWrapEl.addEventListener('pointercancel', releaseBoardPointer);
 boardZoomWrapEl.addEventListener('pointerleave', releaseBoardPointer);
 
-resetZoomBtn.addEventListener('click', () => applyBoardScale(1));
+resetZoomBtn.addEventListener('click', () => {
+  panX = 0;
+  panY = 0;
+  applyBoardScale(1);
+});
+
+/* กันเบราว์เซอร์ (โดยเฉพาะ Safari บน iOS) แอบซูมทั้งหน้าจอเองตอนใช้สองนิ้ว
+   ทั้งที่ตั้งใจให้ซูมเฉพาะกระดานผ่านระบบของเราเท่านั้น */
+document.addEventListener('touchmove', (e) => {
+  if(e.touches && e.touches.length > 1) e.preventDefault();
+}, { passive: false });
+
+document.addEventListener('gesturestart', (e) => e.preventDefault());
+document.addEventListener('gesturechange', (e) => e.preventDefault());
+document.addEventListener('gestureend', (e) => e.preventDefault());
 
 /* =========================================================
    SUBMIT EQUATION + VALIDATION + SCORING
