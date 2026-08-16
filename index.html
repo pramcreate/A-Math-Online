@@ -106,18 +106,28 @@
     touch-action: none; /* กันเบราว์เซอร์แย่งจัดการ gesture ไปทำ native zoom/scroll เอง */
     overscroll-behavior: contain;
     border-radius: 18px;
+    margin-bottom: 14px;
+    margin-right: 14px;
+    box-shadow:
+      6px 8px 0 var(--wood-dark),
+      10px 13px 0 #6b4d2e,
+      16px 24px 26px -8px rgba(30, 20, 10, 0.5);
   }
 
   .board-frame{
     width: 100%;
     height: 100%;
     box-sizing: border-box;
-    background: linear-gradient(160deg, var(--wood) 0%, var(--wood-dark) 100%);
+    background:
+      linear-gradient(160deg, rgba(255,255,255,0.18) 0%, transparent 30%),
+      linear-gradient(160deg, var(--wood) 0%, var(--wood-dark) 100%);
     padding: 12px;
     border-radius: 18px;
     box-shadow:
-      0 2px 0 rgba(255,255,255,0.25) inset,
-      0 16px 30px -12px rgba(60, 45, 20, 0.4);
+      0 2px 0 rgba(255,255,255,0.3) inset,
+      0 -6px 10px rgba(0,0,0,0.18) inset,
+      0 20px 34px -14px rgba(45, 30, 10, 0.55),
+      0 3px 0 rgba(45, 30, 10, 0.3);
     transform-origin: center center;
     will-change: transform;
   }
@@ -145,19 +155,21 @@
     grid-template-columns: repeat(15, minmax(0,1fr));
     grid-template-rows: repeat(15, minmax(0,1fr));
     gap: 2px;
-    background: var(--board-green);
+    background: linear-gradient(160deg, var(--board-green) 0%, var(--board-green-dark) 100%);
     padding: 6px;
     border-radius: 10px;
     width: 100%;
     height: 100%;
     box-sizing: border-box;
-    box-shadow: 0 0 0 3px var(--board-green-dark) inset;
+    box-shadow:
+      0 0 0 3px var(--board-green-dark) inset,
+      0 3px 8px rgba(0,0,0,0.35) inset;
   }
 
   .cell{
     position: relative;
-    background: var(--plain);
-    border-radius: 3px;
+    background: linear-gradient(165deg, #fffefb 0%, var(--plain) 55%, #f2ecd9 100%);
+    border-radius: 4px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -167,15 +179,63 @@
     font-size: clamp(5.5px, 1.35vw, 9.5px);
     line-height: 1.05;
     padding: 1px;
+    box-shadow:
+      inset 0 -2.5px 0 rgba(120, 100, 60, 0.28),
+      inset 0 2px 0 rgba(255,255,255,0.85),
+      inset 2px 0 0 rgba(255,255,255,0.35),
+      inset -2px 0 0 rgba(120,100,60,0.12),
+      0 1px 1px rgba(0,0,0,0.15);
   }
 
-  .cell.red{ background: var(--red); color: var(--red-ink); }
-  .cell.yellow{ background: var(--yellow); color: var(--yellow-ink); }
-  .cell.blue{ background: var(--blue); color: var(--blue-ink); }
-  .cell.orange{ background: var(--orange); color: var(--orange-ink); }
+  .cell.red{
+    background: linear-gradient(165deg, #f5c2ba 0%, var(--red) 55%, #d98d81 100%);
+    color: var(--red-ink);
+    box-shadow:
+      inset 0 -2.5px 0 rgba(154, 66, 51, 0.4),
+      inset 0 2px 0 rgba(255,255,255,0.6),
+      inset 2px 0 0 rgba(255,255,255,0.25),
+      inset -2px 0 0 rgba(154,66,51,0.18),
+      0 1px 1px rgba(0,0,0,0.15);
+  }
+  .cell.yellow{
+    background: linear-gradient(165deg, #f7e2ae 0%, var(--yellow) 55%, #dcb96a 100%);
+    color: var(--yellow-ink);
+    box-shadow:
+      inset 0 -2.5px 0 rgba(140, 100, 30, 0.35),
+      inset 0 2px 0 rgba(255,255,255,0.6),
+      inset 2px 0 0 rgba(255,255,255,0.25),
+      inset -2px 0 0 rgba(140,100,30,0.15),
+      0 1px 1px rgba(0,0,0,0.15);
+  }
+  .cell.blue{
+    background: linear-gradient(165deg, #c6e6f1 0%, var(--blue) 55%, #85b9cd 100%);
+    color: var(--blue-ink);
+    box-shadow:
+      inset 0 -2.5px 0 rgba(30, 85, 110, 0.35),
+      inset 0 2px 0 rgba(255,255,255,0.65),
+      inset 2px 0 0 rgba(255,255,255,0.3),
+      inset -2px 0 0 rgba(30,85,110,0.15),
+      0 1px 1px rgba(0,0,0,0.15);
+  }
+  .cell.orange{
+    background: linear-gradient(165deg, #f7d0ac 0%, var(--orange) 55%, #dc9c5f 100%);
+    color: var(--orange-ink);
+    box-shadow:
+      inset 0 -2.5px 0 rgba(140, 80, 20, 0.35),
+      inset 0 2px 0 rgba(255,255,255,0.6),
+      inset 2px 0 0 rgba(255,255,255,0.25),
+      inset -2px 0 0 rgba(140,80,20,0.15),
+      0 1px 1px rgba(0,0,0,0.15);
+  }
 
-  .cell.center{ background: var(--star); }
-  .cell.center svg{ width: 46%; height: 46%; fill: #fff; }
+  .cell.center{
+    background: radial-gradient(circle at 35% 30%, #a3d3ac 0%, var(--star) 55%, #5c9668 100%);
+    box-shadow:
+      inset 0 1px 2px rgba(0,0,0,0.2),
+      inset 0 -2px 3px rgba(0,0,0,0.15),
+      0 2px 4px rgba(0,0,0,0.25);
+  }
+  .cell.center svg{ width: 46%; height: 46%; fill: #fff; filter: drop-shadow(0 1px 1px rgba(0,0,0,0.25)); }
 
   .cell.drag-over{
     outline: 2px dashed var(--board-green-dark);
@@ -183,7 +243,7 @@
     z-index: 2;
   }
 
-  .cell.filled{ background: var(--plain); }
+  .cell.filled{ background: linear-gradient(165deg, #fffefb 0%, var(--plain) 55%, #f2ecd9 100%); }
   .cell.filled .bonus-label{ display: none; }
 
   .cell.invalid{
@@ -205,7 +265,9 @@
     background: linear-gradient(150deg, var(--blue-tile-lt) 0%, var(--blue-tile) 55%, var(--blue-tile-dk) 100%);
     box-shadow:
       0 2px 0 var(--blue-tile-dk),
-      inset 0 1px 2px rgba(255,255,255,0.5);
+      0 3px 3px rgba(0,0,0,0.25),
+      inset 0 1px 1px rgba(255,255,255,0.7),
+      inset 0 -2px 2px rgba(0,0,0,0.15);
     font-family: 'Kanit', sans-serif;
     font-weight: 700;
     color: #fff;
@@ -215,7 +277,11 @@
   }
   .placed-tile.op{
     background: linear-gradient(150deg, var(--slate-lt) 0%, var(--slate) 55%, var(--slate-dk) 100%);
-    box-shadow: 0 2px 0 var(--slate-dk), inset 0 1px 2px rgba(255,255,255,0.45);
+    box-shadow:
+      0 2px 0 var(--slate-dk),
+      0 3px 3px rgba(0,0,0,0.25),
+      inset 0 1px 1px rgba(255,255,255,0.6),
+      inset 0 -2px 2px rgba(0,0,0,0.15);
   }
   .placed-tile.blank{
     background: linear-gradient(150deg, var(--blank-lt) 0%, var(--blank) 55%, var(--blank-dk) 100%);
@@ -277,18 +343,98 @@
     min-height: 16px;
   }
 
-  /* ================= SCORE PANEL ================= */
-  .score-panel{
-    width: 190px;
-    flex-shrink: 0;
+  /* ================= SCORE FLOATING WIDGET (ลอยมุมขวาบน ใต้ปุ่มกลับขนาดเดิม) ================= */
+  .score-float-widget{
+    position: fixed;
+    top: 60px;
+    right: 14px;
+    z-index: 600;
+    width: 94px;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
     background: #fff;
-    border: 1px solid var(--cream-deep);
-    border-radius: 16px;
-    padding: 16px 14px;
-    text-align: center;
-    align-self: stretch;
+    border: 1.5px solid var(--cream-deep);
+    border-radius: 999px;
+    padding: 7px 10px;
+    cursor: pointer;
+    box-shadow: 0 3px 10px -3px rgba(60,45,20,0.2);
+    font-family: 'Kanit', sans-serif;
+  }
+  .score-float-widget:active{ transform: translateY(1px); }
+  .score-float-item{
     display: flex;
     flex-direction: column;
+    align-items: center;
+    line-height: 1.15;
+  }
+  .score-float-label{
+    font-size: 9.5px;
+    color: #8a7c63;
+  }
+  .score-float-value{
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--red-ink);
+  }
+  .score-float-item:last-child .score-float-value{ color: #5b4fb3; }
+  .score-float-divider{
+    width: 1px;
+    height: 20px;
+    background: var(--cream-deep);
+  }
+
+  /* ================= SCORE PANEL (เลื่อนเข้าจากขวาเมื่อกดวิดเจ็ต) ================= */
+  .score-panel-backdrop{
+    position: fixed;
+    inset: 0;
+    background: rgba(30, 20, 10, 0.35);
+    z-index: 1400;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+  }
+  .score-panel-backdrop.open{
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .score-panel{
+    position: fixed;
+    top: 0;
+    right: 0;
+    height: 100vh;
+    width: min(86vw, 300px);
+    flex-shrink: 0;
+    background: #fff;
+    border-left: 1px solid var(--cream-deep);
+    border-radius: 18px 0 0 18px;
+    padding: 20px 14px 16px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    z-index: 1500;
+    box-shadow: -10px 0 28px -10px rgba(30,20,10,0.25);
+    transform: translateX(100%);
+    transition: transform 0.25s ease;
+    overflow-y: auto;
+  }
+  .score-panel.open{ transform: translateX(0); }
+
+  .score-panel-close{
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: none;
+    background: var(--cream);
+    color: #8a7c63;
+    font-size: 15px;
+    cursor: pointer;
   }
 
   .score-title{
@@ -516,8 +662,7 @@
 
   @media (max-width: 640px){
     .score-panel{
-      width: 100%;
-      max-width: min(96vw, 700px);
+      width: min(90vw, 320px);
     }
   }
 
@@ -595,20 +740,33 @@
     background: linear-gradient(150deg, var(--blue-tile-lt) 0%, var(--blue-tile) 55%, var(--blue-tile-dk) 100%);
     box-shadow:
       0 4px 0 var(--blue-tile-dk),
-      0 7px 12px -4px rgba(35, 70, 100, 0.35),
-      inset 0 2px 3px rgba(255,255,255,0.55),
-      inset 0 -3px 4px rgba(0,0,0,0.12);
+      0 8px 14px -4px rgba(35, 70, 100, 0.45),
+      inset 0 2px 3px rgba(255,255,255,0.65),
+      inset 0 -3px 5px rgba(0,0,0,0.18);
     touch-action: none;
     cursor: grab;
+    overflow: hidden;
+  }
+  .tile::before{
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 8%;
+    width: 84%;
+    height: 34%;
+    background: linear-gradient(180deg, rgba(255,255,255,0.55), rgba(255,255,255,0));
+    border-radius: 50% 50% 60% 60% / 70% 70% 100% 100%;
+    pointer-events: none;
   }
   .tile.op{
     background: linear-gradient(150deg, var(--slate-lt) 0%, var(--slate) 55%, var(--slate-dk) 100%);
-    box-shadow: 0 4px 0 var(--slate-dk), 0 7px 12px -4px rgba(50,60,70,0.35), inset 0 2px 3px rgba(255,255,255,0.5), inset 0 -3px 4px rgba(0,0,0,0.12);
+    box-shadow: 0 4px 0 var(--slate-dk), 0 8px 14px -4px rgba(50,60,70,0.45), inset 0 2px 3px rgba(255,255,255,0.6), inset 0 -3px 5px rgba(0,0,0,0.18);
   }
   .tile.blank{
     background: linear-gradient(150deg, var(--blank-lt) 0%, var(--blank) 55%, var(--blank-dk) 100%);
-    box-shadow: 0 4px 0 var(--blank-dk), 0 7px 12px -4px rgba(80,60,110,0.3), inset 0 2px 3px rgba(255,255,255,0.55), inset 0 -3px 4px rgba(0,0,0,0.12);
+    box-shadow: 0 4px 0 var(--blank-dk), 0 8px 14px -4px rgba(80,60,110,0.4), inset 0 2px 3px rgba(255,255,255,0.65), inset 0 -3px 5px rgba(0,0,0,0.18);
   }
+  .tile:active{ transform: translateY(2px); }
 
   .tile .value{
     font-family: 'Kanit', sans-serif;
@@ -677,30 +835,62 @@
     flex-wrap: wrap;
   }
 
-  .rack-footer button{
+  /* ================= ACTION BUTTONS (ลอยมุมขวา ใต้กล่องคะแนน) ================= */
+  .action-float-stack{
+    position: fixed;
+    top: 132px;
+    right: 14px;
+    z-index: 600;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    width: 94px;
+  }
+  .action-float-btn{
     font-family: 'Kanit', sans-serif;
-    font-weight: 600;
-    font-size: 13px;
-    color: #fff;
-    border: none;
-    border-radius: 8px;
-    padding: 9px 18px;
+    font-weight: 700;
+    font-size: 10.5px;
+    text-align: center;
+    background: #fff;
+    border: 1.5px solid #ece4d2;
+    border-radius: 999px;
+    padding: 6px 9px;
+    min-height: 40px;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1.2;
     cursor: pointer;
+    box-shadow: 0 2px 7px -3px rgba(60,45,20,0.2);
+    color: #8a7c63;
+    transition: border-color 0.15s ease, transform 0.08s ease;
   }
-  #exchangeBtn{
-    background: linear-gradient(150deg, var(--blue-tile-lt), var(--blue-tile-dk));
-    box-shadow: 0 3px 0 var(--blue-tile-dk);
-  }
-  #exchangeBtn:active{ transform: translateY(2px); box-shadow: 0 1px 0 var(--blue-tile-dk); }
-  #exchangeBtn.selecting{
-    background: linear-gradient(150deg, #ff9b8f, var(--red-ink));
-    box-shadow: 0 3px 0 var(--red-ink);
-  }
-  #exchangeBtn:disabled{
-    background: #d8d2c2;
-    box-shadow: 0 3px 0 #b8b09a;
+  .action-float-btn:active{ transform: translateY(2px); }
+  .action-float-btn:disabled{
+    opacity: 0.55;
     cursor: not-allowed;
-    opacity: 0.7;
+  }
+  #pullAllBtn.action-float-btn{ color: var(--orange-ink); border-color: #f3ddc3; }
+  #exchangeBtn.action-float-btn{ color: var(--blue-tile-dk); border-color: #d7e8f4; }
+  #exchangeBtn.action-float-btn.selecting{ color: var(--red-ink); border-color: #f3c9c3; }
+  #endTurnBtn.action-float-btn{ color: #5b4fb3; border-color: #e0d9f5; }
+  #submitBtn.action-float-btn{ color: #2f8f63; border-color: #d3ecdf; }
+
+  /* จอเล็ก (มือถือ) — เก็บตัวหนังสือไว้ แต่ย่อขนาดตัวอักษร/ระยะห่างให้เล็กลง กันบังกระดาน */
+  @media (max-width: 480px){
+    .action-float-stack{
+      top: 118px;
+      right: 8px;
+      width: 94px;
+      gap: 5px;
+    }
+    .action-float-btn{
+      padding: 5px 7px;
+      font-size: 8.5px;
+      border-radius: 999px;
+      min-height: 40px;
+    }
   }
 
   #cancelExchangeBtn{
@@ -712,30 +902,6 @@
     text-decoration: underline;
     cursor: pointer;
     padding: 4px 2px;
-  }
-
-  #pullAllBtn{
-    background: linear-gradient(150deg, #f5c78f, var(--orange-ink));
-    box-shadow: 0 3px 0 var(--orange-ink);
-  }
-  #pullAllBtn:active{ transform: translateY(2px); box-shadow: 0 1px 0 var(--orange-ink); }
-  #pullAllBtn:disabled{
-    background: #d8d2c2;
-    box-shadow: 0 3px 0 #b8b09a;
-    cursor: not-allowed;
-    opacity: 0.7;
-  }
-
-  #endTurnBtn{
-    background: linear-gradient(150deg, #c8bdf0, #5b4fb3);
-    box-shadow: 0 3px 0 #5b4fb3;
-  }
-  #endTurnBtn:active{ transform: translateY(2px); box-shadow: 0 1px 0 #5b4fb3; }
-  #endTurnBtn:disabled{
-    background: #d8d2c2;
-    box-shadow: 0 3px 0 #b8b09a;
-    cursor: not-allowed;
-    opacity: 0.7;
   }
 
   .rack.exchange-mode{
@@ -750,18 +916,6 @@
     transform: translateY(-3px);
   }
 
-  #submitBtn{
-    background: linear-gradient(150deg, #8fce9e, var(--locked-dk));
-    box-shadow: 0 3px 0 var(--locked-dk);
-  }
-  #submitBtn:active{ transform: translateY(2px); box-shadow: 0 1px 0 var(--locked-dk); }
-  #submitBtn:disabled{
-    background: #d8d2c2;
-    box-shadow: 0 3px 0 #b8b09a;
-    cursor: not-allowed;
-    opacity: 0.7;
-  }
-
   /* ---- blank tile chosen-value marker ---- */
   .blank-chosen{ position: relative; }
 
@@ -772,7 +926,7 @@
     align-items: center;
     justify-content: center;
   }
-  .confirm-backdrop.open{ display: flex; }
+  .confirm-backdrop.open{ display: flex !important; }
   .confirm-panel{
     background: #fff;
     border-radius: 18px;
@@ -906,6 +1060,9 @@
   body.pre-game header,
   body.pre-game .stats,
   body.pre-game .score-panel,
+  body.pre-game .score-float-widget,
+  body.pre-game .action-float-stack,
+  body.pre-game .reset-zoom-btn,
   body.pre-game .rack-area{
     display: none;
   }
@@ -949,13 +1106,13 @@
     border-radius: 16px;
     padding: 16px 20px;
     margin-bottom: 22px;
-    box-shadow: 0 10px 26px -10px rgba(30,20,10,0.25);
+    box-shadow: 0 8px 20px -10px rgba(30,20,10,0.15);
   }
   .start-buttons-box{
     background: #fff;
     border-radius: 16px;
     padding: 16px;
-    box-shadow: 0 10px 26px -10px rgba(30,20,10,0.25);
+    box-shadow: 0 8px 20px -10px rgba(30,20,10,0.15);
   }
   .start-title{
     font-family: 'Mali', cursive;
@@ -976,16 +1133,18 @@
     font-weight: 700;
     font-size: 14.5px;
     line-height: 1.5;
-    color: #fff;
-    background: linear-gradient(150deg, var(--blue-tile-lt), var(--blue-tile-dk));
-    border: none;
+    color: var(--blue-tile-dk);
+    background: #fff;
+    border: 2px solid #d7e8f4;
     border-radius: 14px;
     padding: 14px 8px;
     cursor: pointer;
-    box-shadow: 0 4px 0 var(--blue-tile-dk);
+    box-shadow: 0 3px 10px -4px rgba(63,123,176,0.25);
+    transition: border-color 0.15s ease, transform 0.1s ease, box-shadow 0.15s ease;
   }
-  .start-solo-btn small{ font-weight: 400; font-size: 11px; opacity: 0.9; }
-  .start-solo-btn:active{ transform: translateY(2px); box-shadow: 0 2px 0 var(--blue-tile-dk); }
+  .start-solo-btn small{ font-weight: 400; font-size: 11px; opacity: 0.75; }
+  .start-solo-btn:hover{ border-color: var(--blue-tile-lt); }
+  .start-solo-btn:active{ transform: translateY(2px); box-shadow: 0 1px 4px -2px rgba(63,123,176,0.25); }
 
   .start-mode-row{
     display: flex;
@@ -993,15 +1152,17 @@
   }
   .start-mode-row .start-solo-btn{ width: auto; flex: 1; }
   .start-solo-btn.online-btn{
-    background: linear-gradient(150deg, #a5e0c4, #2f8f63);
-    box-shadow: 0 4px 0 #2f8f63;
+    color: #2f8f63;
+    border-color: #d3ecdf;
+    box-shadow: 0 3px 10px -4px rgba(47,143,99,0.25);
   }
-  .start-solo-btn.online-btn:active{ box-shadow: 0 2px 0 #2f8f63; }
+  .start-solo-btn.online-btn:hover{ border-color: #a5e0c4; }
+  .start-solo-btn.online-btn:active{ box-shadow: 0 1px 4px -2px rgba(47,143,99,0.25); }
 
   .start-back-btn{
     font-family: 'Kanit', sans-serif;
     font-size: 12.5px;
-    color: var(--blue-tile-dk);
+    color: #8a7c63;
     background: none;
     border: none;
     cursor: pointer;
@@ -1009,7 +1170,13 @@
     display: block;
   }
 
-  .start-diff-wrap{ margin-top: 4px; }
+  .start-diff-wrap{
+    margin-top: 4px;
+    background: #fff;
+    border-radius: 16px;
+    padding: 18px 18px 20px;
+    box-shadow: 0 8px 20px -10px rgba(30,20,10,0.15);
+  }
   .start-diff-title{
     font-family: 'Kanit', sans-serif;
     font-weight: 600;
@@ -1030,17 +1197,22 @@
     font-family: 'Kanit', sans-serif;
     font-weight: 600;
     font-size: 12.5px;
-    color: var(--ink);
-    background: var(--cream);
-    border: 2px solid var(--cream-deep);
+    color: #8a7c63;
+    background: #fff;
+    border: 2px solid #ece4d2;
     border-radius: 12px;
     padding: 14px 4px;
     cursor: pointer;
-    transition: transform 0.1s ease, border-color 0.15s ease;
+    transition: transform 0.1s ease, border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
   }
   .start-diff-btn:hover{ border-color: var(--blue-tile-lt); }
   .start-diff-btn:active{ transform: scale(0.96); }
   .start-diff-btn .sdb-emoji{ font-size: 22px; }
+  .start-diff-btn.active{
+    background: #eef6fc;
+    border-color: var(--blue-tile-dk);
+    color: var(--blue-tile-dk);
+  }
 
   .start-tileset-buttons{
     display: flex;
@@ -1056,26 +1228,32 @@
     font-family: 'Kanit', sans-serif;
     font-weight: 600;
     font-size: 12.5px;
-    color: var(--ink);
-    background: var(--cream);
-    border: 2px solid var(--cream-deep);
+    color: #8a7c63;
+    background: #fff;
+    border: 2px solid #ece4d2;
     border-radius: 12px;
     padding: 12px 4px;
     cursor: pointer;
-    transition: transform 0.1s ease, border-color 0.15s ease, background 0.15s ease;
+    transition: transform 0.1s ease, border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
   }
-  .start-tileset-btn small{ font-weight: 400; opacity: 0.8; }
+  .start-tileset-btn small{ font-weight: 400; opacity: 0.75; }
   .start-tileset-btn:hover{ border-color: var(--blue-tile-lt); }
   .start-tileset-btn:active{ transform: scale(0.96); }
   .start-tileset-btn .sdb-emoji{ font-size: 20px; }
   .start-tileset-btn.active{
-    background: linear-gradient(150deg, var(--blue-tile-lt), var(--blue-tile-dk));
+    background: #eef6fc;
     border-color: var(--blue-tile-dk);
-    color: #fff;
+    color: var(--blue-tile-dk);
   }
 
   /* ---- online matchmaking panel ---- */
-  .start-online-wrap{ margin-top: 4px; }
+  .start-online-wrap{
+    margin-top: 4px;
+    background: #fff;
+    border-radius: 16px;
+    padding: 18px 18px 20px;
+    box-shadow: 0 8px 20px -10px rgba(30,20,10,0.15);
+  }
   .online-status-text{
     font-family: 'Kanit', sans-serif;
     font-weight: 600;
@@ -1095,22 +1273,24 @@
     font-family: 'Kanit', sans-serif;
     font-weight: 700;
     font-size: 15px;
-    color: #fff;
-    background: linear-gradient(150deg, #a5e0c4, #2f8f63);
-    border: none;
+    color: #2f8f63;
+    background: #fff;
+    border: 2px solid #d3ecdf;
     border-radius: 12px;
     padding: 14px 8px;
     cursor: pointer;
-    box-shadow: 0 4px 0 #2f8f63;
+    box-shadow: 0 3px 10px -4px rgba(47,143,99,0.25);
+    transition: border-color 0.15s ease, transform 0.1s ease;
   }
-  .online-find-btn:active{ transform: translateY(2px); box-shadow: 0 2px 0 #2f8f63; }
+  .online-find-btn:hover{ border-color: #a5e0c4; }
+  .online-find-btn:active{ transform: translateY(2px); box-shadow: 0 1px 4px -2px rgba(47,143,99,0.25); }
   .online-cancel-btn{
     font-family: 'Kanit', sans-serif;
     font-weight: 600;
     font-size: 13px;
     color: var(--red-ink);
-    background: var(--cream);
-    border: 1.5px solid var(--cream-deep);
+    background: #fff;
+    border: 1.5px solid #f3d8d4;
     border-radius: 10px;
     padding: 10px 16px;
     cursor: pointer;
@@ -1128,10 +1308,12 @@
 
   .online-find-btn{ margin-bottom: 10px; }
   .online-find-btn.friend-btn{
-    background: linear-gradient(150deg, #c8bdf0, #5b4fb3);
-    box-shadow: 0 4px 0 #5b4fb3;
+    color: #5b4fb3;
+    border-color: #e0d9f5;
+    box-shadow: 0 3px 10px -4px rgba(91,79,179,0.25);
   }
-  .online-find-btn.friend-btn:active{ box-shadow: 0 2px 0 #5b4fb3; }
+  .online-find-btn.friend-btn:hover{ border-color: #c8bdf0; }
+  .online-find-btn.friend-btn:active{ box-shadow: 0 1px 4px -2px rgba(91,79,179,0.25); }
 
   .friend-divider{
     font-family: 'Kanit', sans-serif;
@@ -1159,8 +1341,8 @@
     text-align: center;
     text-transform: uppercase;
     color: var(--ink);
-    background: var(--cream);
-    border: 2px solid var(--cream-deep);
+    background: #fff;
+    border: 2px solid #ece4d2;
     border-radius: 10px;
     padding: 12px 8px;
     margin-bottom: 10px;
@@ -1174,8 +1356,8 @@
     font-size: 34px;
     letter-spacing: 8px;
     color: #5b4fb3;
-    background: var(--cream);
-    border: 2px dashed #c8bdf0;
+    background: #fff;
+    border: 2px dashed #d9d1f2;
     border-radius: 12px;
     padding: 14px 8px;
     margin-bottom: 12px;
@@ -1185,14 +1367,14 @@
     font-weight: 600;
     font-size: 13px;
     color: #5b4fb3;
-    background: var(--cream);
-    border: 1.5px solid #c8bdf0;
+    background: #fff;
+    border: 1.5px solid #e0d9f5;
     border-radius: 9px;
     padding: 9px 16px;
     cursor: pointer;
     margin-bottom: 14px;
   }
-  .copy-code-btn.copied{ background: #d8f0e2; border-color: #2f8f63; color: #2f8f63; }
+  .copy-code-btn.copied{ background: #f2fbf5; border-color: #2f8f63; color: #2f8f63; }
 
   /* ================= ERROR TOAST ================= */
   .toast{
@@ -1349,12 +1531,12 @@
 
 <div class="start-overlay" id="startOverlay">
   <div class="start-panel">
-    <div class="start-header-box">
+    <div class="start-header-box" id="startHeaderBox">
       <div class="start-title">A-Math Online</div>
       <div class="start-sub" id="startSub">เลือกโหมดการเล่น</div>
     </div>
 
-    <div class="start-buttons-box">
+    <div class="start-buttons-box" id="startButtonsBox">
       <div class="start-mode-row" id="startModeRow">
         <button class="start-solo-btn" id="startSoloBtn">🎮 เล่นคนเดียว<br><small>แข่งกับบอท</small></button>
         <button class="start-solo-btn online-btn" id="startOnlineBtn">🌐 จับคู่ออนไลน์<br><small>แข่งกับคนแปลกหน้า</small></button>
@@ -1365,7 +1547,7 @@
       <button class="start-back-btn" id="soloBackBtn">← กลับ</button>
 
       <div class="start-diff-title">เลือกชุดเบี้ย</div>
-      <div class="start-tileset-buttons">
+      <div class="start-tileset-buttons" id="soloTilesetButtons">
         <button class="start-tileset-btn active" data-tileset="secondary">
           <span class="sdb-emoji">🎓</span>มัธยม<br><small>100 ตัว</small>
         </button>
@@ -1377,13 +1559,13 @@
       <div class="start-diff-title">เลือกระดับความยากของบอท</div>
       <div class="start-diff-buttons">
         <button class="start-diff-btn" data-diff="easy">
-          <span class="sdb-emoji">🙂</span>ง่าย
+          ง่าย
         </button>
         <button class="start-diff-btn" data-diff="medium">
-          <span class="sdb-emoji">😐</span>ปานกลาง
+          ปานกลาง
         </button>
         <button class="start-diff-btn" data-diff="hard">
-          <span class="sdb-emoji">😈</span>ยาก
+          ยาก
         </button>
       </div>
     </div>
@@ -1406,10 +1588,22 @@
 
       <div id="onlineFriendChoice" style="display:none;">
         <button class="start-back-btn" id="friendChoiceBackBtn">← กลับ</button>
+
+        <div class="start-diff-title" style="margin-top:0;">ชุดเบี้ย (สำหรับห้องที่จะสร้าง)</div>
+        <div class="start-tileset-buttons" id="onlineTilesetButtons">
+          <button class="start-tileset-btn active" data-tileset="secondary">
+            <span class="sdb-emoji">🎓</span>มัธยม<br><small>100 ตัว</small>
+          </button>
+          <button class="start-tileset-btn" data-tileset="elementary">
+            <span class="sdb-emoji">✏️</span>ประถม<br><small>70 ตัว</small>
+          </button>
+        </div>
+
         <button class="online-find-btn" id="createRoomBtn">🎲 สร้างห้องใหม่</button>
         <div class="friend-divider">หรือ</div>
         <input type="text" id="joinCodeInput" class="join-code-input" placeholder="กรอกรหัสห้อง" maxlength="6" autocomplete="off" autocapitalize="characters">
         <button class="online-find-btn friend-btn" id="joinRoomBtn">🚪 เข้าร่วมห้อง</button>
+        <div class="online-status-sub">*เข้าร่วมห้องจะใช้ชุดเบี้ยเดียวกับที่เจ้าของห้องเลือกไว้</div>
         <div class="online-status-sub" id="joinRoomError" style="display:none;"></div>
       </div>
 
@@ -1425,7 +1619,6 @@
       <div id="onlineError" style="display:none;">
         <div class="online-status-text error">⚠️ เชื่อมต่อไม่ได้</div>
         <div class="online-status-sub" id="onlineErrorMsg">ตรวจสอบการตั้งค่า Firebase</div>
-        <button class="start-back-btn" id="onlineErrorBackBtn">← กลับ</button>
       </div>
     </div>
   </div>
@@ -1509,7 +1702,23 @@
     <div class="stats" id="statsLine"></div>
   </div>
 
-  <div class="score-panel">
+  <button class="score-float-widget" id="scoreFloatWidget">
+    <div class="score-float-item">
+      <span class="score-float-label">คุณ</span>
+      <span class="score-float-value" id="floatScorePlayer">0</span>
+    </div>
+    <div class="score-float-divider"></div>
+    <div class="score-float-item">
+      <span class="score-float-label" id="floatOpponentLabel">บอท</span>
+      <span class="score-float-value" id="floatScoreBot">0</span>
+    </div>
+  </button>
+
+  <div class="score-panel-backdrop" id="scorePanelBackdrop"></div>
+
+  <div class="score-panel" id="scorePanel">
+    <button class="score-panel-close" id="scorePanelClose">✕</button>
+
     <div class="bot-setup" id="botSetupPanel">
       <div class="bot-setup-title">🤖 โหมดบอท</div>
       <div class="diff-buttons">
@@ -1554,13 +1763,15 @@
   <div class="rack" id="rack"></div>
   <div class="rack-footer">
     <span id="bagCount"></span>
-    <button id="pullAllBtn">⬆️ ดึงเบี้ยทั้งหมด</button>
-    <button id="exchangeBtn">🔁 เปลี่ยนเบี้ย</button>
     <button id="cancelExchangeBtn" style="display:none;">ยกเลิก</button>
-    <button id="endTurnBtn">⏭️ จบตา</button>
-    <button id="submitBtn">✅ ลงสมการ</button>
-
   </div>
+</div>
+
+<div class="action-float-stack" id="actionFloatStack">
+  <button id="pullAllBtn" class="action-float-btn">⬆️ <span class="action-label">ดึงเบี้ย<br>ทั้งหมด</span></button>
+  <button id="exchangeBtn" class="action-float-btn">🔁 <span class="action-label">เปลี่ยนเบี้ย</span></button>
+  <button id="endTurnBtn" class="action-float-btn">⏭️ <span class="action-label">จบตา</span></button>
+  <button id="submitBtn" class="action-float-btn">✅ <span class="action-label">ลงสมการ</span></button>
 </div>
 
 <script type="module">
@@ -1691,6 +1902,7 @@ async function startMatchmaking(onMatched, onError){
             tx.set(roomRef, {
               status: 'active',
               turn: 'p1',
+              tileSet: 'secondary',
               passStreak: 0,
               p1Time: 1320,
               p2Time: 1320,
@@ -1732,7 +1944,7 @@ function generateRoomCode(){
   return code;
 }
 
-async function createFriendRoom(){
+async function createFriendRoom(tileSet){
   await ensureAuth();
 
   let code;
@@ -1754,6 +1966,7 @@ async function createFriendRoom(){
     status: 'waiting',
     mode: 'friend',
     code,
+    tileSet: tileSet === 'elementary' ? 'elementary' : 'secondary',
     turn: 'p1',
     passStreak: 0,
     p1Time: 1320,
@@ -2384,22 +2597,14 @@ const MAX_BOARD_SCALE = 2.5;
 let boardScale = 1;
 let panX = 0;
 let panY = 0;
-const activeBoardPointers = new Map(); // pointerId -> {x,y}
 let pinchStartDistance = 0;
 let pinchStartScale = 1;
 
 let isPanning = false;
-let panPointerId = null;
 let panStartClientX = 0;
 let panStartClientY = 0;
 let panStartX = 0;
 let panStartY = 0;
-
-function getBoardPointerDistance(){
-  const pts = [...activeBoardPointers.values()];
-  if(pts.length < 2) return 0;
-  return Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
-}
 
 /* กันลาก/ซูมจนกระดานหลุดออกนอกกรอบไปไกลเกินจะดึงกลับ */
 function clampPan(){
@@ -2432,57 +2637,53 @@ function cancelInProgressTileDrag(){
   resetDrag();
 }
 
-boardZoomWrapEl.addEventListener('pointerdown', (e) => {
-  activeBoardPointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+/* ใช้ Touch Events ตรงๆ (แทน Pointer Events) สำหรับท่าบีบ/ขยายสองนิ้วโดยเฉพาะ
+   เพราะ Touch Events อ่านค่านิ้วทั้งหมดพร้อมกันได้ตรงไปตรงมากว่า และกันเบราว์เซอร์
+   (โดยเฉพาะ Safari บนมือถือ) แอบเอาไปซูมทั้งหน้าจอเองได้แน่นอนกว่า Pointer Events */
+function getTouchDistance(touches){
+  if(touches.length < 2) return 0;
+  const dx = touches[0].clientX - touches[1].clientX;
+  const dy = touches[0].clientY - touches[1].clientY;
+  return Math.hypot(dx, dy);
+}
 
-  if(activeBoardPointers.size === 2){
-    // สองนิ้ว = ตั้งใจซูม ไม่ใช่ลากเบี้ยหรือแพน ยกเลิกสิ่งที่ค้างอยู่
+boardZoomWrapEl.addEventListener('touchstart', (e) => {
+  if(e.touches.length === 2){
     cancelInProgressTileDrag();
     isPanning = false;
-    panPointerId = null;
-    pinchStartDistance = getBoardPointerDistance();
+    pinchStartDistance = getTouchDistance(e.touches);
     pinchStartScale = boardScale;
-  } else if(activeBoardPointers.size === 1 && boardScale > 1.02){
-    // นิ้วเดียวตอนซูมอยู่ + ไม่ได้แตะโดนตัวเบี้ย -> เริ่มแพนดูรอบกระดาน
+  } else if(e.touches.length === 1 && boardScale > 1.02){
     const isTileTarget = e.target.closest('.tile, .placed-tile');
     if(!isTileTarget){
       isPanning = true;
-      panPointerId = e.pointerId;
-      panStartClientX = e.clientX;
-      panStartClientY = e.clientY;
+      panStartClientX = e.touches[0].clientX;
+      panStartClientY = e.touches[0].clientY;
       panStartX = panX;
       panStartY = panY;
     }
   }
-});
+}, { passive: true });
 
-boardZoomWrapEl.addEventListener('pointermove', (e) => {
-  if(!activeBoardPointers.has(e.pointerId)) return;
-  activeBoardPointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
-
-  if(activeBoardPointers.size === 2 && pinchStartDistance > 0){
+boardZoomWrapEl.addEventListener('touchmove', (e) => {
+  if(e.touches.length === 2 && pinchStartDistance > 0){
     e.preventDefault();
-    const currentDistance = getBoardPointerDistance();
+    const currentDistance = getTouchDistance(e.touches);
     applyBoardScale(pinchStartScale * (currentDistance / pinchStartDistance));
-  } else if(isPanning && e.pointerId === panPointerId){
+  } else if(isPanning && e.touches.length === 1){
     e.preventDefault();
-    panX = panStartX + (e.clientX - panStartClientX);
-    panY = panStartY + (e.clientY - panStartClientY);
+    panX = panStartX + (e.touches[0].clientX - panStartClientX);
+    panY = panStartY + (e.touches[0].clientY - panStartClientY);
     updateBoardTransform();
   }
-});
+}, { passive: false });
 
-function releaseBoardPointer(e){
-  activeBoardPointers.delete(e.pointerId);
-  if(activeBoardPointers.size < 2) pinchStartDistance = 0;
-  if(e.pointerId === panPointerId){
-    isPanning = false;
-    panPointerId = null;
-  }
+function handleTouchRelease(e){
+  if(e.touches.length < 2) pinchStartDistance = 0;
+  if(e.touches.length === 0) isPanning = false;
 }
-boardZoomWrapEl.addEventListener('pointerup', releaseBoardPointer);
-boardZoomWrapEl.addEventListener('pointercancel', releaseBoardPointer);
-boardZoomWrapEl.addEventListener('pointerleave', releaseBoardPointer);
+boardZoomWrapEl.addEventListener('touchend', handleTouchRelease, { passive: true });
+boardZoomWrapEl.addEventListener('touchcancel', handleTouchRelease, { passive: true });
 
 resetZoomBtn.addEventListener('click', () => {
   panX = 0;
@@ -2806,6 +3007,33 @@ const scoreTotalBotEl = document.getElementById('scoreTotalBot');
 const scoreHistoryEl = document.getElementById('scoreHistory');
 const scoreEmptyEl = document.getElementById('scoreEmpty');
 
+/* ---- กล่องคะแนนลอย (มุมขวาบน) + แผงรายละเอียดที่เลื่อนเข้ามาเมื่อกด ---- */
+const scoreFloatWidget = document.getElementById('scoreFloatWidget');
+const scorePanelEl = document.getElementById('scorePanel');
+const scorePanelBackdrop = document.getElementById('scorePanelBackdrop');
+const scorePanelClose = document.getElementById('scorePanelClose');
+const floatScorePlayerEl = document.getElementById('floatScorePlayer');
+const floatScoreBotEl = document.getElementById('floatScoreBot');
+const floatOpponentLabelEl = document.getElementById('floatOpponentLabel');
+
+function syncFloatScores(){
+  floatScorePlayerEl.textContent = scorePlayer;
+  floatScoreBotEl.textContent = scoreBot;
+  floatOpponentLabelEl.textContent = opponentScoreLabel.textContent.replace(/^\S+\s*/, '') || 'บอท';
+}
+
+function openScorePanel(){
+  scorePanelEl.classList.add('open');
+  scorePanelBackdrop.classList.add('open');
+}
+function closeScorePanel(){
+  scorePanelEl.classList.remove('open');
+  scorePanelBackdrop.classList.remove('open');
+}
+scoreFloatWidget.addEventListener('click', openScorePanel);
+scorePanelClose.addEventListener('click', closeScorePanel);
+scorePanelBackdrop.addEventListener('click', closeScorePanel);
+
 function addScoreEntry(result, owner){
   if(owner === 'bot'){
     scoreBot += result.total;
@@ -2827,6 +3055,7 @@ function addScoreEntry(result, owner){
     total: result.total,
     isBingo: result.isBingo,
   });
+  syncFloatScores();
 }
 
 /* วาดแถวประวัติคะแนน 1 แถว — ใช้ร่วมกันทั้งโหมดบอท (เรียกจาก addScoreEntry)
@@ -4132,8 +4361,12 @@ function applyOnlineRoomUpdate(data){
   }
 
   // ตาแรกสุด: ห้องเพิ่งถูกสร้าง ยังไม่มีถุงเบี้ย -> ให้ p1 (ผู้สร้างห้อง) เป็นคนแจกเบี้ยเริ่มต้น
+  // ตั้งค่าชุดเบี้ย/ขอบเขต BLANK ตามที่ห้องนี้กำหนดไว้ (ทั้งสองฝั่งต้องตรงกัน)
+  const roomTileDefs = data.tileSet === 'elementary' ? AMATH_TILE_DEFINITIONS_ELEMENTARY : AMATH_TILE_DEFINITIONS;
+  activeBlankNumbers = data.tileSet === 'elementary' ? BLANK_NUMBERS_ELEMENTARY : BLANK_NUMBERS_SECONDARY;
+
   if(mySlot === 'p1' && data.bag === null){
-    const freshBag = createTileBag();
+    const freshBag = createTileBag(roomTileDefs);
     const p1Rack = freshBag.splice(0, RACK_SIZE);
     const p2Rack = freshBag.splice(0, RACK_SIZE);
     window.AmathOnline.updateRoom(onlineRoomRef, {
@@ -4164,6 +4397,7 @@ function applyOnlineRoomUpdate(data){
   scoreBot = data[opponentSlot]?.score || 0;
   scoreTotalPlayerEl.textContent = scorePlayer;
   scoreTotalBotEl.textContent = scoreBot;
+  syncFloatScores();
 
   // sync ประวัติการลงสมการ (ของทั้งสองฝั่ง) — แสดงเฉพาะแถวที่ยังไม่เคยเรนเดอร์
   const hist = data.scoreHistory || [];
@@ -4359,6 +4593,7 @@ const startOnlineBtn = document.getElementById('startOnlineBtn');
 const startDiffWrap = document.getElementById('startDiffWrap');
 const startOnlineWrap = document.getElementById('startOnlineWrap');
 const startSub = document.getElementById('startSub');
+const startButtonsBox = document.getElementById('startButtonsBox');
 
 const onlineModeChoice = document.getElementById('onlineModeChoice');
 const onlineSearching = document.getElementById('onlineSearching');
@@ -4375,23 +4610,24 @@ let gameMode = 'bot'; // 'bot' | 'online'
 let pendingFriendRoomRef = null;
 
 startSoloBtn.addEventListener('click', () => {
-  startModeRow.style.display = 'none';
+  startButtonsBox.style.display = 'none';
   startSub.style.display = 'none';
   startDiffWrap.style.display = '';
 });
 
 document.getElementById('soloBackBtn').addEventListener('click', () => {
   startDiffWrap.style.display = 'none';
-  startModeRow.style.display = '';
+  startButtonsBox.style.display = '';
   startSub.style.display = '';
 });
 
 let selectedTileSet = 'secondary'; // 'secondary' (มัธยม 100 ตัว) | 'elementary' (ประถม 70 ตัว)
+let selectedOnlineTileSet = 'secondary'; // ใช้ตอนสร้างห้องเล่นกับเพื่อนเท่านั้น (จับคู่สุ่มใช้มัธยมเสมอ)
 
-document.querySelectorAll('.start-tileset-btn').forEach(btn => {
+document.querySelectorAll('#soloTilesetButtons .start-tileset-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     selectedTileSet = btn.dataset.tileset;
-    document.querySelectorAll('.start-tileset-btn').forEach(b => {
+    document.querySelectorAll('#soloTilesetButtons .start-tileset-btn').forEach(b => {
       b.classList.toggle('active', b.dataset.tileset === selectedTileSet);
     });
   });
@@ -4438,7 +4674,7 @@ function checkOnlineReady(){
 }
 
 startOnlineBtn.addEventListener('click', () => {
-  startModeRow.style.display = 'none';
+  startButtonsBox.style.display = 'none';
   startSub.style.display = 'none';
   startOnlineWrap.style.display = '';
   showOnlineState('modeChoice');
@@ -4448,13 +4684,10 @@ document.getElementById('onlineBackBtn').addEventListener('click', () => {
   if(window.AmathOnline) window.AmathOnline.cancelMatchmaking();
   clearInterval(onlineWaitTimer);
   startOnlineWrap.style.display = 'none';
-  startModeRow.style.display = '';
+  startButtonsBox.style.display = '';
   startSub.style.display = '';
 });
 
-document.getElementById('onlineErrorBackBtn').addEventListener('click', () => {
-  showOnlineState('modeChoice');
-});
 
 /* ---- แบบสุ่ม ---- */
 document.getElementById('onlineRandomModeBtn').addEventListener('click', () => {
@@ -4473,8 +4706,6 @@ document.getElementById('onlineRandomModeBtn').addEventListener('click', () => {
     (roomId, uid) => {
       clearInterval(onlineWaitTimer);
       gameMode = 'online';
-    activeBlankNumbers = BLANK_NUMBERS_SECONDARY;
-      activeBlankNumbers = BLANK_NUMBERS_SECONDARY;
       onlineRoomId = roomId;
       myOnlineUid = uid;
       startOverlay.remove();
@@ -4507,10 +4738,19 @@ document.getElementById('friendChoiceBackBtn').addEventListener('click', () => {
   showOnlineState('modeChoice');
 });
 
+document.querySelectorAll('#onlineTilesetButtons .start-tileset-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    selectedOnlineTileSet = btn.dataset.tileset;
+    document.querySelectorAll('#onlineTilesetButtons .start-tileset-btn').forEach(b => {
+      b.classList.toggle('active', b.dataset.tileset === selectedOnlineTileSet);
+    });
+  });
+});
+
 document.getElementById('createRoomBtn').addEventListener('click', async () => {
   if(!checkOnlineReady()) return;
   try {
-    const { roomId, code } = await window.AmathOnline.createFriendRoom();
+    const { roomId, code } = await window.AmathOnline.createFriendRoom(selectedOnlineTileSet);
     roomCodeDisplay.textContent = code;
     showOnlineState('waitingRoom');
 
@@ -4519,13 +4759,10 @@ document.getElementById('createRoomBtn').addEventListener('click', async () => {
       if(data.status === 'active' && data.p2){
         window.AmathOnline.unsubscribeRoom();
         gameMode = 'online';
-    activeBlankNumbers = BLANK_NUMBERS_SECONDARY;
-        activeBlankNumbers = BLANK_NUMBERS_SECONDARY;
-      activeBlankNumbers = BLANK_NUMBERS_SECONDARY;
         onlineRoomId = roomId;
         myOnlineUid = window.AmathOnline.getMyUid();
         startOverlay.remove();
-      document.body.classList.remove('pre-game');
+        document.body.classList.remove('pre-game');
         beginOnlineRoom(roomId);
       }
     });
@@ -4573,11 +4810,10 @@ document.getElementById('joinRoomBtn').addEventListener('click', async () => {
   try {
     const roomId = await window.AmathOnline.joinFriendRoom(code);
     gameMode = 'online';
-    activeBlankNumbers = BLANK_NUMBERS_SECONDARY;
     onlineRoomId = roomId;
     myOnlineUid = window.AmathOnline.getMyUid();
     startOverlay.remove();
-      document.body.classList.remove('pre-game');
+    document.body.classList.remove('pre-game');
     beginOnlineRoom(roomId);
   } catch(e){
     joinRoomError.textContent = e.message === 'not-found' || e.message === 'taken'
