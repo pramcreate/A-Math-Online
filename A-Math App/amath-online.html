@@ -1,0 +1,5019 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+<title>เอแม็ท A-Math | เล่นบนกระดาน</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#2f5d50">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="A-Math">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;600;700&family=Mali:wght@400;600;700&family=Sarabun:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --board-green: #2f5d50;
+    --board-green-dark: #24473d;
+    --cream: #fdf6e8;
+    --cream-deep: #f7ecd6;
+    --wood: #b98a5a;
+    --wood-dark: #8f6a41;
+    --plain: #fdfbf5;
+    --plain-line: #dcd0b4;
+
+    --red: #ecab9f;
+    --red-ink: #8a3a2c;
+    --yellow: #eed19a;
+    --yellow-ink: #7c5a12;
+    --blue: #a9d3e3;
+    --blue-ink: #1f5872;
+    --orange: #eeb98d;
+    --orange-ink: #8a4c14;
+    --star: #7fae82;
+
+    --ink: #3c342a;
+
+    --blue-tile-lt: #8fc6ef;
+    --blue-tile: #5b9fd8;
+    --blue-tile-dk: #3f7bb0;
+    --slate-lt: #b9c3cc;
+    --slate: #8b98a6;
+    --slate-dk: #626f7c;
+    --blank-lt: #e9e2f5;
+    --blank: #c7b8e8;
+    --blank-dk: #9c85c9;
+
+    --locked-lt: #d8dfc9;
+    --locked: #a9b98d;
+    --locked-dk: #7c8d63;
+  }
+
+  *{ box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  body{
+    margin: 0;
+    min-height: 100vh;
+    background: #ffffff;
+    font-family: 'Sarabun', sans-serif;
+    color: var(--ink);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 18px 12px 30px;
+    /* กันเนื้อหาโดนแป้นเบี้ยที่ติดขอบล่างจอบัง */
+    padding-bottom: calc(240px + env(safe-area-inset-bottom));
+    overflow-x: hidden;
+    user-select: none;
+  }
+
+  header{ text-align: center; margin-bottom: 4px; }
+  .eyebrow{
+    font-family: 'Kanit', sans-serif;
+    font-size: 12px;
+    letter-spacing: 3px;
+    color: var(--wood-dark);
+    text-transform: uppercase;
+    margin-bottom: 2px;
+  }
+  h1{
+    font-family: 'Mali', cursive;
+    font-weight: 700;
+    font-size: clamp(24px, 4.5vw, 36px);
+    margin: 0 0 12px;
+    color: var(--board-green-dark);
+  }
+  h1 span{ color: var(--red-ink); }
+
+  /* ================= LAYOUT: BOARD + SCORE PANEL ================= */
+  .play-area{
+    display: flex;
+    gap: 18px;
+    align-items: flex-start;
+    justify-content: center;
+    flex-wrap: wrap;
+    width: 100%;
+  }
+
+  .board-column{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  /* ================= BOARD ================= */
+  /* ห่อกระดานไว้ในกล่องที่ scroll/clip ได้ เผื่อซูมแล้วล้นออกนอกจอ */
+  .board-zoom-wrap{
+    width: min(96vw, 700px);
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+    -webkit-overflow-scrolling: touch;
+    touch-action: none; /* กันเบราว์เซอร์แย่งจัดการ gesture ไปทำ native zoom/scroll เอง */
+    overscroll-behavior: contain;
+    border-radius: 18px;
+    margin-bottom: 14px;
+    margin-right: 14px;
+    box-shadow:
+      6px 8px 0 var(--wood-dark),
+      10px 13px 0 #6b4d2e,
+      16px 24px 26px -8px rgba(30, 20, 10, 0.5);
+  }
+
+  .board-frame{
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    background:
+      linear-gradient(160deg, rgba(255,255,255,0.18) 0%, transparent 30%),
+      linear-gradient(160deg, var(--wood) 0%, var(--wood-dark) 100%);
+    padding: 12px;
+    border-radius: 18px;
+    box-shadow:
+      0 2px 0 rgba(255,255,255,0.3) inset,
+      0 -6px 10px rgba(0,0,0,0.18) inset,
+      0 20px 34px -14px rgba(45, 30, 10, 0.55),
+      0 3px 0 rgba(45, 30, 10, 0.3);
+    transform-origin: center center;
+    will-change: transform;
+  }
+
+  .reset-zoom-btn{
+    position: fixed;
+    top: 14px;
+    right: 14px;
+    z-index: 600;
+    font-family: 'Kanit', sans-serif;
+    font-weight: 600;
+    font-size: 12.5px;
+    color: var(--board-green-dark);
+    background: #fff;
+    border: 1.5px solid var(--cream-deep);
+    border-radius: 999px;
+    padding: 8px 14px;
+    cursor: pointer;
+    box-shadow: 0 3px 10px -3px rgba(60,45,20,0.25);
+  }
+  .reset-zoom-btn:active{ transform: translateY(1px); }
+
+  .board{
+    display: grid;
+    grid-template-columns: repeat(15, minmax(0,1fr));
+    grid-template-rows: repeat(15, minmax(0,1fr));
+    gap: 2px;
+    background: linear-gradient(160deg, var(--board-green) 0%, var(--board-green-dark) 100%);
+    padding: 6px;
+    border-radius: 10px;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    box-shadow:
+      0 0 0 3px var(--board-green-dark) inset,
+      0 3px 8px rgba(0,0,0,0.35) inset;
+  }
+
+  .cell{
+    position: relative;
+    background: linear-gradient(165deg, #fffefb 0%, var(--plain) 55%, #f2ecd9 100%);
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-family: 'Kanit', sans-serif;
+    font-weight: 600;
+    font-size: clamp(5.5px, 1.35vw, 9.5px);
+    line-height: 1.05;
+    padding: 1px;
+    box-shadow:
+      inset 0 -2.5px 0 rgba(120, 100, 60, 0.28),
+      inset 0 2px 0 rgba(255,255,255,0.85),
+      inset 2px 0 0 rgba(255,255,255,0.35),
+      inset -2px 0 0 rgba(120,100,60,0.12),
+      0 1px 1px rgba(0,0,0,0.15);
+  }
+
+  .cell.red{
+    background: linear-gradient(165deg, #f5c2ba 0%, var(--red) 55%, #d98d81 100%);
+    color: var(--red-ink);
+    box-shadow:
+      inset 0 -2.5px 0 rgba(154, 66, 51, 0.4),
+      inset 0 2px 0 rgba(255,255,255,0.6),
+      inset 2px 0 0 rgba(255,255,255,0.25),
+      inset -2px 0 0 rgba(154,66,51,0.18),
+      0 1px 1px rgba(0,0,0,0.15);
+  }
+  .cell.yellow{
+    background: linear-gradient(165deg, #f7e2ae 0%, var(--yellow) 55%, #dcb96a 100%);
+    color: var(--yellow-ink);
+    box-shadow:
+      inset 0 -2.5px 0 rgba(140, 100, 30, 0.35),
+      inset 0 2px 0 rgba(255,255,255,0.6),
+      inset 2px 0 0 rgba(255,255,255,0.25),
+      inset -2px 0 0 rgba(140,100,30,0.15),
+      0 1px 1px rgba(0,0,0,0.15);
+  }
+  .cell.blue{
+    background: linear-gradient(165deg, #c6e6f1 0%, var(--blue) 55%, #85b9cd 100%);
+    color: var(--blue-ink);
+    box-shadow:
+      inset 0 -2.5px 0 rgba(30, 85, 110, 0.35),
+      inset 0 2px 0 rgba(255,255,255,0.65),
+      inset 2px 0 0 rgba(255,255,255,0.3),
+      inset -2px 0 0 rgba(30,85,110,0.15),
+      0 1px 1px rgba(0,0,0,0.15);
+  }
+  .cell.orange{
+    background: linear-gradient(165deg, #f7d0ac 0%, var(--orange) 55%, #dc9c5f 100%);
+    color: var(--orange-ink);
+    box-shadow:
+      inset 0 -2.5px 0 rgba(140, 80, 20, 0.35),
+      inset 0 2px 0 rgba(255,255,255,0.6),
+      inset 2px 0 0 rgba(255,255,255,0.25),
+      inset -2px 0 0 rgba(140,80,20,0.15),
+      0 1px 1px rgba(0,0,0,0.15);
+  }
+
+  .cell.center{
+    background: radial-gradient(circle at 35% 30%, #a3d3ac 0%, var(--star) 55%, #5c9668 100%);
+    box-shadow:
+      inset 0 1px 2px rgba(0,0,0,0.2),
+      inset 0 -2px 3px rgba(0,0,0,0.15),
+      0 2px 4px rgba(0,0,0,0.25);
+  }
+  .cell.center svg{ width: 46%; height: 46%; fill: #fff; filter: drop-shadow(0 1px 1px rgba(0,0,0,0.25)); }
+
+  .cell.drag-over{
+    outline: 2px dashed var(--board-green-dark);
+    outline-offset: -2px;
+    z-index: 2;
+  }
+
+  .cell.filled{ background: linear-gradient(165deg, #fffefb 0%, var(--plain) 55%, #f2ecd9 100%); }
+  .cell.filled .bonus-label{ display: none; }
+
+  .cell.invalid{
+    outline: 3px solid #e63b2e;
+    outline-offset: -2px;
+    z-index: 3;
+  }
+  .cell.invalid .placed-tile{
+    box-shadow: 0 0 0 2px #e63b2e, 0 2px 0 var(--blue-tile-dk);
+  }
+
+  .placed-tile{
+    position: absolute;
+    inset: 3%;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(150deg, var(--blue-tile-lt) 0%, var(--blue-tile) 55%, var(--blue-tile-dk) 100%);
+    box-shadow:
+      0 2px 0 var(--blue-tile-dk),
+      0 3px 3px rgba(0,0,0,0.25),
+      inset 0 1px 1px rgba(255,255,255,0.7),
+      inset 0 -2px 2px rgba(0,0,0,0.15);
+    font-family: 'Kanit', sans-serif;
+    font-weight: 700;
+    color: #fff;
+    font-size: clamp(9px, 2.6vw, 15px);
+    cursor: grab;
+    touch-action: none;
+  }
+  .placed-tile.op{
+    background: linear-gradient(150deg, var(--slate-lt) 0%, var(--slate) 55%, var(--slate-dk) 100%);
+    box-shadow:
+      0 2px 0 var(--slate-dk),
+      0 3px 3px rgba(0,0,0,0.25),
+      inset 0 1px 1px rgba(255,255,255,0.6),
+      inset 0 -2px 2px rgba(0,0,0,0.15);
+  }
+  .placed-tile.blank{
+    background: linear-gradient(150deg, var(--blank-lt) 0%, var(--blank) 55%, var(--blank-dk) 100%);
+    box-shadow: 0 2px 0 var(--blank-dk), inset 0 1px 2px rgba(255,255,255,0.5);
+  }
+  .placed-tile.locked{
+    background: linear-gradient(150deg, var(--locked-lt) 0%, var(--locked) 55%, var(--locked-dk) 100%);
+    box-shadow: 0 2px 0 var(--locked-dk), inset 0 1px 2px rgba(255,255,255,0.4);
+    cursor: default;
+  }
+  /* เบี้ย BLANK ที่ถูกล็อกแล้ว ต้องยังคงสีม่วงไว้ ไม่โดนสีเขียว/เทาของ .locked ทับ
+     (ใส่ทีหลังเพื่อให้ specificity สูงกว่า .placed-tile.locked เฉยๆ) */
+  .placed-tile.blank.locked{
+    background: linear-gradient(150deg, var(--blank-lt) 0%, var(--blank) 55%, var(--blank-dk) 100%);
+    box-shadow: 0 2px 0 var(--blank-dk), inset 0 1px 2px rgba(255,255,255,0.5);
+  }
+  .placed-tile.blank::before{
+    content: '✦';
+    position: absolute;
+    top: -6px;
+    right: -5px;
+    font-size: 9px;
+    color: var(--blank-dk);
+    line-height: 1;
+    z-index: 2;
+  }
+  .placed-tile .pscore{
+    position: absolute;
+    bottom: 1px;
+    right: 3px;
+    font-size: 0.42em;
+    font-weight: 600;
+    color: rgba(255,255,255,0.9);
+  }
+  .placed-tile.bot-tile{
+    box-shadow: 0 0 0 2px #7c6fc9, 0 2px 0 var(--blue-tile-dk);
+  }
+  .placed-tile.bot-tile.locked{
+    box-shadow: 0 0 0 2px #7c6fc9, 0 2px 0 var(--locked-dk);
+  }
+  .placed-tile.blank.bot-tile.locked{
+    box-shadow: 0 0 0 2px #7c6fc9, 0 2px 0 var(--blank-dk);
+  }
+  .placed-tile.bot-tile::after{
+    content: '🤖';
+    position: absolute;
+    top: -7px;
+    left: -6px;
+    font-size: 9px;
+    line-height: 1;
+  }
+
+  .stats{
+    margin-top: 10px;
+    font-family: 'Kanit', sans-serif;
+    font-size: 12px;
+    color: #8a7c63;
+    text-align: center;
+    min-height: 16px;
+  }
+
+  /* ================= SCORE FLOATING WIDGET (ลอยมุมขวาบน ใต้ปุ่มกลับขนาดเดิม) ================= */
+  .score-float-widget{
+    position: fixed;
+    top: 60px;
+    right: 14px;
+    z-index: 600;
+    width: 94px;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: #fff;
+    border: 1.5px solid var(--cream-deep);
+    border-radius: 999px;
+    padding: 7px 10px;
+    cursor: pointer;
+    box-shadow: 0 3px 10px -3px rgba(60,45,20,0.2);
+    font-family: 'Kanit', sans-serif;
+  }
+  .score-float-widget:active{ transform: translateY(1px); }
+  .score-float-item{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    line-height: 1.15;
+  }
+  .score-float-label{
+    font-size: 9.5px;
+    color: #8a7c63;
+  }
+  .score-float-value{
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--red-ink);
+  }
+  .score-float-item:last-child .score-float-value{ color: #5b4fb3; }
+  .score-float-divider{
+    width: 1px;
+    height: 20px;
+    background: var(--cream-deep);
+  }
+
+  /* ================= SCORE PANEL (เลื่อนเข้าจากขวาเมื่อกดวิดเจ็ต) ================= */
+  .score-panel-backdrop{
+    position: fixed;
+    inset: 0;
+    background: rgba(30, 20, 10, 0.35);
+    z-index: 1400;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+  }
+  .score-panel-backdrop.open{
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .score-panel{
+    position: fixed;
+    top: 0;
+    right: 0;
+    height: 100vh;
+    width: min(86vw, 300px);
+    flex-shrink: 0;
+    background: #fff;
+    border-left: 1px solid var(--cream-deep);
+    border-radius: 18px 0 0 18px;
+    padding: 20px 14px 16px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    z-index: 1500;
+    box-shadow: -10px 0 28px -10px rgba(30,20,10,0.25);
+    transform: translateX(100%);
+    transition: transform 0.25s ease;
+    overflow-y: auto;
+  }
+  .score-panel.open{ transform: translateX(0); }
+
+  .score-panel-close{
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: none;
+    background: var(--cream);
+    color: #8a7c63;
+    font-size: 15px;
+    cursor: pointer;
+  }
+
+  .score-title{
+    font-family: 'Kanit', sans-serif;
+    font-weight: 600;
+    font-size: 13.5px;
+    color: var(--board-green-dark);
+    margin-bottom: 6px;
+  }
+
+  .score-total{
+    font-family: 'Kanit', sans-serif;
+    font-weight: 700;
+    font-size: 40px;
+    color: var(--red-ink);
+    line-height: 1;
+  }
+  .score-total-label{
+    font-family: 'Kanit', sans-serif;
+    font-size: 11px;
+    color: #8a7c63;
+    margin-bottom: 12px;
+  }
+
+  .score-history{
+    border-top: 1px dashed var(--plain-line);
+    padding-top: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-height: 340px;
+    overflow-y: auto;
+    text-align: left;
+  }
+
+  .score-empty{
+    font-family: 'Kanit', sans-serif;
+    font-size: 11.5px;
+    color: #b3a688;
+    text-align: center;
+    padding: 10px 0;
+  }
+
+  .score-entry{
+    background: var(--cream);
+    border-radius: 9px;
+    padding: 7px 9px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+  }
+  .score-entry .turn-label{
+    font-family: 'Kanit', sans-serif;
+    font-size: 10.5px;
+    color: #8a7c63;
+  }
+  .score-entry .turn-detail{
+    font-family: 'Kanit', sans-serif;
+    font-size: 9px;
+    color: #b3a688;
+    display: block;
+  }
+  .score-entry .turn-equation{
+    font-family: 'Kanit', sans-serif;
+    font-weight: 600;
+    font-size: 12px;
+    color: var(--ink);
+    margin: 2px 0;
+    letter-spacing: 0.3px;
+  }
+  .score-entry .turn-points{
+    font-family: 'Kanit', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--board-green-dark);
+    flex-shrink: 0;
+  }
+  .score-entry.bingo{
+    background: linear-gradient(150deg, #fff3d6, #ffe6ab);
+  }
+  .score-entry.bingo .turn-points{ color: #b8860b; }
+  .score-entry.owner-bot{
+    background: #eef0fb;
+  }
+  .score-entry .owner-tag{
+    font-size: 9px;
+    color: #7c6fc9;
+    font-weight: 600;
+  }
+
+  /* ---- bot mode setup ---- */
+  .bot-setup{
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px dashed var(--plain-line);
+  }
+  .online-panel{
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px dashed var(--plain-line);
+  }
+  .online-opponent-row{
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'Kanit', sans-serif;
+    font-size: 12px;
+    color: var(--ink);
+    margin-bottom: 8px;
+  }
+  .online-dot{
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #2f8f63;
+    flex-shrink: 0;
+    box-shadow: 0 0 0 3px rgba(47,143,99,0.15);
+  }
+  .online-dot.stale{ background: #d9a63b; box-shadow: 0 0 0 3px rgba(217,166,59,0.15); }
+  .online-dot.offline{ background: #c0392b; box-shadow: 0 0 0 3px rgba(192,57,43,0.15); }
+  .leave-room-btn{
+    width: 100%;
+    font-family: 'Kanit', sans-serif;
+    font-weight: 600;
+    font-size: 11.5px;
+    color: var(--red-ink);
+    background: var(--cream);
+    border: 1.5px solid var(--cream-deep);
+    border-radius: 8px;
+    padding: 7px 6px;
+    cursor: pointer;
+  }
+  .bot-setup-title{
+    font-family: 'Kanit', sans-serif;
+    font-weight: 600;
+    font-size: 11.5px;
+    color: var(--board-green-dark);
+    margin-bottom: 6px;
+  }
+  .diff-buttons{
+    display: flex;
+    gap: 4px;
+  }
+  .diff-btn{
+    flex: 1;
+    font-family: 'Kanit', sans-serif;
+    font-size: 10.5px;
+    font-weight: 600;
+    padding: 6px 2px;
+    border-radius: 7px;
+    border: 1.5px solid var(--cream-deep);
+    background: var(--cream);
+    color: #8a7c63;
+    cursor: pointer;
+  }
+  .diff-btn.active{
+    background: linear-gradient(150deg, var(--blue-tile-lt), var(--blue-tile-dk));
+    border-color: var(--blue-tile-dk);
+    color: #fff;
+  }
+
+  .turn-indicator{
+    font-family: 'Kanit', sans-serif;
+    font-weight: 600;
+    font-size: 12px;
+    color: var(--board-green-dark);
+    background: var(--cream);
+    border-radius: 8px;
+    padding: 7px 6px;
+    margin-bottom: 10px;
+  }
+  .turn-indicator.bot-turn{
+    background: #eef0fb;
+    color: #5b4fb3;
+  }
+
+  .score-row{
+    display: flex;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  .score-box{
+    flex: 1;
+    background: var(--cream);
+    border-radius: 10px;
+    padding: 8px 4px;
+  }
+  .score-box.bot{ background: #eef0fb; }
+  .score-box-label{
+    font-family: 'Kanit', sans-serif;
+    font-size: 10.5px;
+    color: #8a7c63;
+  }
+  .score-box.bot .score-box-label{ color: #5b4fb3; }
+  .score-box-total{
+    font-family: 'Kanit', sans-serif;
+    font-weight: 700;
+    font-size: 24px;
+    color: var(--red-ink);
+    line-height: 1.3;
+  }
+  .score-box.bot .score-box-total{ color: #5b4fb3; }
+
+  .score-box-timer{
+    font-family: 'Kanit', sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    color: #8a7c63;
+    margin-top: 4px;
+    padding: 3px 6px;
+    border-radius: 6px;
+    display: inline-block;
+  }
+  .score-box-timer.active{
+    background: #d8f0e2;
+    color: #2f8f63;
+  }
+  .score-box-timer.low{
+    background: #fdeceb;
+    color: #c0392b;
+    animation: timerPulse 1s ease-in-out infinite;
+  }
+  @keyframes timerPulse{ 50%{ opacity: 0.5; } }
+
+  @media (max-width: 640px){
+    .score-panel{
+      width: min(90vw, 320px);
+    }
+  }
+
+  /* ================= RACK ================= */
+  .rack-area{
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    margin: 0 auto;
+    width: min(96vw, 700px);
+    background: #fff;
+    border: 1px solid var(--cream-deep);
+    border-bottom: none;
+    border-radius: 16px 16px 0 0;
+    padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+    text-align: center;
+    z-index: 500;
+    box-shadow: 0 -6px 18px -6px rgba(60, 45, 20, 0.18);
+    max-height: 46vh;
+    overflow-y: auto;
+  }
+
+  .rack-title{
+    font-family: 'Kanit', sans-serif;
+    font-weight: 600;
+    font-size: 13.5px;
+    color: var(--board-green-dark);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .rack-title small{
+    font-weight: 400;
+    color: #8a7c63;
+    font-size: 11.5px;
+  }
+
+  .rack{
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    flex-wrap: wrap;
+    min-height: 66px;
+  }
+
+  .rack-slot{
+    width: 58px;
+    height: 58px;
+    border-radius: 12px;
+    border: 2px dashed var(--plain-line);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    position: relative;
+  }
+  .rack-slot.drag-over{
+    border-color: var(--board-green-dark);
+    background: var(--cream-deep);
+  }
+
+  .tile{
+    width: 54px;
+    height: 54px;
+    border-radius: 12px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(150deg, var(--blue-tile-lt) 0%, var(--blue-tile) 55%, var(--blue-tile-dk) 100%);
+    box-shadow:
+      0 4px 0 var(--blue-tile-dk),
+      0 8px 14px -4px rgba(35, 70, 100, 0.45),
+      inset 0 2px 3px rgba(255,255,255,0.65),
+      inset 0 -3px 5px rgba(0,0,0,0.18);
+    touch-action: none;
+    cursor: grab;
+    overflow: hidden;
+  }
+  .tile::before{
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 8%;
+    width: 84%;
+    height: 34%;
+    background: linear-gradient(180deg, rgba(255,255,255,0.55), rgba(255,255,255,0));
+    border-radius: 50% 50% 60% 60% / 70% 70% 100% 100%;
+    pointer-events: none;
+  }
+  .tile.op{
+    background: linear-gradient(150deg, var(--slate-lt) 0%, var(--slate) 55%, var(--slate-dk) 100%);
+    box-shadow: 0 4px 0 var(--slate-dk), 0 8px 14px -4px rgba(50,60,70,0.45), inset 0 2px 3px rgba(255,255,255,0.6), inset 0 -3px 5px rgba(0,0,0,0.18);
+  }
+  .tile.blank{
+    background: linear-gradient(150deg, var(--blank-lt) 0%, var(--blank) 55%, var(--blank-dk) 100%);
+    box-shadow: 0 4px 0 var(--blank-dk), 0 8px 14px -4px rgba(80,60,110,0.4), inset 0 2px 3px rgba(255,255,255,0.65), inset 0 -3px 5px rgba(0,0,0,0.18);
+  }
+  .tile:active{ transform: translateY(2px); }
+
+  .tile .value{
+    font-family: 'Kanit', sans-serif;
+    font-weight: 700;
+    font-size: 20px;
+    color: #fff;
+    text-shadow: 0 1px 1px rgba(0,0,0,0.15);
+  }
+  .tile.blank .value{ font-size: 12px; font-weight: 600; }
+
+  .tile .score{
+    position: absolute;
+    bottom: 3px;
+    right: 5px;
+    font-family: 'Kanit', sans-serif;
+    font-weight: 600;
+    font-size: 9px;
+    color: rgba(255,255,255,0.9);
+  }
+
+  /* ---- dual-choice operator tiles (+/- and x/รท) ---- */
+  .dual-op{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1px;
+    font-family: 'Kanit', sans-serif;
+    font-weight: 700;
+    line-height: 1;
+  }
+  .dual-op .op-sep{
+    font-size: 0.55em;
+    color: rgba(255,255,255,0.55);
+    margin: 0 1px;
+    font-weight: 400;
+  }
+  .dual-op .op-choice{
+    color: rgba(255,255,255,0.55);
+    transition: color 0.12s ease, transform 0.12s ease;
+  }
+  .dual-op .op-choice.selected{
+    color: #ff5449;
+    text-shadow: 0 1px 1px rgba(0,0,0,0.25);
+    transform: scale(1.12);
+  }
+  .placed-tile .dual-op .op-choice{ font-size: 0.85em; }
+
+  .drag-ghost{
+    position: fixed;
+    pointer-events: none;
+    z-index: 999;
+    width: 54px;
+    height: 54px;
+    transform: translate(-50%, -50%) scale(1.15);
+  }
+
+  .rack-footer{
+    margin-top: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    font-family: 'Kanit', sans-serif;
+    font-size: 12px;
+    color: #8a7c63;
+    flex-wrap: wrap;
+  }
+
+  /* ================= ACTION BUTTONS (ลอยมุมขวา ใต้กล่องคะแนน) ================= */
+  .action-float-stack{
+    position: fixed;
+    top: 132px;
+    right: 14px;
+    z-index: 600;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    width: 94px;
+  }
+  .action-float-btn{
+    font-family: 'Kanit', sans-serif;
+    font-weight: 700;
+    font-size: 10.5px;
+    text-align: center;
+    background: #fff;
+    border: 1.5px solid #ece4d2;
+    border-radius: 999px;
+    padding: 6px 9px;
+    min-height: 40px;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1.2;
+    cursor: pointer;
+    box-shadow: 0 2px 7px -3px rgba(60,45,20,0.2);
+    color: #8a7c63;
+    transition: border-color 0.15s ease, transform 0.08s ease;
+  }
+  .action-float-btn:active{ transform: translateY(2px); }
+  .action-float-btn:disabled{
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+  #pullAllBtn.action-float-btn{ color: var(--orange-ink); border-color: #f3ddc3; }
+  #exchangeBtn.action-float-btn{ color: var(--blue-tile-dk); border-color: #d7e8f4; }
+  #exchangeBtn.action-float-btn.selecting{ color: var(--red-ink); border-color: #f3c9c3; }
+  #endTurnBtn.action-float-btn{ color: #5b4fb3; border-color: #e0d9f5; }
+  #submitBtn.action-float-btn{ color: #2f8f63; border-color: #d3ecdf; }
+
+  /* จอเล็ก (มือถือ) — เก็บตัวหนังสือไว้ แต่ย่อขนาดตัวอักษร/ระยะห่างให้เล็กลง กันบังกระดาน */
+  @media (max-width: 480px){
+    .action-float-stack{
+      top: 118px;
+      right: 8px;
+      width: 94px;
+      gap: 5px;
+    }
+    .action-float-btn{
+      padding: 5px 7px;
+      font-size: 8.5px;
+      border-radius: 999px;
+      min-height: 40px;
+    }
+  }
+
+  #cancelExchangeBtn{
+    font-family: 'Kanit', sans-serif;
+    font-size: 12px;
+    color: #8a7c63;
+    background: none;
+    border: none;
+    text-decoration: underline;
+    cursor: pointer;
+    padding: 4px 2px;
+  }
+
+  .rack.exchange-mode{
+    outline: 2px dashed var(--red-ink);
+    outline-offset: 6px;
+    border-radius: 10px;
+  }
+
+  .tile.selected-exchange{
+    outline: 3px solid var(--red-ink);
+    outline-offset: 2px;
+    transform: translateY(-3px);
+  }
+
+  /* ---- blank tile chosen-value marker ---- */
+  .blank-chosen{ position: relative; }
+
+  /* ================= HOME CONFIRM MODAL ================= */
+  .confirm-backdrop{
+    background: rgba(36, 71, 61, 0.5);
+    display: none;
+    align-items: center;
+    justify-content: center;
+  }
+  .confirm-backdrop.open{ display: flex !important; }
+  .confirm-panel{
+    background: #fff;
+    border-radius: 18px;
+    padding: 24px 22px 20px;
+    width: min(88vw, 320px);
+    text-align: center;
+    box-shadow: 0 20px 44px -12px rgba(30,20,10,0.4);
+  }
+  .confirm-title{
+    font-family: 'Kanit', sans-serif;
+    font-weight: 700;
+    font-size: 17px;
+    color: var(--board-green-dark);
+    margin-bottom: 8px;
+  }
+  .confirm-message{
+    font-family: 'Sarabun', sans-serif;
+    font-size: 13.5px;
+    color: #6b5f4d;
+    line-height: 1.5;
+    margin-bottom: 20px;
+  }
+  .confirm-buttons{
+    display: flex;
+    gap: 10px;
+  }
+  .confirm-btn{
+    flex: 1;
+    font-family: 'Kanit', sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    border-radius: 10px;
+    padding: 11px 8px;
+    cursor: pointer;
+    border: none;
+  }
+  .confirm-btn.cancel{
+    background: var(--cream);
+    color: var(--ink);
+    border: 1.5px solid var(--cream-deep);
+  }
+  .confirm-btn.ok{
+    background: linear-gradient(150deg, #ff9b8f, var(--red-ink));
+    color: #fff;
+    box-shadow: 0 3px 0 var(--red-ink);
+  }
+  .confirm-btn.ok:active{ transform: translateY(2px); box-shadow: 0 1px 0 var(--red-ink); }
+
+  /* ---- game over modal ---- */
+  .gameover-panel{ width: min(90vw, 340px); }
+  .gameover-emoji{ font-size: 46px; margin-bottom: 6px; }
+  .gameover-reason{
+    font-family: 'Kanit', sans-serif;
+    font-size: 12.5px;
+    color: #8a7c63;
+    margin-bottom: 18px;
+  }
+  .gameover-score-row{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    margin-bottom: 20px;
+  }
+  .gameover-score-box{
+    flex: 1;
+    background: var(--cream);
+    border-radius: 12px;
+    padding: 12px 6px;
+  }
+  .gameover-score-label{
+    font-family: 'Kanit', sans-serif;
+    font-size: 11.5px;
+    color: #8a7c63;
+    margin-bottom: 4px;
+  }
+  .gameover-penalty{
+    font-family: 'Kanit', sans-serif;
+    font-size: 10.5px;
+    color: var(--red-ink);
+    margin-top: 3px;
+  }
+  .gameover-score-value{
+    font-family: 'Kanit', sans-serif;
+    font-weight: 700;
+    font-size: 30px;
+    color: var(--board-green-dark);
+  }
+  .gameover-score-vs{
+    font-family: 'Kanit', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    color: #b3a688;
+  }
+  #gameOverHomeBtn{
+    background: linear-gradient(150deg, var(--blue-tile-lt), var(--blue-tile-dk));
+    box-shadow: 0 3px 0 var(--blue-tile-dk);
+  }
+  #gameOverHomeBtn:active{ transform: translateY(2px); box-shadow: 0 1px 0 var(--blue-tile-dk); }
+
+  /* ================= HOME BUTTON ================= */
+  .home-btn{
+    position: fixed;
+    top: 14px;
+    left: 14px;
+    z-index: 600;
+    font-family: 'Kanit', sans-serif;
+    font-weight: 600;
+    font-size: 12.5px;
+    color: var(--board-green-dark);
+    background: #fff;
+    border: 1.5px solid var(--cream-deep);
+    border-radius: 999px;
+    padding: 8px 14px;
+    cursor: pointer;
+    box-shadow: 0 3px 10px -3px rgba(60,45,20,0.25);
+  }
+  .home-btn:active{ transform: translateY(1px); }
+
+  /* ================= START SCREEN ================= */
+  /* ================= PRE-GAME STATE (ก่อนเริ่มเกม) =================
+     ซ่อนทุกอย่างยกเว้นตัวกระดาน ให้กระดานเป็นพื้นหลังตกแต่งของหน้าเริ่มต้น
+     และบังคับให้พอดีจอเดียว ไม่ต้องเลื่อนดู */
+  body.pre-game{
+    overflow: hidden;
+    height: 100vh;
+    padding-top: 8px;
+    padding-bottom: 8px !important;
+  }
+  body.pre-game .home-btn,
+  body.pre-game header,
+  body.pre-game .stats,
+  body.pre-game .score-panel,
+  body.pre-game .score-float-widget,
+  body.pre-game .action-float-stack,
+  body.pre-game .reset-zoom-btn,
+  body.pre-game .rack-area{
+    display: none;
+  }
+  body.pre-game .play-area{
+    height: 100vh;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+  }
+  body.pre-game .board-zoom-wrap{
+    width: min(88vw, 82vh, 700px);
+  }
+
+  .start-overlay{
+    position: fixed;
+    inset: 0;
+    background: rgba(255, 255, 255, 0.72);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    padding: 16px;
+  }
+
+  .lang-gear-btn{
+    position: fixed;
+    top: 14px;
+    right: 14px;
+    z-index: 2010;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #fff;
+    border: 1.5px solid var(--cream-deep);
+    font-size: 18px;
+    cursor: pointer;
+    box-shadow: 0 3px 10px -3px rgba(60,45,20,0.25);
+  }
+  .lang-gear-btn:active{ transform: rotate(20deg); }
+
+  .lang-menu{
+    position: fixed;
+    top: 60px;
+    right: 14px;
+    z-index: 2010;
+    background: #fff;
+    border: 1.5px solid var(--cream-deep);
+    border-radius: 14px;
+    padding: 8px;
+    display: none;
+    flex-direction: column;
+    gap: 4px;
+    box-shadow: 0 8px 20px -6px rgba(60,45,20,0.3);
+    min-width: 150px;
+  }
+  .lang-menu.open{ display: flex; }
+  .lang-option{
+    font-family: 'Kanit', sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    text-align: left;
+    color: #8a7c63;
+    background: var(--cream);
+    border: none;
+    border-radius: 9px;
+    padding: 9px 12px;
+    cursor: pointer;
+  }
+  .lang-option.active{
+    background: #eef6fc;
+    color: var(--blue-tile-dk);
+  }
+
+  .start-panel{
+    background: transparent;
+    border-radius: 22px;
+    padding: 32px 26px 28px;
+    width: min(92vw, 380px);
+    text-align: center;
+  }
+  .start-eyebrow{
+    font-family: 'Kanit', sans-serif;
+    font-size: 12px;
+    letter-spacing: 3px;
+    color: var(--wood-dark);
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .start-header-box{
+    background: #fff;
+    border-radius: 16px;
+    padding: 16px 20px;
+    margin-bottom: 22px;
+    box-shadow: 0 8px 20px -10px rgba(30,20,10,0.15);
+  }
+  .start-buttons-box{
+    background: #fff;
+    border-radius: 16px;
+    padding: 16px;
+    box-shadow: 0 8px 20px -10px rgba(30,20,10,0.15);
+  }
+  .start-title{
+    font-family: 'Mali', cursive;
+    font-weight: 700;
+    font-size: clamp(24px, 7vw, 34px);
+    color: var(--board-green-dark);
+    margin-bottom: 4px;
+  }
+  .start-sub{
+    font-family: 'Kanit', sans-serif;
+    font-size: 13px;
+    color: #6b5f4d;
+    margin-bottom: 0;
+  }
+  .start-solo-btn{
+    width: 100%;
+    font-family: 'Kanit', sans-serif;
+    font-weight: 700;
+    font-size: 14.5px;
+    line-height: 1.5;
+    color: var(--blue-tile-dk);
+    background: #fff;
+    border: 2px solid #d7e8f4;
+    border-radius: 14px;
+    padding: 14px 8px;
+    cursor: pointer;
+    box-shadow: 0 3px 10px -4px rgba(63,123,176,0.25);
+    transition: border-color 0.15s ease, transform 0.1s ease, box-shadow 0.15s ease;
+  }
+  .start-solo-btn small{ font-weight: 400; font-size: 11px; opacity: 0.75; }
+  .start-solo-btn:hover{ border-color: var(--blue-tile-lt); }
+  .start-solo-btn:active{ transform: translateY(2px); box-shadow: 0 1px 4px -2px rgba(63,123,176,0.25); }
+
+  .start-mode-row{
+    display: flex;
+    gap: 10px;
+  }
+  .start-mode-row .start-solo-btn{ width: auto; flex: 1; }
+  .start-solo-btn.online-btn{
+    color: #2f8f63;
+    border-color: #d3ecdf;
+    box-shadow: 0 3px 10px -4px rgba(47,143,99,0.25);
+  }
+  .start-solo-btn.online-btn:hover{ border-color: #a5e0c4; }
+  .start-solo-btn.online-btn:active{ box-shadow: 0 1px 4px -2px rgba(47,143,99,0.25); }
+
+  .start-back-btn{
+    font-family: 'Kanit', sans-serif;
+    font-size: 12.5px;
+    color: #8a7c63;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0 0 12px;
+    display: block;
+  }
+
+  .start-diff-wrap{
+    margin-top: 4px;
+    background: #fff;
+    border-radius: 16px;
+    padding: 18px 18px 20px;
+    box-shadow: 0 8px 20px -10px rgba(30,20,10,0.15);
+  }
+  .start-diff-title{
+    font-family: 'Kanit', sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--board-green-dark);
+    margin-bottom: 12px;
+  }
+  .start-diff-buttons{
+    display: flex;
+    gap: 8px;
+  }
+  .start-diff-btn{
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    font-family: 'Kanit', sans-serif;
+    font-weight: 600;
+    font-size: 12.5px;
+    color: #8a7c63;
+    background: #fff;
+    border: 2px solid #ece4d2;
+    border-radius: 12px;
+    padding: 14px 4px;
+    cursor: pointer;
+    transition: transform 0.1s ease, border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+  }
+  .start-diff-btn:hover{ border-color: var(--blue-tile-lt); }
+  .start-diff-btn:active{ transform: scale(0.96); }
+  .start-diff-btn .sdb-emoji{ font-size: 22px; }
+  .start-diff-btn.active{
+    background: #eef6fc;
+    border-color: var(--blue-tile-dk);
+    color: var(--blue-tile-dk);
+  }
+
+  .start-tileset-buttons{
+    display: flex;
+    gap: 8px;
+    margin-bottom: 4px;
+  }
+  .start-tileset-btn{
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    font-family: 'Kanit', sans-serif;
+    font-weight: 600;
+    font-size: 12.5px;
+    color: #8a7c63;
+    background: #fff;
+    border: 2px solid #ece4d2;
+    border-radius: 12px;
+    padding: 12px 4px;
+    cursor: pointer;
+    transition: transform 0.1s ease, border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+  }
+  .start-tileset-btn small{ font-weight: 400; opacity: 0.75; }
+  .start-tileset-btn:hover{ border-color: var(--blue-tile-lt); }
+  .start-tileset-btn:active{ transform: scale(0.96); }
+  .start-tileset-btn .sdb-emoji{ font-size: 20px; }
+  .start-tileset-btn.active{
+    background: #eef6fc;
+    border-color: var(--blue-tile-dk);
+    color: var(--blue-tile-dk);
+  }
+
+  /* ---- online matchmaking panel ---- */
+  .start-online-wrap{
+    margin-top: 4px;
+    background: #fff;
+    border-radius: 16px;
+    padding: 18px 18px 20px;
+    box-shadow: 0 8px 20px -10px rgba(30,20,10,0.15);
+  }
+  .online-status-text{
+    font-family: 'Kanit', sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--board-green-dark);
+    margin-bottom: 16px;
+  }
+  .online-status-text.error{ color: var(--red-ink); }
+  .online-status-sub{
+    font-family: 'Kanit', sans-serif;
+    font-size: 12px;
+    color: #8a7c63;
+    margin-bottom: 16px;
+  }
+  .online-find-btn{
+    width: 100%;
+    font-family: 'Kanit', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    color: #2f8f63;
+    background: #fff;
+    border: 2px solid #d3ecdf;
+    border-radius: 12px;
+    padding: 14px 8px;
+    cursor: pointer;
+    box-shadow: 0 3px 10px -4px rgba(47,143,99,0.25);
+    transition: border-color 0.15s ease, transform 0.1s ease;
+  }
+  .online-find-btn:hover{ border-color: #a5e0c4; }
+  .online-find-btn:active{ transform: translateY(2px); box-shadow: 0 1px 4px -2px rgba(47,143,99,0.25); }
+  .online-cancel-btn{
+    font-family: 'Kanit', sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--red-ink);
+    background: #fff;
+    border: 1.5px solid #f3d8d4;
+    border-radius: 10px;
+    padding: 10px 16px;
+    cursor: pointer;
+  }
+  .online-spinner{
+    width: 34px;
+    height: 34px;
+    margin: 0 auto 14px;
+    border: 4px solid var(--cream-deep);
+    border-top-color: #2f8f63;
+    border-radius: 50%;
+    animation: onlineSpin 0.8s linear infinite;
+  }
+  @keyframes onlineSpin{ to{ transform: rotate(360deg); } }
+
+  .online-find-btn{ margin-bottom: 10px; }
+  .online-find-btn.friend-btn{
+    color: #5b4fb3;
+    border-color: #e0d9f5;
+    box-shadow: 0 3px 10px -4px rgba(91,79,179,0.25);
+  }
+  .online-find-btn.friend-btn:hover{ border-color: #c8bdf0; }
+  .online-find-btn.friend-btn:active{ box-shadow: 0 1px 4px -2px rgba(91,79,179,0.25); }
+
+  .friend-divider{
+    font-family: 'Kanit', sans-serif;
+    font-size: 11.5px;
+    color: #b3a688;
+    margin: 6px 0 12px;
+    position: relative;
+  }
+  .friend-divider::before, .friend-divider::after{
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 38%;
+    border-top: 1px dashed var(--plain-line);
+  }
+  .friend-divider::before{ left: 0; }
+  .friend-divider::after{ right: 0; }
+
+  .join-code-input{
+    width: 100%;
+    font-family: 'Kanit', sans-serif;
+    font-weight: 700;
+    font-size: 20px;
+    letter-spacing: 4px;
+    text-align: center;
+    text-transform: uppercase;
+    color: var(--ink);
+    background: #fff;
+    border: 2px solid #ece4d2;
+    border-radius: 10px;
+    padding: 12px 8px;
+    margin-bottom: 10px;
+    box-sizing: border-box;
+  }
+  .join-code-input:focus{ outline: none; border-color: #5b4fb3; }
+
+  .room-code-display{
+    font-family: 'Kanit', sans-serif;
+    font-weight: 700;
+    font-size: 34px;
+    letter-spacing: 8px;
+    color: #5b4fb3;
+    background: #fff;
+    border: 2px dashed #d9d1f2;
+    border-radius: 12px;
+    padding: 14px 8px;
+    margin-bottom: 12px;
+  }
+  .copy-code-btn{
+    font-family: 'Kanit', sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    color: #5b4fb3;
+    background: #fff;
+    border: 1.5px solid #e0d9f5;
+    border-radius: 9px;
+    padding: 9px 16px;
+    cursor: pointer;
+    margin-bottom: 14px;
+  }
+  .copy-code-btn.copied{ background: #f2fbf5; border-color: #2f8f63; color: #2f8f63; }
+
+  /* ================= ERROR TOAST ================= */
+  .toast{
+    position: fixed;
+    top: 14px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-14px);
+    background: #fdeceb;
+    border: 1px solid #f3b8b2;
+    color: #b8352a;
+    border-radius: 999px;
+    padding: 8px 16px 8px 8px;
+    font-family: 'Kanit', sans-serif;
+    font-weight: 600;
+    font-size: 12.5px;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    box-shadow: 0 8px 20px -6px rgba(60,20,20,0.25);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.18s ease, transform 0.18s ease;
+    z-index: 900;
+    max-width: min(90vw, 420px);
+  }
+  .toast.show{
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+  .toast-icon{
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #e63b2e;
+    color: #fff;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  /* ================= BLANK PICKER POPOVER ================= */
+  .modal-backdrop{
+    position: fixed;
+    inset: 0;
+    background: transparent;
+    display: none;
+    z-index: 1000;
+  }
+  .modal-backdrop.open{ display: block; }
+
+  .modal-panel{
+    position: fixed;
+    background: #fff;
+    border-radius: 14px;
+    padding: 12px 12px 10px;
+    width: 200px;
+    max-height: 70vh;
+    overflow-y: auto;
+    box-shadow: 0 10px 26px -8px rgba(40,32,20,0.35), 0 0 0 1px var(--cream-deep);
+  }
+
+  .modal-header{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    gap: 6px;
+  }
+  .modal-title{
+    font-family: 'Kanit', sans-serif;
+    font-weight: 600;
+    font-size: 11.5px;
+    color: var(--board-green-dark);
+    line-height: 1.2;
+  }
+  .modal-close{
+    background: none;
+    border: none;
+    font-size: 15px;
+    line-height: 1;
+    color: #a99b7f;
+    cursor: pointer;
+    padding: 2px 4px;
+    flex-shrink: 0;
+  }
+
+  .modal-choice-row{
+    display: flex;
+    gap: 6px;
+  }
+  .modal-choice-btn{
+    flex: 1;
+    font-family: 'Kanit', sans-serif;
+    font-weight: 600;
+    font-size: 11px;
+    padding: 10px 4px;
+    border-radius: 9px;
+    border: 2px solid var(--cream-deep);
+    background: var(--cream);
+    color: var(--ink);
+    cursor: pointer;
+    transition: transform 0.1s ease;
+  }
+  .modal-choice-btn:active{ transform: scale(0.96); }
+  .modal-choice-btn.number-choice{ color: var(--blue-tile-dk); border-color: var(--blue-tile-lt); }
+  .modal-choice-btn.operator-choice{ color: var(--slate-dk); border-color: var(--slate-lt); }
+
+  .modal-back{
+    font-family: 'Kanit', sans-serif;
+    font-size: 10.5px;
+    color: var(--blue-tile-dk);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0 0 8px;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+  }
+
+  .value-grid{
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 5px;
+  }
+  .value-grid.operator-grid{
+    grid-template-columns: repeat(5, 1fr);
+  }
+  .value-btn{
+    aspect-ratio: 1 / 1;
+    border-radius: 8px;
+    border: none;
+    background: linear-gradient(150deg, var(--blue-tile-lt), var(--blue-tile-dk));
+    color: #fff;
+    font-family: 'Kanit', sans-serif;
+    font-weight: 700;
+    font-size: 12px;
+    cursor: pointer;
+    box-shadow: 0 2px 0 var(--blue-tile-dk);
+  }
+  .value-btn:active{ transform: translateY(1px); box-shadow: 0 1px 0 var(--blue-tile-dk); }
+  .value-btn.operator-btn{
+    background: linear-gradient(150deg, var(--slate-lt), var(--slate-dk));
+    box-shadow: 0 2px 0 var(--slate-dk);
+    font-size: 15px;
+  }
+  .value-btn.operator-btn:active{ box-shadow: 0 1px 0 var(--slate-dk); }
+</style>
+</head>
+<body class="pre-game">
+
+<div class="start-overlay" id="startOverlay">
+  <button class="lang-gear-btn" id="langGearBtn" title="Language / ภาษา">⚙️</button>
+  <div class="lang-menu" id="langMenu">
+    <button class="lang-option active" data-lang="th">🇹🇭 ภาษาไทย</button>
+    <button class="lang-option" data-lang="en">🇬🇧 English</button>
+  </div>
+
+  <div class="start-panel">
+    <div class="start-header-box" id="startHeaderBox">
+      <div class="start-title">A-Math Online</div>
+      <div class="start-sub" id="startSub" data-i18n="chooseMode">เลือกโหมดการเล่น</div>
+    </div>
+
+    <div class="start-buttons-box" id="startButtonsBox">
+      <div class="start-mode-row" id="startModeRow">
+        <button class="start-solo-btn" id="startSoloBtn">🎮 <span data-i18n="soloMode">เล่นคนเดียว</span><br><small data-i18n="soloModeSub">แข่งกับบอท</small></button>
+        <button class="start-solo-btn online-btn" id="startOnlineBtn">🌐 <span data-i18n="onlineMode">จับคู่ออนไลน์</span><br><small data-i18n="onlineModeSub">แข่งกับคนแปลกหน้า</small></button>
+      </div>
+    </div>
+
+    <div class="start-diff-wrap" id="startDiffWrap" style="display:none;">
+      <button class="start-back-btn" id="soloBackBtn" data-i18n="back">← กลับ</button>
+
+      <div class="start-diff-title" data-i18n="chooseTileset">เลือกชุดเบี้ย</div>
+      <div class="start-tileset-buttons" id="soloTilesetButtons">
+        <button class="start-tileset-btn active" data-tileset="secondary">
+          <span class="sdb-emoji">🎓</span><span data-i18n="secondary">มัธยม</span><br><small data-i18n="secondaryCount">100 ตัว</small>
+        </button>
+        <button class="start-tileset-btn" data-tileset="elementary">
+          <span class="sdb-emoji">✏️</span><span data-i18n="elementary">ประถม</span><br><small data-i18n="elementaryCount">70 ตัว</small>
+        </button>
+      </div>
+
+      <div class="start-diff-title" data-i18n="chooseDifficulty">เลือกระดับความยากของบอท</div>
+      <div class="start-diff-buttons">
+        <button class="start-diff-btn" data-diff="easy" data-i18n="easy">
+          ง่าย
+        </button>
+        <button class="start-diff-btn" data-diff="medium" data-i18n="medium">
+          ปานกลาง
+        </button>
+        <button class="start-diff-btn" data-diff="hard" data-i18n="hard">
+          ยาก
+        </button>
+      </div>
+    </div>
+
+    <div class="start-online-wrap" id="startOnlineWrap" style="display:none;">
+      <button class="start-back-btn" id="onlineBackBtn" data-i18n="back">← กลับ</button>
+
+      <div id="onlineModeChoice">
+        <div class="online-status-text" data-i18n="chooseOnlineWay">เลือกวิธีเล่นออนไลน์</div>
+        <button class="online-find-btn" id="onlineRandomModeBtn">🔍 <span data-i18n="randomMatch">จับคู่แบบสุ่ม</span></button>
+        <button class="online-find-btn friend-btn" id="onlineFriendModeBtn">👥 <span data-i18n="playWithFriend">เล่นกับเพื่อน</span></button>
+      </div>
+
+      <div id="onlineSearching" style="display:none;">
+        <div class="online-spinner"></div>
+        <div class="online-status-text" data-i18n="findingOpponent">กำลังหาคู่ต่อสู้...</div>
+        <div class="online-status-sub" id="onlineWaitTime" data-i18n="waitSeconds0">รอ 0 วินาที</div>
+        <button class="online-cancel-btn" id="onlineCancelBtn" data-i18n="cancel">ยกเลิก</button>
+      </div>
+
+      <div id="onlineFriendChoice" style="display:none;">
+        <button class="start-back-btn" id="friendChoiceBackBtn" data-i18n="back">← กลับ</button>
+
+        <div class="start-diff-title" style="margin-top:0;" data-i18n="tilesetForRoom">ชุดเบี้ย (สำหรับห้องที่จะสร้าง)</div>
+        <div class="start-tileset-buttons" id="onlineTilesetButtons">
+          <button class="start-tileset-btn active" data-tileset="secondary">
+            <span class="sdb-emoji">🎓</span><span data-i18n="secondary">มัธยม</span><br><small data-i18n="secondaryCount">100 ตัว</small>
+          </button>
+          <button class="start-tileset-btn" data-tileset="elementary">
+            <span class="sdb-emoji">✏️</span><span data-i18n="elementary">ประถม</span><br><small data-i18n="elementaryCount">70 ตัว</small>
+          </button>
+        </div>
+
+        <button class="online-find-btn" id="createRoomBtn">🎲 <span data-i18n="createRoom">สร้างห้องใหม่</span></button>
+        <div class="friend-divider" data-i18n="or">หรือ</div>
+        <input type="text" id="joinCodeInput" class="join-code-input" placeholder="กรอกรหัสห้อง" maxlength="6" autocomplete="off" autocapitalize="characters" data-i18n-placeholder="enterCode">
+        <button class="online-find-btn friend-btn" id="joinRoomBtn">🚪 <span data-i18n="joinRoom">เข้าร่วมห้อง</span></button>
+        <div class="online-status-sub" data-i18n="joinRoomNote">*เข้าร่วมห้องจะใช้ชุดเบี้ยเดียวกับที่เจ้าของห้องเลือกไว้</div>
+        <div class="online-status-sub" id="joinRoomError" style="display:none;"></div>
+      </div>
+
+      <div id="onlineWaitingRoom" style="display:none;">
+        <button class="start-back-btn" id="waitingRoomBackBtn" data-i18n="cancelRoom">← ยกเลิกห้อง</button>
+        <div class="online-status-text" data-i18n="yourRoomCode">รหัสห้องของคุณ</div>
+        <div class="room-code-display" id="roomCodeDisplay">------</div>
+        <button class="copy-code-btn" id="copyCodeBtn">📋 <span data-i18n="copyCode">คัดลอกรหัส</span></button>
+        <div class="online-status-sub" data-i18n="sendCodeToFriend">ส่งรหัสนี้ให้เพื่อน แล้วรอเพื่อนกดเข้าร่วม...</div>
+        <div class="online-spinner"></div>
+      </div>
+
+      <div id="onlineError" style="display:none;">
+        <div class="online-status-text error">⚠️ <span data-i18n="connectFailed">เชื่อมต่อไม่ได้</span></div>
+        <div class="online-status-sub" id="onlineErrorMsg" data-i18n="checkFirebase">ตรวจสอบการตั้งค่า Firebase</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="errorToast">
+  <span class="toast-icon">✕</span>
+  <span id="toastMessage"></span>
+</div>
+
+<div class="modal-backdrop confirm-backdrop" id="homeConfirmModal">
+  <div class="confirm-panel">
+    <div class="confirm-title" data-i18n="backHomeQ">กลับหน้าหลัก?</div>
+    <div class="confirm-message" data-i18n="backHomeMsg">คุณต้องการกลับหน้าหลักหรือไม่ ความคืบหน้าของเกมตานี้จะหายไปทั้งหมด</div>
+    <div class="confirm-buttons">
+      <button class="confirm-btn cancel" id="homeConfirmCancel" data-i18n="cancel">ยกเลิก</button>
+      <button class="confirm-btn ok" id="homeConfirmOk" data-i18n="backHome">กลับหน้าหลัก</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop confirm-backdrop" id="gameOverModal">
+  <div class="confirm-panel gameover-panel">
+    <div class="gameover-emoji" id="gameOverEmoji">🏁</div>
+    <div class="confirm-title" id="gameOverTitle">จบเกม</div>
+    <div class="gameover-reason" id="gameOverReason">ทั้งสองฝ่ายผ่าน/เปลี่ยนเบี้ยติดต่อกัน 3 ตา</div>
+    <div class="gameover-score-row">
+      <div class="gameover-score-box">
+        <div class="gameover-score-label" data-i18n="you">คุณ</div>
+        <div class="gameover-score-value" id="gameOverMyScore">0</div>
+        <div class="gameover-penalty" id="gameOverMyPenalty" style="display:none;"></div>
+      </div>
+      <div class="gameover-score-vs">VS</div>
+      <div class="gameover-score-box">
+        <div class="gameover-score-label" id="gameOverOppLabel">คู่ต่อสู้</div>
+        <div class="gameover-score-value" id="gameOverOppScore">0</div>
+        <div class="gameover-penalty" id="gameOverOppPenalty" style="display:none;"></div>
+      </div>
+    </div>
+    <div class="confirm-buttons">
+      <button class="confirm-btn ok" id="gameOverHomeBtn">🏠 <span data-i18n="backHome">กลับหน้าหลัก</span></button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="blankModal">
+  <div class="modal-panel" id="modalPanel">
+    <div class="modal-header">
+      <div class="modal-title" id="modalTitle" data-i18n="blankChooseType">เบี้ยว่าง — เลือกประเภท</div>
+      <button class="modal-close" id="modalCloseBtn">✕</button>
+    </div>
+
+    <div id="modalStepCategory">
+      <div class="modal-choice-row">
+        <button class="modal-choice-btn number-choice" id="chooseNumberBtn">🔢<br><span data-i18n="number">ตัวเลข</span></button>
+        <button class="modal-choice-btn operator-choice" id="chooseOperatorBtn">➗<br><span data-i18n="operator">เครื่องหมาย</span></button>
+      </div>
+    </div>
+
+    <div id="modalStepValue" style="display:none;">
+      <button class="modal-back" id="modalBackBtn" data-i18n="goBack">← ย้อนกลับ</button>
+      <div class="value-grid" id="valueGrid"></div>
+    </div>
+  </div>
+</div>
+
+<button class="home-btn" id="homeBtn" title="กลับหน้าหลัก">🏠 <span data-i18n="home">หน้าหลัก</span></button>
+
+<header>
+  <h1>A-Math Online</h1>
+</header>
+
+<div class="play-area">
+  <div class="board-column">
+    <div class="board-zoom-wrap" id="boardZoomWrap">
+      <div class="board-frame" id="boardFrame">
+        <div class="board" id="board"></div>
+      </div>
+    </div>
+    <button class="reset-zoom-btn" id="resetZoomBtn" style="display:none;">↺ <span data-i18n="resetZoom">กลับขนาดเดิม</span></button>
+    <div class="stats" id="statsLine"></div>
+  </div>
+
+  <button class="score-float-widget" id="scoreFloatWidget">
+    <div class="score-float-item">
+      <span class="score-float-label" data-i18n="you">คุณ</span>
+      <span class="score-float-value" id="floatScorePlayer">0</span>
+    </div>
+    <div class="score-float-divider"></div>
+    <div class="score-float-item">
+      <span class="score-float-label" id="floatOpponentLabel">บอท</span>
+      <span class="score-float-value" id="floatScoreBot">0</span>
+    </div>
+  </button>
+
+  <div class="score-panel-backdrop" id="scorePanelBackdrop"></div>
+
+  <div class="score-panel" id="scorePanel">
+    <button class="score-panel-close" id="scorePanelClose">✕</button>
+
+    <div class="bot-setup" id="botSetupPanel">
+      <div class="bot-setup-title">🤖 <span data-i18n="botMode">โหมดบอท</span></div>
+      <div class="diff-buttons">
+        <button class="diff-btn" data-diff="easy" data-i18n="easy">ง่าย</button>
+        <button class="diff-btn active" data-diff="medium" data-i18n="medium">ปานกลาง</button>
+        <button class="diff-btn" data-diff="hard" data-i18n="hard">ยาก</button>
+      </div>
+    </div>
+
+    <div class="online-panel" id="onlinePanel" style="display:none;">
+      <div class="bot-setup-title">🌐 <span data-i18n="onlineModeTitle">โหมดออนไลน์</span></div>
+      <div class="online-opponent-row">
+        <span class="online-dot" id="opponentDot"></span>
+        <span id="opponentName">คู่ต่อสู้</span>
+      </div>
+      <button class="leave-room-btn" id="leaveRoomBtn" data-i18n="leaveRoom">ออกจากห้อง</button>
+    </div>
+
+    <div class="turn-indicator" id="turnIndicator">🎮 ตาของคุณ</div>
+
+    <div class="score-row">
+      <div class="score-box you">
+        <div class="score-box-label" data-i18n="you">คุณ</div>
+        <div class="score-box-total" id="scoreTotalPlayer">0</div>
+        <div class="score-box-timer" id="myTimerDisplay" style="display:none;">22:00</div>
+      </div>
+      <div class="score-box bot" id="opponentScoreBox">
+        <div class="score-box-label" id="opponentScoreLabel">🤖 บอท</div>
+        <div class="score-box-total" id="scoreTotalBot">0</div>
+        <div class="score-box-timer" id="oppTimerDisplay" style="display:none;">22:00</div>
+      </div>
+    </div>
+
+    <div class="score-history" id="scoreHistory">
+      <div class="score-empty" id="scoreEmpty" data-i18n="noEquationsYet">ยังไม่มีการลงสมการ</div>
+    </div>
+  </div>
+</div>
+
+<div class="rack-area">
+  <div class="rack-title"><span data-i18n="yourRack">แป้นวางเบี้ยของคุณ</span> <small data-i18n="rackHint">· ลากเบี้ยไปวางบนกระดาน หรือสลับตำแหน่งในแป้นได้อิสระ</small></div>
+  <div class="rack" id="rack"></div>
+  <div class="rack-footer">
+    <span id="bagCount"></span>
+    <button id="cancelExchangeBtn" style="display:none;" data-i18n="cancel">ยกเลิก</button>
+  </div>
+</div>
+
+<div class="action-float-stack" id="actionFloatStack">
+  <button id="pullAllBtn" class="action-float-btn">⬆️ <span class="action-label" data-i18n="pullAll">ดึงเบี้ย<br>ทั้งหมด</span></button>
+  <button id="exchangeBtn" class="action-float-btn">🔁 <span class="action-label" data-i18n="exchange">เปลี่ยนเบี้ย</span></button>
+  <button id="endTurnBtn" class="action-float-btn">⏭️ <span class="action-label" data-i18n="endTurn">จบตา</span></button>
+  <button id="submitBtn" class="action-float-btn">✅ <span class="action-label" data-i18n="submit">ลงสมการ</span></button>
+</div>
+
+<script type="module">
+/* =========================================================
+   FIREBASE ONLINE MATCHMAKING MODULE
+   =========================================================
+   ต้องมีโปรเจกต์ Firebase ของตัวเองก่อนถึงจะใช้โหมดออนไลน์ได้:
+   1) สร้างโปรเจกต์ที่ https://console.firebase.google.com
+   2) เปิดใช้ Authentication -> Sign-in method -> Anonymous
+   3) เปิดใช้ Firestore Database (โหมด production ก็ได้)
+   4) เอา Firebase config จากหน้า Project settings มาวางแทนด้านล่างนี้
+   5) ตั้งค่า Firestore Security Rules ประมาณนี้ (ไปวางในแท็บ Rules):
+
+      rules_version = '2';
+      service cloud.firestore {
+        match /databases/{database}/documents {
+          match /amathQueue/{uid} {
+            allow read, write: if request.auth != null;
+          }
+          match /amathRooms/{roomId} {
+            allow read, write: if request.auth != null;
+          }
+        }
+      }
+   ========================================================= */
+
+// ===== วางค่า Firebase config ของคุณตรงนี้ =====
+const firebaseConfig = {
+  apiKey: "AIzaSyCpDvhJg1qL9qJwr5tWIMWwb8o7GKBbvqk",
+  authDomain: "a-math-online-2ce1a.firebaseapp.com",
+  projectId: "a-math-online-2ce1a",
+  storageBucket: "a-math-online-2ce1a.firebasestorage.app",
+  messagingSenderId: "402154625334",
+  appId: "1:402154625334:web:944ef3b59e507f3fa5bb97",
+};
+// ================================================
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+import {
+  getAuth, signInAnonymously, onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+import {
+  getFirestore, doc, setDoc, updateDoc, deleteDoc, onSnapshot, getDocs,
+  collection, query, where, orderBy, limit, runTransaction, serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+
+let app, auth, db, myUid = null;
+let configValid = !!(firebaseConfig.apiKey && firebaseConfig.apiKey !== "YOUR_API_KEY");
+
+if(configValid){
+  try {
+    app = initializeApp(firebaseConfig);
+    auth = getAuth(app);
+    db = getFirestore(app);
+  } catch(e){
+    console.error('Firebase init failed', e);
+    configValid = false;
+  }
+}
+
+function ensureAuth(){
+  return new Promise((resolve, reject) => {
+    if(!configValid){ reject(new Error('no-config')); return; }
+    const unsub = onAuthStateChanged(auth, user => {
+      if(user){
+        myUid = user.uid;
+        unsub();
+        resolve(user.uid);
+      } else {
+        signInAnonymously(auth).catch(err => { unsub(); reject(err); });
+      }
+    }, err => { unsub(); reject(err); });
+  });
+}
+
+/* ---- Matchmaking ---- */
+let queueUnsub = null;
+let myQueueUnsub = null;
+
+function cleanupMatchmakingListeners(){
+  if(queueUnsub){ queueUnsub(); queueUnsub = null; }
+  if(myQueueUnsub){ myQueueUnsub(); myQueueUnsub = null; }
+}
+
+async function startMatchmaking(onMatched, onError){
+  try {
+    await ensureAuth();
+  } catch(e){
+    onError('ยังไม่ได้ตั้งค่า Firebase (ดูคอมเมนต์ในซอร์สโค้ด ส่วน FIREBASE ONLINE MATCHMAKING MODULE)');
+    return;
+  }
+
+  try {
+    const myQueueRef = doc(db, 'amathQueue', myUid);
+    await setDoc(myQueueRef, { status: 'waiting', createdAt: serverTimestamp(), roomId: null });
+
+    myQueueUnsub = onSnapshot(myQueueRef, snap => {
+      const data = snap.data();
+      if(data && data.status === 'matched' && data.roomId){
+        cleanupMatchmakingListeners();
+        onMatched(data.roomId, myUid);
+      }
+    });
+
+    const q = query(
+      collection(db, 'amathQueue'),
+      where('status', '==', 'waiting'),
+      orderBy('createdAt', 'asc'),
+      limit(10)
+    );
+
+    queueUnsub = onSnapshot(q, async snap => {
+      for(const docSnap of snap.docs){
+        const candidateUid = docSnap.id;
+        if(candidateUid === myUid) continue;
+
+        const roomId = 'room_' + Math.random().toString(36).slice(2, 10);
+        try {
+          const matched = await runTransaction(db, async (tx) => {
+            const meRef = doc(db, 'amathQueue', myUid);
+            const candRef = doc(db, 'amathQueue', candidateUid);
+            const meSnap = await tx.get(meRef);
+            const candSnap = await tx.get(candRef);
+            if(!meSnap.exists() || meSnap.data().status !== 'waiting') return false;
+            if(!candSnap.exists() || candSnap.data().status !== 'waiting') return false;
+
+            const roomRef = doc(db, 'amathRooms', roomId);
+            tx.set(roomRef, {
+              status: 'active',
+              turn: 'p1',
+              tileSet: 'secondary',
+              passStreak: 0,
+              p1Time: 1320,
+              p2Time: 1320,
+              turnStartedAt: serverTimestamp(),
+              createdAt: serverTimestamp(),
+              lastActivity: serverTimestamp(),
+              p1: { uid: myUid, score: 0, lastSeen: Date.now() },
+              p2: { uid: candidateUid, score: 0, lastSeen: Date.now() },
+              board: {},
+              bag: null,
+              scoreHistory: [],
+            });
+            tx.update(meRef, { status: 'matched', roomId });
+            tx.update(candRef, { status: 'matched', roomId });
+            return true;
+          });
+
+          if(matched){
+            cleanupMatchmakingListeners();
+            onMatched(roomId, myUid);
+            return;
+          }
+        } catch(e){
+          continue; // ชนกับอีกฝั่งที่แย่งจับคู่พร้อมกัน ลองคนถัดไป
+        }
+      }
+    });
+  } catch(e){
+    console.error(e);
+    onError('เชื่อมต่อ Firestore ไม่ได้ ลองตรวจสอบ Security Rules');
+  }
+}
+
+/* ---- Friend room (สร้างห้องด้วยรหัส) ---- */
+function generateRoomCode(){
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // ตัดตัวที่สับสนง่าย (0/O, 1/I) ออก
+  let code = '';
+  for(let i = 0; i < 6; i++) code += chars[Math.floor(Math.random() * chars.length)];
+  return code;
+}
+
+async function createFriendRoom(tileSet){
+  await ensureAuth();
+
+  let code;
+  for(let attempt = 0; attempt < 5; attempt++){
+    code = generateRoomCode();
+    const q = query(
+      collection(db, 'amathRooms'),
+      where('code', '==', code),
+      where('status', 'in', ['waiting', 'active']),
+      limit(1)
+    );
+    const snap = await getDocs(q);
+    if(snap.empty) break;
+  }
+
+  const roomId = 'room_' + Math.random().toString(36).slice(2, 10);
+  const roomRef = doc(db, 'amathRooms', roomId);
+  await setDoc(roomRef, {
+    status: 'waiting',
+    mode: 'friend',
+    code,
+    tileSet: tileSet === 'elementary' ? 'elementary' : 'secondary',
+    turn: 'p1',
+    passStreak: 0,
+    p1Time: 1320,
+    p2Time: 1320,
+    turnStartedAt: null, // เริ่มจับเวลาจริงตอนเพื่อนเข้าร่วมห้องแล้วเท่านั้น
+    createdAt: serverTimestamp(),
+    lastActivity: serverTimestamp(),
+    p1: { uid: myUid, score: 0, lastSeen: Date.now() },
+    p2: null,
+    board: {},
+    bag: null,
+    scoreHistory: [],
+  });
+
+  return { roomId, code };
+}
+
+async function joinFriendRoom(code){
+  await ensureAuth();
+
+  const cleanCode = (code || '').trim().toUpperCase();
+  const q = query(
+    collection(db, 'amathRooms'),
+    where('code', '==', cleanCode),
+    where('status', '==', 'waiting'),
+    limit(1)
+  );
+  const snap = await getDocs(q);
+  if(snap.empty) throw new Error('not-found');
+
+  const roomId = snap.docs[0].id;
+  const roomRef = doc(db, 'amathRooms', roomId);
+
+  const joined = await runTransaction(db, async (tx) => {
+    const s = await tx.get(roomRef);
+    if(!s.exists() || s.data().status !== 'waiting' || s.data().p2) return false;
+    tx.update(roomRef, {
+      p2: { uid: myUid, score: 0, lastSeen: Date.now() },
+      status: 'active',
+      turnStartedAt: serverTimestamp(),
+      lastActivity: serverTimestamp(),
+    });
+    return true;
+  });
+
+  if(!joined) throw new Error('taken');
+  return roomId;
+}
+
+async function cancelFriendRoom(roomRef){
+  if(!roomRef) return;
+  try { await deleteDoc(roomRef); } catch(e){ /* ignore */ }
+}
+
+async function cancelMatchmaking(){
+  cleanupMatchmakingListeners();
+  if(myUid && configValid){
+    try { await deleteDoc(doc(db, 'amathQueue', myUid)); } catch(e){ /* ignore */ }
+  }
+}
+
+/* ---- Room sync ---- */
+let roomUnsub = null;
+
+function subscribeRoom(roomId, onUpdate){
+  const roomRef = doc(db, 'amathRooms', roomId);
+  roomUnsub = onSnapshot(roomRef, snap => {
+    if(snap.exists()) onUpdate(snap.data(), roomRef);
+  });
+  return roomRef;
+}
+
+function unsubscribeRoom(){
+  if(roomUnsub){ roomUnsub(); roomUnsub = null; }
+}
+
+async function updateRoom(roomRef, data){
+  data.lastActivity = serverTimestamp();
+  await updateDoc(roomRef, data);
+}
+
+async function leaveRoom(roomRef){
+  unsubscribeRoom();
+  if(roomRef){
+    try { await updateDoc(roomRef, { status: 'ended' }); } catch(e){ /* ignore */ }
+  }
+}
+
+window.AmathOnline = {
+  isConfigured: () => configValid,
+  getMyUid: () => myUid,
+  getServerTimestamp: () => serverTimestamp(),
+  startMatchmaking,
+  cancelMatchmaking,
+  createFriendRoom,
+  joinFriendRoom,
+  cancelFriendRoom,
+  subscribeRoom,
+  unsubscribeRoom,
+  updateRoom,
+  leaveRoom,
+};
+</script>
+
+<script>
+/* =========================================================
+   ภาษา / LANGUAGE (i18n)
+   ========================================================= */
+const I18N = {
+  th: {
+    chooseMode: 'เลือกโหมดการเล่น', soloMode: 'เล่นคนเดียว', soloModeSub: 'แข่งกับบอท',
+    onlineMode: 'จับคู่ออนไลน์', onlineModeSub: 'แข่งกับคนแปลกหน้า',
+    back: '← กลับ', chooseTileset: 'เลือกชุดเบี้ย', secondary: 'มัธยม', secondaryCount: '100 ตัว',
+    elementary: 'ประถม', elementaryCount: '70 ตัว', chooseDifficulty: 'เลือกระดับความยากของบอท',
+    easy: 'ง่าย', medium: 'ปานกลาง', hard: 'ยาก',
+    chooseOnlineWay: 'เลือกวิธีเล่นออนไลน์', randomMatch: 'จับคู่แบบสุ่ม', playWithFriend: 'เล่นกับเพื่อน',
+    findingOpponent: 'กำลังหาคู่ต่อสู้...', waitSeconds0: 'รอ 0 วินาที', cancel: 'ยกเลิก',
+    tilesetForRoom: 'ชุดเบี้ย (สำหรับห้องที่จะสร้าง)', createRoom: 'สร้างห้องใหม่', or: 'หรือ',
+    enterCode: 'กรอกรหัสห้อง', joinRoom: 'เข้าร่วมห้อง',
+    joinRoomNote: '*เข้าร่วมห้องจะใช้ชุดเบี้ยเดียวกับที่เจ้าของห้องเลือกไว้',
+    cancelRoom: '← ยกเลิกห้อง', yourRoomCode: 'รหัสห้องของคุณ', copyCode: 'คัดลอกรหัส',
+    sendCodeToFriend: 'ส่งรหัสนี้ให้เพื่อน แล้วรอเพื่อนกดเข้าร่วม...',
+    connectFailed: 'เชื่อมต่อไม่ได้', checkFirebase: 'ตรวจสอบการตั้งค่า Firebase',
+    backHomeQ: 'กลับหน้าหลัก?', backHomeMsg: 'คุณต้องการกลับหน้าหลักหรือไม่ ความคืบหน้าของเกมตานี้จะหายไปทั้งหมด',
+    backHome: 'กลับหน้าหลัก', you: 'คุณ',
+    blankChooseType: 'เบี้ยว่าง — เลือกประเภท', number: 'ตัวเลข', operator: 'เครื่องหมาย', goBack: '← ย้อนกลับ',
+    home: 'หน้าหลัก', resetZoom: 'กลับขนาดเดิม',
+    botMode: 'โหมดบอท', onlineModeTitle: 'โหมดออนไลน์', leaveRoom: 'ออกจากห้อง',
+    noEquationsYet: 'ยังไม่มีการลงสมการ', yourRack: 'แป้นวางเบี้ยของคุณ',
+    rackHint: '· ลากเบี้ยไปวางบนกระดาน หรือสลับตำแหน่งในแป้นได้อิสระ',
+    pullAll: 'ดึงเบี้ย<br>ทั้งหมด', exchange: 'เปลี่ยนเบี้ย', endTurn: 'จบตา', submit: 'ลงสมการ',
+    confirmExchange: 'ยืนยันเปลี่ยน', confirmExchangeCount: 'ยืนยันเปลี่ยน ({n} ตัว)',
+    bonusRed: '3xสมการ', bonusYellow: '2xสมการ', bonusBlue: '3xตัว', bonusOrange: '2xตัว',
+  },
+  en: {
+    chooseMode: 'Choose Game Mode', soloMode: 'Solo Play', soloModeSub: 'vs Bot',
+    onlineMode: 'Play Online', onlineModeSub: 'vs a stranger',
+    back: '← Back', chooseTileset: 'Choose Tile Set', secondary: 'Secondary', secondaryCount: '100 tiles',
+    elementary: 'Elementary', elementaryCount: '70 tiles', chooseDifficulty: 'Choose Bot Difficulty',
+    easy: 'Easy', medium: 'Medium', hard: 'Hard',
+    chooseOnlineWay: 'Choose Online Method', randomMatch: 'Random Match', playWithFriend: 'Play with Friend',
+    findingOpponent: 'Finding opponent...', waitSeconds0: 'Waiting 0 sec', cancel: 'Cancel',
+    tilesetForRoom: 'Tile Set (for this room)', createRoom: 'Create New Room', or: 'or',
+    enterCode: 'Enter room code', joinRoom: 'Join Room',
+    joinRoomNote: '*Joining uses the same tile set the host chose',
+    cancelRoom: '← Cancel Room', yourRoomCode: 'Your Room Code', copyCode: 'Copy Code',
+    sendCodeToFriend: 'Send this code to your friend and wait for them to join...',
+    connectFailed: 'Connection Failed', checkFirebase: 'Please check your Firebase setup',
+    backHomeQ: 'Back to Home?', backHomeMsg: 'Are you sure you want to go back to home? Progress this turn will be lost.',
+    backHome: 'Back to Home', you: 'You',
+    blankChooseType: 'Blank Tile — Choose Type', number: 'Number', operator: 'Operator', goBack: '← Back',
+    home: 'Home', resetZoom: 'Reset Zoom',
+    botMode: 'Bot Mode', onlineModeTitle: 'Online Mode', leaveRoom: 'Leave Room',
+    noEquationsYet: 'No equations played yet', yourRack: 'Your Tile Rack',
+    rackHint: '· Drag tiles onto the board, or reorder them freely in the rack',
+    pullAll: 'Pull All<br>Tiles', exchange: 'Exchange', endTurn: 'End Turn', submit: 'Submit',
+    confirmExchange: 'Confirm Exchange', confirmExchangeCount: 'Confirm ({n})',
+    bonusRed: '3x WORD', bonusYellow: '2x WORD', bonusBlue: '3x TILE', bonusOrange: '2x TILE',
+  },
+};
+
+let currentLang = localStorage.getItem('amathLang') || 'th';
+
+function t(key){
+  return (I18N[currentLang] && I18N[currentLang][key]) || I18N.th[key] || key;
+}
+
+function applyLanguage(lang){
+  currentLang = (lang === 'en') ? 'en' : 'th';
+  localStorage.setItem('amathLang', currentLang);
+
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    el.innerHTML = t(el.getAttribute('data-i18n'));
+  });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    el.setAttribute('placeholder', t(el.getAttribute('data-i18n-placeholder')));
+  });
+  document.querySelectorAll('.lang-option').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.lang === currentLang);
+  });
+  document.documentElement.lang = currentLang === 'en' ? 'en' : 'th';
+
+  // ถ้าตัวกระดานถูกสร้างไปแล้ว (แสดงเป็นพื้นหลังหน้าเริ่มต้นอยู่) ให้รีเฟรชป้ายโบนัสบนกระดานด้วย
+  try{
+    const freshLabels = { red: t('bonusRed'), yellow: t('bonusYellow'), blue: t('bonusBlue'), orange: t('bonusOrange') };
+    Object.keys(bonusMap).forEach(key => {
+      const cell = cellsByRC[key];
+      const labelEl = cell && cell.querySelector('.bonus-label');
+      if(labelEl) labelEl.textContent = freshLabels[bonusMap[key]];
+    });
+  } catch(e){ /* กระดานยังไม่ถูกสร้าง (เรียกครั้งแรกตอนโหลดหน้า) ข้ามไปได้ */ }
+}
+
+document.getElementById('langGearBtn').addEventListener('click', (e) => {
+  e.stopPropagation();
+  document.getElementById('langMenu').classList.toggle('open');
+});
+document.querySelectorAll('.lang-option').forEach(btn => {
+  btn.addEventListener('click', () => {
+    applyLanguage(btn.dataset.lang);
+    document.getElementById('langMenu').classList.remove('open');
+  });
+});
+document.addEventListener('click', (e) => {
+  const menu = document.getElementById('langMenu');
+  if(!menu) return; // เมนูภาษาอยู่ในหน้าจอเริ่มต้นเท่านั้น ถูกลบไปแล้วตอนเริ่มเกมจริง
+  if(menu.classList.contains('open') && !menu.contains(e.target) && e.target.id !== 'langGearBtn'){
+    menu.classList.remove('open');
+  }
+});
+applyLanguage(currentLang);
+
+/* =========================================================
+   BOARD SETUP
+   ========================================================= */
+const SIZE = 15;
+const CENTER = 7;
+
+const redCoords = [[0,0],[0,7],[0,14],[7,0],[7,14],[14,0],[14,7],[14,14]];
+const yellowCoords = [
+  [1,1],[2,2],[3,3],[4,4],[1,13],[2,12],[3,11],[4,10],
+  [13,1],[12,2],[11,3],[10,4],[13,13],[12,12],[11,11],[10,10]
+];
+const blueCoords = [
+  [1,5],[1,9],[5,1],[5,5],[5,9],[5,13],[9,1],[9,5],[9,9],[9,13],[13,5],[13,9]
+];
+const orangeCoords = [
+  [0,3],[0,11],[2,6],[2,8],[3,0],[3,7],[3,14],
+  [6,2],[6,6],[6,8],[6,12],[7,3],[7,11],
+  [8,2],[8,6],[8,8],[8,12],[11,0],[11,7],[11,14],
+  [12,6],[12,8],[14,3],[14,11]
+];
+
+const toKey = (r,c) => r + '-' + c;
+const bonusMap = {};
+redCoords.forEach(([r,c]) => bonusMap[toKey(r,c)] = 'red');
+yellowCoords.forEach(([r,c]) => bonusMap[toKey(r,c)] = 'yellow');
+blueCoords.forEach(([r,c]) => bonusMap[toKey(r,c)] = 'blue');
+orangeCoords.forEach(([r,c]) => bonusMap[toKey(r,c)] = 'orange');
+
+function getBonusLabels(){
+  return { red: t('bonusRed'), yellow: t('bonusYellow'), blue: t('bonusBlue'), orange: t('bonusOrange') };
+}
+const labels = getBonusLabels();
+
+const boardEl = document.getElementById('board');
+const cellsByRC = {}; // 'r-c' -> cell element, used for line/run detection
+
+for(let r = 0; r < SIZE; r++){
+  for(let c = 0; c < SIZE; c++){
+    const cell = document.createElement('div');
+    cell.className = 'cell';
+    cell.dataset.row = r;
+    cell.dataset.col = c;
+
+    if(r === CENTER && c === CENTER){
+      // ช่องดาวกลางกระดาน: คูณ 3 เฉพาะเบี้ยตัวที่ทับช่องนี้เท่านั้น
+      // (มีผลเหมือนช่องฟ้า "3xตัว" ทุกประการ แค่ภาพเป็นดาวสีเขียว)
+      cell.classList.add('center');
+      cell.dataset.bonusType = 'blue';
+      cell.dataset.multiplier = '3';
+      cell.dataset.multiplierScope = 'tile';
+      cell.innerHTML = `<svg viewBox="0 0 24 24"><path d="M12 2l2.9 6.6L22 9.3l-5 4.9 1.3 7.1L12 17.9 5.7 21.3 7 14.2 2 9.3l7.1-0.7z" fill="#fff"/></svg>`;
+    } else {
+      const type = bonusMap[toKey(r,c)];
+      if(type){
+        cell.classList.add(type);
+        cell.dataset.bonusType = type;
+        cell.dataset.multiplier = (type === 'red' || type === 'blue') ? '3' : '2';
+        cell.dataset.multiplierScope = (type === 'red' || type === 'yellow') ? 'equation' : 'tile';
+        cell.innerHTML = `<span class="bonus-label">${labels[type]}</span>`;
+      }
+    }
+    boardEl.appendChild(cell);
+    cellsByRC[toKey(r,c)] = cell;
+  }
+}
+
+/* =========================================================
+   TILE DATA
+   ========================================================= */
+const AMATH_TILE_DEFINITIONS = [
+  { value: '0',  type: 'number', score: 1, count: 5 },
+  { value: '1',  type: 'number', score: 1, count: 6 },
+  { value: '2',  type: 'number', score: 1, count: 6 },
+  { value: '3',  type: 'number', score: 1, count: 5 },
+  { value: '4',  type: 'number', score: 2, count: 5 },
+  { value: '5',  type: 'number', score: 2, count: 4 },
+  { value: '6',  type: 'number', score: 2, count: 4 },
+  { value: '7',  type: 'number', score: 2, count: 4 },
+  { value: '8',  type: 'number', score: 2, count: 4 },
+  { value: '9',  type: 'number', score: 2, count: 4 },
+  { value: '10', type: 'number', score: 3, count: 2 },
+  { value: '11', type: 'number', score: 4, count: 1 },
+  { value: '12', type: 'number', score: 3, count: 2 },
+  { value: '13', type: 'number', score: 6, count: 1 },
+  { value: '14', type: 'number', score: 4, count: 1 },
+  { value: '15', type: 'number', score: 4, count: 1 },
+  { value: '16', type: 'number', score: 4, count: 1 },
+  { value: '17', type: 'number', score: 6, count: 1 },
+  { value: '18', type: 'number', score: 4, count: 1 },
+  { value: '19', type: 'number', score: 7, count: 1 },
+  { value: '20', type: 'number', score: 5, count: 1 },
+  { value: '+',   type: 'operator', score: 2, count: 4 },
+  { value: '−',   type: 'operator', score: 2, count: 4 },
+  { value: '+/−', type: 'operator', score: 1, count: 5 },
+  { value: '×',   type: 'operator', score: 2, count: 4 },
+  { value: '÷',   type: 'operator', score: 2, count: 4 },
+  { value: '×/÷', type: 'operator', score: 1, count: 4 },
+  { value: '=',   type: 'operator', score: 1, count: 11 },
+  { value: 'BLANK', type: 'blank', score: 0, count: 4 },
+];
+
+/* ชุดเบี้ยระดับประถมศึกษา — 70 ตัว (เล็กกว่า/ง่ายกว่าชุดมัธยม 100 ตัว)
+   อ้างอิงกติกาทางการ A-Math ระดับประถม: ไม่มีเลข 17-19, ไม่มีเครื่องหมาย × / ÷ เดี่ยวๆ
+   (มีเฉพาะ ×/÷ รวม), = เหลือ 8 ตัว */
+const AMATH_TILE_DEFINITIONS_ELEMENTARY = [
+  { value: '0',  type: 'number', score: 1, count: 4 },
+  { value: '1',  type: 'number', score: 1, count: 4 },
+  { value: '2',  type: 'number', score: 1, count: 4 },
+  { value: '3',  type: 'number', score: 1, count: 4 },
+  { value: '4',  type: 'number', score: 2, count: 4 },
+  { value: '5',  type: 'number', score: 2, count: 3 },
+  { value: '6',  type: 'number', score: 2, count: 3 },
+  { value: '7',  type: 'number', score: 2, count: 2 },
+  { value: '8',  type: 'number', score: 2, count: 3 },
+  { value: '9',  type: 'number', score: 2, count: 2 },
+  { value: '10', type: 'number', score: 3, count: 1 },
+  { value: '11', type: 'number', score: 4, count: 1 },
+  { value: '12', type: 'number', score: 3, count: 1 },
+  { value: '13', type: 'number', score: 6, count: 1 },
+  { value: '14', type: 'number', score: 4, count: 1 },
+  { value: '15', type: 'number', score: 4, count: 1 },
+  { value: '16', type: 'number', score: 4, count: 1 },
+  { value: '20', type: 'number', score: 5, count: 1 },
+  { value: '+',   type: 'operator', score: 2, count: 4 },
+  { value: '−',   type: 'operator', score: 2, count: 4 },
+  { value: '+/−', type: 'operator', score: 1, count: 5 },
+  { value: '×/÷', type: 'operator', score: 1, count: 4 },
+  { value: '=',   type: 'operator', score: 1, count: 8 },
+  { value: 'BLANK', type: 'blank', score: 0, count: 4 },
+];
+
+// BLANK ระดับประถม แทนเลขได้แค่ 0-16 และ 20 (แทน 17,18,19 ไม่ได้ เพราะชุดประถมไม่มีเบี้ยเลขพวกนี้ให้เล่น)
+const BLANK_NUMBERS_SECONDARY = ['0','1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20'];
+const BLANK_NUMBERS_ELEMENTARY = ['0','1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','20'];
+
+let activeTileDefinitions = AMATH_TILE_DEFINITIONS; // เปลี่ยนตามชุดเบี้ยที่เลือกตอนเริ่มเกม (โหมดบอทเท่านั้น)
+let activeBlankNumbers = BLANK_NUMBERS_SECONDARY;
+
+function shuffleArray(arr){
+  for(let i=arr.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [arr[i],arr[j]] = [arr[j],arr[i]];
+  }
+  return arr;
+}
+
+let tileIdCounter = 0;
+function createTileBag(defs){
+  const defsToUse = defs || AMATH_TILE_DEFINITIONS;
+  const bag = [];
+  defsToUse.forEach(def => {
+    for(let i=0;i<def.count;i++){
+      bag.push({ id:'t'+(tileIdCounter++), value:def.value, type:def.type, score:def.score });
+    }
+  });
+  return shuffleArray(bag);
+}
+
+/* =========================================================
+   RACK (8 fixed slots) + DRAG & DROP
+   ========================================================= */
+const RACK_SIZE = 8;
+let bag = createTileBag();
+const rackEl = document.getElementById('rack');
+const bagCountEl = document.getElementById('bagCount');
+const statsLine = document.getElementById('statsLine');
+const submitBtn = document.getElementById('submitBtn');
+
+const rackSlots = [];
+for(let i=0;i<RACK_SIZE;i++){
+  const slot = document.createElement('div');
+  slot.className = 'rack-slot';
+  slot.dataset.slotIndex = i;
+  rackEl.appendChild(slot);
+  rackSlots.push(slot);
+}
+
+function tileClass(type){
+  if(type === 'operator') return 'op';
+  if(type === 'blank') return 'blank';
+  return '';
+}
+
+function updateBagCount(){
+  bagCountEl.textContent = `เหลือในถุง: ${bag.length} ตัว`;
+}
+
+const DUAL_OP_OPTIONS = {
+  '+/−': ['+', '−'],
+  '×/÷': ['×', '÷'],
+};
+
+function isDualOp(value){
+  return Object.prototype.hasOwnProperty.call(DUAL_OP_OPTIONS, value);
+}
+
+// สร้าง markup ของ "หน้าเบี้ย" ไม่ว่าจะเป็นเบี้ยในถาดหรือเบี้ยบนกระดาน
+function renderTileFace(el, tileData, isPlaced){
+  el.innerHTML = '';
+
+  const valueWrap = document.createElement(isPlaced ? 'span' : 'div');
+  if(!isPlaced) valueWrap.className = 'value';
+
+  if(isDualOp(tileData.value)){
+    const options = DUAL_OP_OPTIONS[tileData.value];
+    const selected = tileData.selected || options[0];
+    el.dataset.selected = selected;
+
+    const dual = document.createElement('span');
+    dual.className = 'dual-op';
+    dual.innerHTML =
+      `<span class="op-choice${selected === options[0] ? ' selected' : ''}">${options[0]}</span>` +
+      `<span class="op-sep">/</span>` +
+      `<span class="op-choice${selected === options[1] ? ' selected' : ''}">${options[1]}</span>`;
+    valueWrap.appendChild(dual);
+  } else if(tileData.value === 'BLANK'){
+    if(tileData.blankValue){
+      el.dataset.blankValue = tileData.blankValue;
+      valueWrap.innerHTML = `<span class="blank-chosen">${tileData.blankValue}</span>`;
+    } else {
+      valueWrap.textContent = '☐';
+    }
+  } else {
+    valueWrap.textContent = tileData.value === 'BLANK' ? '☐' : tileData.value;
+  }
+
+  el.appendChild(valueWrap);
+
+  if(tileData.type !== 'blank'){
+    const score = document.createElement(isPlaced ? 'span' : 'div');
+    score.className = isPlaced ? 'pscore' : 'score';
+    score.textContent = tileData.score;
+    el.appendChild(score);
+  }
+}
+
+function toggleOperatorSelection(el){
+  const value = el.dataset.value;
+  if(!isDualOp(value)) return;
+  const options = DUAL_OP_OPTIONS[value];
+  const current = el.dataset.selected || options[0];
+  const next = current === options[0] ? options[1] : options[0];
+  const isPlaced = el.classList.contains('placed-tile');
+  renderTileFace(el, { value, type: el.dataset.type, score: el.dataset.score, selected: next }, isPlaced);
+}
+
+function buildTileEl(tileData){
+  const el = document.createElement('div');
+  el.className = 'tile ' + tileClass(tileData.type);
+  el.dataset.value = tileData.value;
+  el.dataset.type = tileData.type;
+  el.dataset.score = tileData.score;
+
+  renderTileFace(el, tileData, false);
+
+  el.addEventListener('pointerdown', onPointerDown);
+  return el;
+}
+
+function buildPlacedTileEl(tileData){
+  const el = document.createElement('div');
+  el.className = 'placed-tile ' + tileClass(tileData.type);
+  el.dataset.value = tileData.value;
+  el.dataset.type = tileData.type;
+  el.dataset.score = tileData.score;
+
+  renderTileFace(el, tileData, true);
+
+  el.addEventListener('pointerdown', onPointerDown);
+  return el;
+}
+
+function readTileData(el){
+  return {
+    value: el.dataset.value,
+    type: el.dataset.type,
+    score: Number(el.dataset.score),
+    selected: el.dataset.selected,
+    blankValue: el.dataset.blankValue,
+  };
+}
+
+function firstEmptySlot(){
+  return rackSlots.find(s => s.children.length === 0) || null;
+}
+
+function fillRackFromBag(count){
+  let drawn = 0;
+  for(const slot of rackSlots){
+    if(drawn >= count) break;
+    if(slot.children.length === 0 && bag.length > 0){
+      slot.appendChild(buildTileEl(bag.shift()));
+      drawn++;
+    }
+  }
+  updateBagCount();
+}
+
+/* ---- Drag state ---- */
+let dragGhost = null;
+let dragTileEl = null;      // the actual tile element being moved
+let dragTileData = null;
+let dragSource = null;      // { kind:'rack', slot } | { kind:'board', cell }
+let dragOverTarget = null;
+let dragStartX = 0;
+let dragStartY = 0;
+let dragMoved = false;
+const TAP_THRESHOLD = 6; // px
+
+/* ---- Exchange (เปลี่ยนเบี้ย) state ---- */
+let exchangeMode = false;
+const selectedForExchange = new Set();
+
+function onPointerDown(e){
+  const el = e.currentTarget;
+
+  // เกมจบแล้ว -> ล็อกทุกอย่าง
+  if(gameEnded) return;
+
+  // ไม่ใช่ตาของผู้เล่น -> ห้ามโต้ตอบกับกระดาน แต่ยังสลับเบี้ยในถาดตัวเองได้
+  if(currentTurn !== 'player'){
+    const rackSlotCheck = el.closest('.rack-slot');
+    if(!rackSlotCheck) return;
+  }
+
+  // ignore locked board tiles
+  if(el.classList.contains('locked')) return;
+
+  // โหมดเปลี่ยนเบี้ย: แตะเบี้ยในถาดเพื่อเลือก/ยกเลิกเลือก ไม่เปิดการลากใดๆ
+  if(exchangeMode){
+    e.preventDefault();
+    const rackSlot = el.closest('.rack-slot');
+    if(rackSlot){
+      toggleExchangeSelection(el);
+    }
+    return;
+  }
+
+  e.preventDefault();
+  dragTileEl = el;
+  dragTileData = readTileData(el);
+  dragStartX = e.clientX;
+  dragStartY = e.clientY;
+  dragMoved = false;
+
+  const rackSlot = el.closest('.rack-slot');
+  const cell = el.closest('.cell');
+  if(rackSlot){
+    dragSource = { kind: 'rack', slot: rackSlot };
+  } else if(cell){
+    dragSource = { kind: 'board', cell: cell };
+  } else {
+    return;
+  }
+
+  dragGhost = el.cloneNode(true);
+  dragGhost.classList.add('drag-ghost');
+  dragGhost.style.left = e.clientX + 'px';
+  dragGhost.style.top = e.clientY + 'px';
+  document.body.appendChild(dragGhost);
+
+  el.style.visibility = 'hidden';
+
+  window.addEventListener('pointermove', onPointerMove);
+  window.addEventListener('pointerup', onPointerUp);
+}
+
+function onPointerMove(e){
+  if(!dragMoved){
+    const dx = e.clientX - dragStartX;
+    const dy = e.clientY - dragStartY;
+    if(Math.hypot(dx, dy) > TAP_THRESHOLD) dragMoved = true;
+  }
+
+  if(dragGhost){
+    dragGhost.style.left = e.clientX + 'px';
+    dragGhost.style.top = e.clientY + 'px';
+  }
+
+  if(dragOverTarget) dragOverTarget.classList.remove('drag-over');
+
+  dragGhost.style.display = 'none';
+  const under = document.elementFromPoint(e.clientX, e.clientY);
+  dragGhost.style.display = '';
+
+  const slot = under ? under.closest('.rack-slot') : null;
+  const cell = under ? under.closest('.cell') : null;
+
+  if(slot){
+    slot.classList.add('drag-over');
+    dragOverTarget = slot;
+  } else if(cell && currentTurn === 'player'){
+    cell.classList.add('drag-over');
+    dragOverTarget = cell;
+  } else {
+    dragOverTarget = null;
+  }
+}
+
+function onPointerUp(e){
+  window.removeEventListener('pointermove', onPointerMove);
+  window.removeEventListener('pointerup', onPointerUp);
+
+  if(dragOverTarget) dragOverTarget.classList.remove('drag-over');
+  if(dragGhost){ dragGhost.remove(); dragGhost = null; }
+  clearInvalidHighlights();
+
+  // แตะเฉยๆ ไม่ได้ลาก -> ถ้าเป็นเบี้ย +/− หรือ ×/÷ ให้สลับสัญลักษณ์ที่เลือก / ถ้าเป็น BLANK ให้เปิดตัวเลือก
+  if(!dragMoved){
+    dragTileEl.style.visibility = '';
+    if(dragTileEl.dataset.value === 'BLANK'){
+      openBlankPicker(dragTileEl);
+    } else {
+      toggleOperatorSelection(dragTileEl);
+    }
+    resetDrag();
+    return;
+  }
+
+  const target = dragOverTarget;
+  dragOverTarget = null;
+
+  const restoreOriginal = () => {
+    dragTileEl.style.visibility = '';
+  };
+
+  if(!target){
+    restoreOriginal();
+    resetDrag();
+    return;
+  }
+
+  const isTargetSlot = target.classList.contains('rack-slot');
+  const isTargetCell = target.classList.contains('cell');
+
+  // ไม่ใช่ตาเรา -> ห้ามวางเบี้ยลงกระดานเด็ดขาด (สลับในถาดได้อย่างเดียว)
+  if(currentTurn !== 'player' && isTargetCell){
+    restoreOriginal();
+    resetDrag();
+    return;
+  }
+
+  /* ---- DROP ON RACK SLOT ---- */
+  if(isTargetSlot){
+    if(dragSource.kind === 'rack'){
+      const sourceSlot = dragSource.slot;
+      if(target === sourceSlot){
+        restoreOriginal();
+      } else if(target.children.length === 0){
+        // move to empty slot
+        dragTileEl.remove();
+        dragTileEl.style.visibility = '';
+        target.appendChild(dragTileEl);
+      } else {
+        // swap the two tiles
+        const otherTile = target.firstElementChild;
+        dragTileEl.remove();
+        otherTile.remove();
+        dragTileEl.style.visibility = '';
+        target.appendChild(dragTileEl);
+        sourceSlot.appendChild(otherTile);
+      }
+    } else if(dragSource.kind === 'board'){
+      const sourceCell = dragSource.cell;
+      if(target.children.length === 0){
+        dragTileEl.remove();
+        sourceCell.classList.remove('filled');
+        delete sourceCell.dataset.value;
+        target.appendChild(buildTileEl(dragTileData));
+      } else {
+        // slot occupied - can't drop, revert to board
+        restoreOriginal();
+      }
+    }
+  }
+  /* ---- DROP ON BOARD CELL ---- */
+  else if(isTargetCell){
+    const alreadyFilled = target.classList.contains('filled');
+    const isSameCell = dragSource.kind === 'board' && dragSource.cell === target;
+
+    if(alreadyFilled && !isSameCell){
+      restoreOriginal();
+    } else if(dragSource.kind === 'rack'){
+      const sourceSlot = dragSource.slot;
+      dragTileEl.remove();
+      sourceSlot.innerHTML = ''; // slot stays empty — no auto refill
+      target.classList.add('filled');
+      target.dataset.value = dragTileData.value;
+      target.appendChild(buildPlacedTileEl(dragTileData));
+    } else if(dragSource.kind === 'board'){
+      const sourceCell = dragSource.cell;
+      if(isSameCell){
+        restoreOriginal();
+      } else {
+        dragTileEl.remove();
+        sourceCell.classList.remove('filled');
+        delete sourceCell.dataset.value;
+        target.classList.add('filled');
+        target.dataset.value = dragTileData.value;
+        target.appendChild(buildPlacedTileEl(dragTileData));
+      }
+    }
+  }
+
+  resetDrag();
+  updateSubmitState();
+}
+
+function resetDrag(){
+  dragTileEl = null;
+  dragTileData = null;
+  dragSource = null;
+}
+
+/* =========================================================
+   PINCH-ZOOM เฉพาะกระดาน (ไม่ซูมถาดเบี้ย/ปุ่มอื่นๆ)
+   ใช้สองนิ้วบีบ/ขยายบน .board-zoom-wrap เพื่อซูมเฉพาะ .board-frame
+   พอซูมแล้วลากนิ้วเดียว (บนพื้นที่ว่าง ไม่ใช่ตัวเบี้ย) เพื่อเลื่อนดูรอบกระดานได้อิสระ
+   ========================================================= */
+const boardZoomWrapEl = document.getElementById('boardZoomWrap');
+const boardFrameEl = document.getElementById('boardFrame');
+const resetZoomBtn = document.getElementById('resetZoomBtn');
+
+const MIN_BOARD_SCALE = 1;
+const MAX_BOARD_SCALE = 2.5;
+let boardScale = 1;
+let panX = 0;
+let panY = 0;
+let pinchStartDistance = 0;
+let pinchStartScale = 1;
+
+let isPanning = false;
+let panStartClientX = 0;
+let panStartClientY = 0;
+let panStartX = 0;
+let panStartY = 0;
+
+/* กันลาก/ซูมจนกระดานหลุดออกนอกกรอบไปไกลเกินจะดึงกลับ */
+function clampPan(){
+  const wrapRect = boardZoomWrapEl.getBoundingClientRect();
+  const naturalW = boardFrameEl.offsetWidth;
+  const naturalH = boardFrameEl.offsetHeight;
+  const maxPanX = Math.max(0, (naturalW * boardScale - wrapRect.width) / 2 + naturalW * 0.15);
+  const maxPanY = Math.max(0, (naturalH * boardScale - wrapRect.height) / 2 + naturalH * 0.15);
+  panX = Math.min(maxPanX, Math.max(-maxPanX, panX));
+  panY = Math.min(maxPanY, Math.max(-maxPanY, panY));
+}
+
+function updateBoardTransform(){
+  clampPan();
+  boardFrameEl.style.transform = `translate(${panX}px, ${panY}px) scale(${boardScale})`;
+}
+
+function applyBoardScale(scale){
+  boardScale = Math.min(MAX_BOARD_SCALE, Math.max(MIN_BOARD_SCALE, scale));
+  updateBoardTransform();
+  resetZoomBtn.style.display = boardScale > 1.02 ? '' : 'none';
+}
+
+function cancelInProgressTileDrag(){
+  if(!dragTileEl) return;
+  dragTileEl.style.visibility = '';
+  if(dragGhost){ dragGhost.remove(); dragGhost = null; }
+  window.removeEventListener('pointermove', onPointerMove);
+  window.removeEventListener('pointerup', onPointerUp);
+  resetDrag();
+}
+
+/* ใช้ Touch Events ตรงๆ (แทน Pointer Events) สำหรับท่าบีบ/ขยายสองนิ้วโดยเฉพาะ
+   เพราะ Touch Events อ่านค่านิ้วทั้งหมดพร้อมกันได้ตรงไปตรงมากว่า และกันเบราว์เซอร์
+   (โดยเฉพาะ Safari บนมือถือ) แอบเอาไปซูมทั้งหน้าจอเองได้แน่นอนกว่า Pointer Events */
+function getTouchDistance(touches){
+  if(touches.length < 2) return 0;
+  const dx = touches[0].clientX - touches[1].clientX;
+  const dy = touches[0].clientY - touches[1].clientY;
+  return Math.hypot(dx, dy);
+}
+
+boardZoomWrapEl.addEventListener('touchstart', (e) => {
+  if(e.touches.length === 2){
+    cancelInProgressTileDrag();
+    isPanning = false;
+    pinchStartDistance = getTouchDistance(e.touches);
+    pinchStartScale = boardScale;
+  } else if(e.touches.length === 1 && boardScale > 1.02){
+    const isTileTarget = e.target.closest('.tile, .placed-tile');
+    if(!isTileTarget){
+      isPanning = true;
+      panStartClientX = e.touches[0].clientX;
+      panStartClientY = e.touches[0].clientY;
+      panStartX = panX;
+      panStartY = panY;
+    }
+  }
+}, { passive: true });
+
+boardZoomWrapEl.addEventListener('touchmove', (e) => {
+  if(e.touches.length === 2 && pinchStartDistance > 0){
+    e.preventDefault();
+    const currentDistance = getTouchDistance(e.touches);
+    applyBoardScale(pinchStartScale * (currentDistance / pinchStartDistance));
+  } else if(isPanning && e.touches.length === 1){
+    e.preventDefault();
+    panX = panStartX + (e.touches[0].clientX - panStartClientX);
+    panY = panStartY + (e.touches[0].clientY - panStartClientY);
+    updateBoardTransform();
+  }
+}, { passive: false });
+
+function handleTouchRelease(e){
+  if(e.touches.length < 2) pinchStartDistance = 0;
+  if(e.touches.length === 0) isPanning = false;
+}
+boardZoomWrapEl.addEventListener('touchend', handleTouchRelease, { passive: true });
+boardZoomWrapEl.addEventListener('touchcancel', handleTouchRelease, { passive: true });
+
+resetZoomBtn.addEventListener('click', () => {
+  panX = 0;
+  panY = 0;
+  applyBoardScale(1);
+});
+
+/* กันเบราว์เซอร์ (โดยเฉพาะ Safari บน iOS) แอบซูมทั้งหน้าจอเองตอนใช้สองนิ้ว
+   ทั้งที่ตั้งใจให้ซูมเฉพาะกระดานผ่านระบบของเราเท่านั้น */
+document.addEventListener('touchmove', (e) => {
+  if(e.touches && e.touches.length > 1) e.preventDefault();
+}, { passive: false });
+
+document.addEventListener('gesturestart', (e) => e.preventDefault());
+document.addEventListener('gesturechange', (e) => e.preventDefault());
+document.addEventListener('gestureend', (e) => e.preventDefault());
+
+/* =========================================================
+   SUBMIT EQUATION + VALIDATION + SCORING
+   ========================================================= */
+function unlockedPlacedCells(){
+  return Array.from(document.querySelectorAll('.cell.filled')).filter(c => {
+    const t = c.querySelector('.placed-tile');
+    return t && !t.classList.contains('locked');
+  });
+}
+
+const pullAllBtn = document.getElementById('pullAllBtn');
+
+/* รวมการอัปเดตปุ่มทั้ง 4 (ลงสมการ/ดึงเบี้ย/จบตา) ไว้ที่เดียว
+   กันปัญหาปุ่มบางปุ่มถูกอัปเดต แต่บางปุ่มไม่ถูกอัปเดตตาม ทำให้ค้างไม่ตรงกัน */
+function refreshActionButtons(){
+  const isMyTurn = currentTurn === 'player';
+  const n = unlockedPlacedCells().length;
+  submitBtn.disabled = !isMyTurn || n === 0;
+  pullAllBtn.disabled = !isMyTurn || n === 0;
+  endTurnBtn.disabled = !isMyTurn || exchangeMode;
+}
+
+function updateSubmitState(){
+  refreshActionButtons();
+}
+
+function clearInvalidHighlights(){
+  document.querySelectorAll('.cell.invalid').forEach(c => c.classList.remove('invalid'));
+  if(errorToast) errorToast.classList.remove('show');
+}
+
+function highlightInvalid(cells){
+  clearInvalidHighlights();
+  (cells || []).forEach(c => c.classList.add('invalid'));
+}
+
+/* ---- กล่องข้อความแจ้งเตือนเล็กๆ ด้านบนจอ ---- */
+const errorToast = document.getElementById('errorToast');
+const toastMessageEl = document.getElementById('toastMessage');
+let toastTimer = null;
+
+function showErrorToast(message){
+  toastMessageEl.textContent = message;
+  errorToast.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => {
+    errorToast.classList.remove('show');
+  }, 3200);
+}
+
+/* ---- อ่านค่าจริงของเบี้ยในช่อง (แปลง BLANK / +−÷× ที่เลือกไว้ ให้เป็นสัญลักษณ์จริง) ---- */
+function actualCellValue(cell){
+  const tileEl = cell.querySelector('.placed-tile');
+  let val = tileEl.dataset.value;
+  if(val === 'BLANK'){
+    return tileEl.dataset.blankValue || null; // null = ยังไม่ได้เลือกค่า
+  }
+  if(val === '+/−' || val === '×/÷'){
+    return tileEl.dataset.selected || (val === '+/−' ? '+' : '×');
+  }
+  return val;
+}
+
+/* ---- หาแนวเรียงของเบี้ยที่เพิ่งวาง + ต่อรวมกับเบี้ยที่ล็อกแล้วในแนวเดียวกัน ---- */
+function detectLineAndRun(newCells){
+  if(newCells.length === 0) return { valid:false, message:'ยังไม่มีเบี้ยวางบนกระดาน', highlightCells: [] };
+
+  const rows = new Set(newCells.map(c => Number(c.dataset.row)));
+  const cols = new Set(newCells.map(c => Number(c.dataset.col)));
+
+  function buildRun(orientation){
+    let fixed, getVar, cellAt;
+    if(orientation === 'row'){
+      fixed = Number(newCells[0].dataset.row);
+      getVar = c => Number(c.dataset.col);
+      cellAt = v => cellsByRC[fixed + '-' + v];
+    } else {
+      fixed = Number(newCells[0].dataset.col);
+      getVar = c => Number(c.dataset.row);
+      cellAt = v => cellsByRC[v + '-' + fixed];
+    }
+    const varsArr = newCells.map(getVar).sort((a,b) => a - b);
+    let minV = varsArr[0], maxV = varsArr[varsArr.length - 1];
+    while(cellAt(minV - 1) && cellAt(minV - 1).classList.contains('filled')) minV--;
+    while(cellAt(maxV + 1) && cellAt(maxV + 1).classList.contains('filled')) maxV++;
+    const run = [];
+    for(let v = minV; v <= maxV; v++){
+      const c = cellAt(v);
+      if(!c || !c.classList.contains('filled')) return null; // มีช่องว่างคั่นกลาง
+      run.push(c);
+    }
+    return run;
+  }
+
+  function finalize(run){
+    const anyLockedOnBoard = document.querySelector('.placed-tile.locked') !== null;
+    const coversCenter = run.some(c => c.classList.contains('center'));
+    const touchesExisting = run.some(c => c.querySelector('.placed-tile')?.classList.contains('locked'));
+    if(!anyLockedOnBoard && !coversCenter){
+      return { valid:false, message:'การลงเบี้ยครั้งแรกต้องทับช่องดาวกลางกระดาน', highlightCells: newCells };
+    }
+    if(anyLockedOnBoard && !touchesExisting){
+      return { valid:false, message:'ต้องวางเบี้ยต่อเนื่องกับสมการที่มีอยู่แล้วบนกระดาน', highlightCells: newCells };
+    }
+    return { valid:true, run };
+  }
+
+  let orientation;
+  if(rows.size === 1 && cols.size === 1){
+    orientation = 'ambiguous'; // เบี้ยตัวเดียว
+  } else if(rows.size === 1){
+    orientation = 'row';
+  } else if(cols.size === 1){
+    orientation = 'col';
+  } else {
+    return { valid:false, message:'เบี้ยต้องเรียงอยู่ในแนวเดียวกัน (แนวนอนหรือแนวตั้งเท่านั้น)', highlightCells: newCells };
+  }
+
+  if(orientation === 'ambiguous'){
+    const rowRun = buildRun('row');
+    const colRun = buildRun('col');
+    const run = (rowRun && colRun) ? (rowRun.length >= colRun.length ? rowRun : colRun) : (rowRun || colRun);
+    if(!run) return { valid:false, message:'มีช่องว่างคั่นอยู่ในแนวเดียวกัน กรุณาวางเบี้ยให้ต่อเนื่อง', highlightCells: newCells };
+    return finalize(run);
+  }
+
+  const run = buildRun(orientation);
+  if(!run) return { valid:false, message:'มีช่องว่างคั่นอยู่ในแนวเดียวกัน กรุณาวางเบี้ยให้ต่อเนื่อง', highlightCells: newCells };
+  return finalize(run);
+}
+
+/* ---- ตรวจความถูกต้องทางคณิตศาสตร์ของสมการที่เรียงเป็นแนวเดียวกัน ---- */
+function validateEquation(runCells){
+  const symbols = [];
+  for(const cell of runCells){
+    const val = actualCellValue(cell);
+    if(val === null){
+      return { valid:false, message:'กรุณาเลือกค่าให้เบี้ย BLANK ก่อนลงสมการ' };
+    }
+    symbols.push(val);
+  }
+  return checkEquationSymbols(symbols);
+}
+
+/* ---- ฟังก์ชันกลาง (pure): รับ array ของสัญลักษณ์เรียงตามลำดับบนกระดาน
+   ตรวจรูปแบบ + คำนวณว่าสมการถูกต้องไหม ใช้ทั้งฝั่งผู้เล่นและฝั่งบอท ---- */
+function checkEquationSymbols(symbols){
+  const rawTokens = [];
+  for(const val of symbols){
+    if(val === '='){ rawTokens.push({ type:'eq' }); }
+    else if(['+','−','×','÷'].includes(val)){ rawTokens.push({ type:'op', value: val }); }
+    else { rawTokens.push({ type:'digit', value: val }); }
+  }
+
+  // รวมเบี้ยตัวเลขที่อยู่ติดกัน (ไม่มีเครื่องหมายคั่น) ให้เป็นเลขหลายหลัก
+  const merged = [];
+  for(let i = 0; i < rawTokens.length; i++){
+    if(rawTokens[i].type === 'digit'){
+      let str = rawTokens[i].value;
+      let j = i + 1;
+      while(j < rawTokens.length && rawTokens[j].type === 'digit'){ str += rawTokens[j].value; j++; }
+      merged.push({ type:'num', value: str });
+      i = j - 1;
+    } else {
+      merged.push(rawTokens[i]);
+    }
+  }
+
+  // จัดการเครื่องหมายลบนำหน้า (unary minus) ที่วางไว้ต้นฝั่งสมการ
+  const finalTokens = [];
+  for(let i = 0; i < merged.length; i++){
+    const t = merged[i];
+    const prev = finalTokens[finalTokens.length - 1];
+    const atExprStart = !prev || prev.type === 'eq';
+    if(t.type === 'op' && t.value === '−' && atExprStart){
+      const next = merged[i + 1];
+      if(!next || next.type !== 'num'){
+        return { valid:false, message:'เครื่องหมายลบนำหน้าต้องตามด้วยตัวเลข' };
+      }
+      if(next.value === '0'){
+        return { valid:false, message:'ห้ามใส่เครื่องหมายลบนำหน้าเลข 0' };
+      }
+      finalTokens.push({ type:'num', value: '-' + next.value });
+      i++;
+      continue;
+    }
+    finalTokens.push(t);
+  }
+
+  if(finalTokens.length === 0 || finalTokens.length % 2 === 0){
+    return { valid:false, message:'รูปแบบสมการไม่สมบูรณ์' };
+  }
+
+  let eqCount = 0;
+  for(let i = 0; i < finalTokens.length; i++){
+    const t = finalTokens[i];
+    const expectNum = (i % 2 === 0);
+    if(expectNum){
+      if(t.type !== 'num') return { valid:false, message:'รูปแบบสมการไม่ถูกต้อง (ตำแหน่งตัวเลขผิด)' };
+      const digits = t.value.replace('-', '');
+      if(digits.length > 1 && digits[0] === '0'){
+        return { valid:false, message:'ห้ามมีเลข 0 นำหน้าตัวเลขอื่น' };
+      }
+    } else {
+      if(t.type === 'eq') eqCount++;
+      else if(t.type !== 'op') return { valid:false, message:'รูปแบบสมการไม่ถูกต้อง' };
+    }
+  }
+  if(eqCount < 1){
+    return { valid:false, message:'สมการต้องมีเครื่องหมาย "=" อย่างน้อยหนึ่งตัว' };
+  }
+
+  // แบ่งเป็นหลายท่อนตามจำนวน "=" ที่มี (รองรับสมการต่อกันหลายตัว เช่น 2+1=3=6÷2)
+  const segments = [];
+  let segStart = 0;
+  for(let i = 0; i < finalTokens.length; i++){
+    if(finalTokens[i].type === 'eq'){
+      segments.push(finalTokens.slice(segStart, i));
+      segStart = i + 1;
+    }
+  }
+  segments.push(finalTokens.slice(segStart));
+
+  if(segments.some(seg => seg.length === 0)){
+    return { valid:false, message:'ต้องมีตัวเลขอยู่ทุกฝั่งของเครื่องหมาย "="' };
+  }
+
+  function evalSide(tokens){
+    const vals = [Number(tokens[0].value)];
+    const ops = [];
+    for(let i = 1; i < tokens.length; i += 2){
+      ops.push(tokens[i].value);
+      vals.push(Number(tokens[i + 1].value));
+    }
+    // คูณ/หาร ก่อน ซ้ายไปขวา
+    const vals2 = [vals[0]];
+    const ops2 = [];
+    for(let i = 0; i < ops.length; i++){
+      if(ops[i] === '×'){
+        vals2[vals2.length - 1] *= vals[i + 1];
+      } else if(ops[i] === '÷'){
+        if(vals[i + 1] === 0) return null; // ห้ามหารด้วย 0
+        vals2[vals2.length - 1] /= vals[i + 1];
+      } else {
+        ops2.push(ops[i]);
+        vals2.push(vals[i + 1]);
+      }
+    }
+    // บวก/ลบ ซ้ายไปขวา
+    let result = vals2[0];
+    for(let i = 0; i < ops2.length; i++){
+      result = ops2[i] === '+' ? result + vals2[i + 1] : result - vals2[i + 1];
+    }
+    return result;
+  }
+
+  const segmentValues = segments.map(evalSide);
+  if(segmentValues.some(v => v === null)){
+    return { valid:false, message:'ห้ามหารด้วย 0' };
+  }
+  const allEqual = segmentValues.every(v => Math.abs(v - segmentValues[0]) <= 1e-9);
+  if(!allEqual){
+    return { valid:false, message:`สมการไม่ถูกต้อง (${segmentValues.join(' ≠ ')})` };
+  }
+
+  return { valid:true, leftVal: segmentValues[0], rightVal: segmentValues[0] };
+}
+
+/* คำนวณคะแนนของการลงสมการหนึ่งครั้ง ตามกติกา A-Math:
+   - รวมค่าคะแนนของเบี้ยทุกตัวในสมการ (ทั้งตัวที่เพิ่งลงและตัวที่ล็อกไว้ก่อนหน้า)
+   - ตัวคูณช่องพิเศษ (เฉพาะตัว/ทั้งสมการ) ใช้ได้เฉพาะเบี้ยที่เพิ่งลงในตานี้เท่านั้น
+   - ถ้าใช้เบี้ยครบ 8 ตัวในตาเดียว (บิงโก) ได้โบนัสเพิ่ม 40 แต้ม */
+function computeScoreForCells(newCells, runCells){
+  let subtotal = 0;
+  let equationMultiplier = 1;
+
+  runCells.forEach(cell => {
+    const tileEl = cell.querySelector('.placed-tile');
+    let tileScore = Number(tileEl.dataset.score) || 0;
+    const isNew = newCells.includes(cell);
+
+    if(isNew){
+      const bonusType = cell.dataset.bonusType;
+      const scope = cell.dataset.multiplierScope;
+      const mult = Number(cell.dataset.multiplier) || 1;
+      if(bonusType && scope === 'tile') tileScore *= mult;
+      if(bonusType && scope === 'equation') equationMultiplier *= mult;
+    }
+    subtotal += tileScore;
+  });
+
+  const isBingo = newCells.length === 8;
+  const beforeBingo = subtotal * equationMultiplier;
+  const total = beforeBingo + (isBingo ? 40 : 0);
+
+  return { subtotal, equationMultiplier, beforeBingo, isBingo, total, tileCount: newCells.length };
+}
+
+let scorePlayer = 0;
+let scoreBot = 0;
+let turnNumber = 0;
+const scoreTotalPlayerEl = document.getElementById('scoreTotalPlayer');
+const scoreTotalBotEl = document.getElementById('scoreTotalBot');
+const scoreHistoryEl = document.getElementById('scoreHistory');
+const scoreEmptyEl = document.getElementById('scoreEmpty');
+
+/* ---- กล่องคะแนนลอย (มุมขวาบน) + แผงรายละเอียดที่เลื่อนเข้ามาเมื่อกด ---- */
+const scoreFloatWidget = document.getElementById('scoreFloatWidget');
+const scorePanelEl = document.getElementById('scorePanel');
+const scorePanelBackdrop = document.getElementById('scorePanelBackdrop');
+const scorePanelClose = document.getElementById('scorePanelClose');
+const floatScorePlayerEl = document.getElementById('floatScorePlayer');
+const floatScoreBotEl = document.getElementById('floatScoreBot');
+const floatOpponentLabelEl = document.getElementById('floatOpponentLabel');
+
+function syncFloatScores(){
+  floatScorePlayerEl.textContent = scorePlayer;
+  floatScoreBotEl.textContent = scoreBot;
+  floatOpponentLabelEl.textContent = opponentScoreLabel.textContent.replace(/^\S+\s*/, '') || 'บอท';
+}
+
+function openScorePanel(){
+  scorePanelEl.classList.add('open');
+  scorePanelBackdrop.classList.add('open');
+}
+function closeScorePanel(){
+  scorePanelEl.classList.remove('open');
+  scorePanelBackdrop.classList.remove('open');
+}
+scoreFloatWidget.addEventListener('click', openScorePanel);
+scorePanelClose.addEventListener('click', closeScorePanel);
+scorePanelBackdrop.addEventListener('click', closeScorePanel);
+
+function addScoreEntry(result, owner){
+  if(owner === 'bot'){
+    scoreBot += result.total;
+    scoreTotalBotEl.textContent = scoreBot;
+  } else {
+    scorePlayer += result.total;
+    scoreTotalPlayerEl.textContent = scorePlayer;
+  }
+
+  let detail = `${result.tileCount} ตัว`;
+  if(result.equationMultiplier > 1) detail += ` · ${result.subtotal}×${result.equationMultiplier}`;
+  if(result.isBingo) detail += ` · บิงโก +40`;
+
+  renderHistoryEntry({
+    isMine: owner !== 'bot',
+    playerLabel: owner === 'bot' ? '🤖 บอท' : 'คุณ',
+    equationText: result.equationText || null,
+    detail,
+    total: result.total,
+    isBingo: result.isBingo,
+  });
+  syncFloatScores();
+}
+
+/* วาดแถวประวัติคะแนน 1 แถว — ใช้ร่วมกันทั้งโหมดบอท (เรียกจาก addScoreEntry)
+   และโหมดออนไลน์ (เรียกจากลิสต์ scoreHistory ที่ sync มาจาก Firestore) */
+function renderHistoryEntry({ isMine, playerLabel, equationText, detail, total, isBingo }){
+  turnNumber++;
+  if(scoreEmptyEl && scoreEmptyEl.isConnected) scoreEmptyEl.remove();
+
+  const entry = document.createElement('div');
+  entry.className = 'score-entry' + (isBingo ? ' bingo' : '') + (!isMine ? ' owner-bot' : '');
+
+  entry.innerHTML = `
+    <div>
+      <span class="turn-label">ตาที่ ${turnNumber}</span>
+      <span class="owner-tag"> · ${playerLabel}</span>
+      ${equationText ? `<div class="turn-equation">${equationText}</div>` : ''}
+      <span class="turn-detail">${detail}</span>
+    </div>
+    <div class="turn-points">+${total}</div>
+  `;
+  scoreHistoryEl.prepend(entry);
+}
+
+/* =========================================================
+   END GAME: ผ่าน/เปลี่ยนเบี้ยติดกัน 3 ตาทั้งสองฝั่ง (รวม 6 ตาติดกัน)
+   ========================================================= */
+let noPlacementStreak = 0;   // ใช้เฉพาะโหมดบอท (โหมดออนไลน์ใช้ passStreak ที่ sync ผ่าน Firestore แทน)
+let everAnyPlacement = false;
+let gameEnded = false;
+
+const gameOverModal = document.getElementById('gameOverModal');
+
+/* หักคะแนน 5 แต้มต่อ 1 นาทีที่ใช้เวลาเกิน 22 นาที (เวลาติดลบ) */
+function computeOvertimePenalty(timeValue){
+  const overtimeSec = Math.max(0, -(timeValue ?? 0));
+  const overtimeMin = Math.ceil(overtimeSec / 60); // เศษวินาทีที่เกิน นับเป็น 1 นาทีทันที
+  return overtimeMin * 5;
+}
+
+function showGameOverModal(myScore, oppScore, oppLabel, forcedResult, reasonText, myPenalty = 0, oppPenalty = 0){
+  gameEnded = true;
+  clearInterval(onlineTimerInterval);
+  setPlayerControlsEnabled(false);
+  submitBtn.disabled = true;
+
+  const emojiEl = document.getElementById('gameOverEmoji');
+  const titleEl = document.getElementById('gameOverTitle');
+  const reasonEl = document.getElementById('gameOverReason');
+  const myPenaltyEl = document.getElementById('gameOverMyPenalty');
+  const oppPenaltyEl = document.getElementById('gameOverOppPenalty');
+
+  const myFinalScore = myScore - myPenalty;
+  const oppFinalScore = oppScore - oppPenalty;
+
+  document.getElementById('gameOverMyScore').textContent = myFinalScore;
+  document.getElementById('gameOverOppScore').textContent = oppFinalScore;
+  document.getElementById('gameOverOppLabel').textContent = oppLabel;
+
+  if(myPenalty > 0){
+    myPenaltyEl.textContent = `−${myPenalty} (ใช้เวลาเกิน ${myPenalty / 5} นาที)`;
+    myPenaltyEl.style.display = '';
+  } else {
+    myPenaltyEl.style.display = 'none';
+  }
+  if(oppPenalty > 0){
+    oppPenaltyEl.textContent = `−${oppPenalty} (ใช้เวลาเกิน ${oppPenalty / 5} นาที)`;
+    oppPenaltyEl.style.display = '';
+  } else {
+    oppPenaltyEl.style.display = 'none';
+  }
+
+  if(reasonText) reasonEl.textContent = reasonText;
+
+  const result = forcedResult || (myFinalScore > oppFinalScore ? 'win' : (myFinalScore < oppFinalScore ? 'lose' : 'draw'));
+  if(result === 'win'){ emojiEl.textContent = '🏆'; titleEl.textContent = 'คุณชนะ!'; }
+  else if(result === 'lose'){ emojiEl.textContent = '😢'; titleEl.textContent = 'คุณแพ้'; }
+  else { emojiEl.textContent = '🤝'; titleEl.textContent = 'เสมอกัน'; }
+
+  gameOverModal.classList.add('open');
+}
+
+document.getElementById('gameOverHomeBtn').addEventListener('click', () => {
+  location.reload();
+});
+
+/* คืนเบี้ยทั้งหมด (ถุง + แป้นทั้งสองฝั่ง) มารวมกันแล้วแจกใหม่ 8:8 — ใช้เมื่อยังไม่มีใครลงเบี้ยเลย */
+function reshuffleBothRacksBotMode(){
+  const myTiles = rackSlots.map(s => s.firstElementChild).filter(Boolean).map(t => ({
+    value: t.dataset.value, type: t.dataset.type, score: Number(t.dataset.score),
+  }));
+  const combined = [...bag, ...myTiles, ...botRack];
+  shuffleArray(combined);
+
+  const newMyRack = combined.splice(0, RACK_SIZE);
+  const newBotRack = combined.splice(0, RACK_SIZE);
+  bag = combined;
+  botRack = newBotRack;
+
+  rackSlots.forEach(s => s.innerHTML = '');
+  newMyRack.forEach((t, i) => { if(rackSlots[i]) rackSlots[i].appendChild(buildTileEl(t)); });
+  updateBagCount();
+
+  noPlacementStreak = 0;
+  statsLine.textContent = 'ยังไม่มีใครลงเบี้ยเลย 3 ตาติดกัน — สุ่มแจกเบี้ยทั้งสองฝั่งใหม่';
+}
+
+/* เรียกหลังทุกครั้งที่มีการ "ผ่าน/เปลี่ยนเบี้ย" หรือ "ลงเบี้ยสำเร็จ" ในโหมดบอท */
+/* รวมคะแนนของเบี้ยที่เหลืออยู่ในถาด (array ของ tile data หรือ NodeList ของ rack-slot ก็ได้) */
+function sumRackTileData(tiles){
+  return (tiles || []).reduce((sum, t) => sum + (Number(t?.score) || 0), 0);
+}
+function sumRackSlotsScore(){
+  return rackSlots.reduce((sum, s) => {
+    const t = s.firstElementChild;
+    return sum + (t ? Number(t.dataset.score) || 0 : 0);
+  }, 0);
+}
+
+function checkBotModePassStreak(){
+  if(gameMode !== 'bot' || gameEnded) return;
+  if(noPlacementStreak < 6) return;
+
+  if(everAnyPlacement){
+    // กติกา: จบเกมเพราะเดินต่อไม่ได้ (ผ่าน/เปลี่ยนครบ 3 ตาทั้งสองฝั่ง)
+    // -> หักคะแนนของเบี้ยที่เหลืออยู่ในแป้นของตัวเอง ออกจากคะแนนของตัวเอง (คนละฝั่ง ไม่เกี่ยวกัน)
+    const myRackPenalty = sumRackSlotsScore();
+    const botRackPenalty = sumRackTileData(botRack);
+    const finalMy = scorePlayer - myRackPenalty;
+    const finalBot = scoreBot - botRackPenalty;
+    let reason = 'ทั้งสองฝ่ายผ่าน/เปลี่ยนเบี้ยติดต่อกัน 3 ตา';
+    if(myRackPenalty > 0 || botRackPenalty > 0){
+      reason += ` (หักเบี้ยเหลือในแป้น: คุณ -${myRackPenalty}, บอท -${botRackPenalty})`;
+    }
+    showGameOverModal(finalMy, finalBot, '🤖 บอท', undefined, reason);
+  } else {
+    reshuffleBothRacksBotMode();
+  }
+}
+
+/* กติกา: ถ้ามีฝ่ายใดลงเบี้ยจนหมดแป้นเป็นคนแรก (และไม่มีเบี้ยเหลือในถุงให้จั่วแล้ว)
+   -> เอาคะแนนเบี้ยที่เหลือของอีกฝ่าย คูณ 2 บวกให้ฝ่ายที่หมดก่อน แล้วจบเกมทันที */
+function checkRackEmptyEndBotMode(emptiedSide){
+  if(gameMode !== 'bot' || gameEnded) return false;
+  if(bag.length > 0) return false;
+
+  if(emptiedSide === 'player' && rackSlots.every(s => s.children.length === 0)){
+    const bonus = sumRackTileData(botRack) * 2;
+    showGameOverModal(
+      scorePlayer + bonus, scoreBot, '🤖 บอท', undefined,
+      `คุณลงเบี้ยหมดก่อน ได้คะแนนเบี้ยที่เหลือของบอท ×2 เพิ่ม (+${bonus})`
+    );
+    return true;
+  }
+  if(emptiedSide === 'bot' && botRack.length === 0){
+    const bonus = sumRackSlotsScore() * 2;
+    showGameOverModal(
+      scorePlayer, scoreBot + bonus, '🤖 บอท', undefined,
+      `บอทลงเบี้ยหมดก่อน ได้คะแนนเบี้ยที่เหลือของคุณ ×2 เพิ่ม (+${bonus})`
+    );
+    return true;
+  }
+  return false;
+}
+
+submitBtn.addEventListener('click', () => {
+  if(currentTurn !== 'player') return;
+  const placed = unlockedPlacedCells();
+  if(placed.length === 0) return;
+
+  const lineResult = detectLineAndRun(placed);
+  if(!lineResult.valid){
+    highlightInvalid(lineResult.highlightCells);
+    showErrorToast(lineResult.message);
+    return;
+  }
+
+  const eqResult = validateEquation(lineResult.run);
+  if(!eqResult.valid){
+    highlightInvalid(lineResult.run);
+    showErrorToast(eqResult.message);
+    return;
+  }
+
+  clearInvalidHighlights();
+  const result = computeScoreForCells(placed, lineResult.run);
+  const equationText = lineResult.run.map(c => actualCellValue(c)).join('');
+
+  placed.forEach(cell => {
+    const t = cell.querySelector('.placed-tile');
+    t.classList.add('locked');
+  });
+
+  fillRackFromBag(placed.length);
+
+  statsLine.textContent = result.isBingo
+    ? `✅ บิงโก! ลง ${placed.length} ตัว ได้ ${result.total} แต้ม (รวมโบนัส +40)`
+    : `✅ ลงสมการแล้ว ${placed.length} ตัว ได้ ${result.total} แต้ม`;
+  updateSubmitState();
+
+  if(gameMode === 'online'){
+    pushOnlineSubmit(placed, result, equationText);
+  } else if(botEnabled){
+    addScoreEntry(result, 'player');
+    noPlacementStreak = 0;
+    everAnyPlacement = true;
+    if(!checkRackEmptyEndBotMode('player')){
+      triggerBotTurn();
+    }
+  }
+});
+
+pullAllBtn.addEventListener('click', () => {
+  if(currentTurn !== 'player') return;
+  const placed = unlockedPlacedCells();
+  if(placed.length === 0) return;
+
+  placed.forEach(cell => {
+    const tileEl = cell.querySelector('.placed-tile');
+    const data = readTileData(tileEl);
+    const slot = firstEmptySlot();
+    if(!slot) return; // ตามหลักแล้วจะมีที่ว่างพอเสมอ
+    cell.classList.remove('filled');
+    delete cell.dataset.value;
+    tileEl.remove();
+    slot.appendChild(buildTileEl(data));
+  });
+
+  clearInvalidHighlights();
+  statsLine.textContent = 'ดึงเบี้ยกลับถาดทั้งหมดแล้ว';
+  updateSubmitState();
+});
+
+/* =========================================================
+   EXCHANGE TILES (เปลี่ยนเบี้ย)
+   กติกา: เลือกเบี้ยในถาด 1-8 ตัว แล้วกดยืนยัน จะได้เบี้ยใหม่
+   มาแทนเฉพาะตัวที่เลือก (ต้องมีเบี้ยในถุงเหลืออย่างน้อย 5 ตัว)
+   ========================================================= */
+const exchangeBtn = document.getElementById('exchangeBtn');
+const cancelExchangeBtn = document.getElementById('cancelExchangeBtn');
+
+function toggleExchangeSelection(tileEl){
+  if(selectedForExchange.has(tileEl)){
+    selectedForExchange.delete(tileEl);
+    tileEl.classList.remove('selected-exchange');
+  } else {
+    selectedForExchange.add(tileEl);
+    tileEl.classList.add('selected-exchange');
+  }
+  updateExchangeBtnLabel();
+}
+
+function updateExchangeBtnLabel(){
+  const n = selectedForExchange.size;
+  exchangeBtn.textContent = n > 0 ? `✅ ${t('confirmExchangeCount').replace('{n}', n)}` : `✅ ${t('confirmExchange')}`;
+  exchangeBtn.disabled = n === 0;
+}
+
+function enterExchangeMode(){
+  exchangeMode = true;
+  selectedForExchange.clear();
+  rackEl.classList.add('exchange-mode');
+  exchangeBtn.classList.add('selecting');
+  updateExchangeBtnLabel();
+  cancelExchangeBtn.style.display = '';
+  submitBtn.disabled = true;
+  submitBtn.style.display = 'none';
+  pullAllBtn.disabled = true;
+  pullAllBtn.style.display = 'none';
+  endTurnBtn.style.display = 'none';
+  updateEndTurnState();
+  statsLine.textContent = 'แตะเบี้ยในถาดที่ต้องการเปลี่ยน แล้วกดยืนยัน';
+}
+
+function exitExchangeMode(){
+  exchangeMode = false;
+  document.querySelectorAll('.tile.selected-exchange').forEach(t => t.classList.remove('selected-exchange'));
+  selectedForExchange.clear();
+  rackEl.classList.remove('exchange-mode');
+  exchangeBtn.classList.remove('selecting');
+  exchangeBtn.textContent = `🔁 ${t('exchange')}`;
+  exchangeBtn.disabled = false;
+  cancelExchangeBtn.style.display = 'none';
+  submitBtn.style.display = '';
+  pullAllBtn.style.display = '';
+  endTurnBtn.style.display = '';
+  updateSubmitState();
+  updateEndTurnState();
+}
+
+function confirmExchange(){
+  if(selectedForExchange.size === 0) return;
+
+  const tilesToExchange = Array.from(selectedForExchange);
+  const slots = tilesToExchange.map(t => t.closest('.rack-slot'));
+  const count = tilesToExchange.length;
+
+  // คืนเบี้ยที่เลือกกลับถุง (รีเซ็ตเป็นเบี้ยเปล่าตามค่าดั้งเดิม ไม่พกค่าที่เลือกไว้ติดไปด้วย)
+  tilesToExchange.forEach(tileEl => {
+    bag.push({
+      id: 't' + (tileIdCounter++),
+      value: tileEl.dataset.value,
+      type: tileEl.dataset.type,
+      score: Number(tileEl.dataset.score),
+    });
+    tileEl.remove();
+  });
+  shuffleArray(bag);
+
+  // จั่วเบี้ยใหม่มาแทนเฉพาะช่องที่ว่างจากการเปลี่ยน
+  slots.forEach(slot => {
+    if(bag.length > 0){
+      slot.appendChild(buildTileEl(bag.shift()));
+    }
+  });
+  updateBagCount();
+
+  statsLine.textContent = `เปลี่ยนเบี้ยแล้ว ${count} ตัว · จบตา`;
+  exitExchangeMode();
+
+  if(gameMode === 'online'){
+    pushOnlineExchange();
+  } else if(botEnabled){
+    noPlacementStreak++;
+    triggerBotTurn();
+  }
+}
+
+exchangeBtn.addEventListener('click', () => {
+  if(currentTurn !== 'player') return;
+  if(!exchangeMode){
+    if(bag.length < 5){
+      statsLine.textContent = 'เบี้ยในถุงเหลือน้อยกว่า 5 ตัว ไม่สามารถเปลี่ยนเบี้ยได้';
+      return;
+    }
+    enterExchangeMode();
+  } else {
+    confirmExchange();
+  }
+});
+
+cancelExchangeBtn.addEventListener('click', () => {
+  exitExchangeMode();
+  statsLine.textContent = 'ยกเลิกการเปลี่ยนเบี้ย';
+});
+
+
+/* =========================================================
+   BLANK TILE PICKER (small popover next to the tile)
+   ========================================================= */
+let currentBlankTile = null;
+
+const blankModal = document.getElementById('blankModal');
+const modalPanel = document.getElementById('modalPanel');
+const modalTitle = document.getElementById('modalTitle');
+const modalStepCategory = document.getElementById('modalStepCategory');
+const modalStepValue = document.getElementById('modalStepValue');
+const valueGrid = document.getElementById('valueGrid');
+
+function positionPopoverNear(tileEl){
+  if(!tileEl) return;
+  const rect = tileEl.getBoundingClientRect();
+  const margin = 8;
+
+  // ตั้งตำแหน่งคร่าวๆ ทันทีก่อน (กันกระพริบที่มุมจอ)
+  modalPanel.style.left = (rect.right + margin) + 'px';
+  modalPanel.style.top = rect.top + 'px';
+
+  // วัดขนาดจริงของกล่องหลัง render เฟรมถัดไป แล้วปรับให้ไม่ล้นจอ
+  requestAnimationFrame(() => {
+    const pw = modalPanel.offsetWidth;
+    const ph = modalPanel.offsetHeight;
+
+    let left = rect.right + margin;
+    let top = rect.top;
+
+    // ถ้าล้นขวา ให้ไปอยู่ฝั่งซ้ายของเบี้ยแทน
+    if(left + pw > window.innerWidth - margin){
+      left = rect.left - pw - margin;
+    }
+    // ถ้ายังล้น (จอแคบมาก) วางกึ่งกลางแนวนอนแทน
+    if(left < margin){
+      left = Math.max(margin, Math.min(window.innerWidth - pw - margin, rect.left));
+    }
+    // กันล้นล่าง/บน
+    if(top + ph > window.innerHeight - margin){
+      top = window.innerHeight - ph - margin;
+    }
+    if(top < margin){
+      top = margin;
+    }
+
+    modalPanel.style.left = left + 'px';
+    modalPanel.style.top = top + 'px';
+  });
+}
+
+function openBlankPicker(tileEl){
+  currentBlankTile = tileEl;
+  modalTitle.textContent = 'เบี้ยว่าง — เลือกประเภท';
+  modalStepCategory.style.display = '';
+  modalStepValue.style.display = 'none';
+  blankModal.classList.add('open');
+  positionPopoverNear(tileEl);
+}
+
+function closeBlankPicker(){
+  blankModal.classList.remove('open');
+  currentBlankTile = null;
+}
+
+function showValueStep(kind){
+  modalStepCategory.style.display = 'none';
+  modalStepValue.style.display = '';
+  valueGrid.innerHTML = '';
+  valueGrid.className = 'value-grid' + (kind === 'operator' ? ' operator-grid' : '');
+
+  if(kind === 'number'){
+    modalTitle.textContent = 'เลือกตัวเลข';
+    activeBlankNumbers.forEach(n => {
+      const btn = document.createElement('button');
+      btn.className = 'value-btn';
+      btn.textContent = n;
+      btn.addEventListener('click', () => selectBlankValue(n));
+      valueGrid.appendChild(btn);
+    });
+  } else {
+    modalTitle.textContent = 'เลือกเครื่องหมาย';
+    const ops = ['+', '−', '×', '÷', '='];
+    ops.forEach(op => {
+      const btn = document.createElement('button');
+      btn.className = 'value-btn operator-btn';
+      btn.textContent = op;
+      btn.addEventListener('click', () => selectBlankValue(op));
+      valueGrid.appendChild(btn);
+    });
+  }
+
+  positionPopoverNear(currentBlankTile);
+}
+
+function selectBlankValue(chosen){
+  if(currentBlankTile){
+    currentBlankTile.dataset.blankValue = chosen;
+    renderTileFace(currentBlankTile, { value: 'BLANK', type: 'blank', score: 0, blankValue: chosen }, currentBlankTile.classList.contains('placed-tile'));
+  }
+  closeBlankPicker();
+}
+
+document.getElementById('chooseNumberBtn').addEventListener('click', () => showValueStep('number'));
+document.getElementById('chooseOperatorBtn').addEventListener('click', () => showValueStep('operator'));
+document.getElementById('modalBackBtn').addEventListener('click', () => {
+  modalStepValue.style.display = 'none';
+  modalStepCategory.style.display = '';
+  modalTitle.textContent = 'เบี้ยว่าง — เลือกประเภท';
+  positionPopoverNear(currentBlankTile);
+});
+document.getElementById('modalCloseBtn').addEventListener('click', closeBlankPicker);
+blankModal.addEventListener('click', (e) => {
+  if(e.target === blankModal) closeBlankPicker();
+});
+
+/* =========================================================
+   BOT OPPONENT (สลับกันเล่นกับบอท 3 ระดับความยาก)
+
+   ข้อจำกัดที่ตั้งใจลดความซับซ้อนลง (แจ้งให้ทราบตรงๆ):
+   - บอทค้นสมการของตัวเองด้วยการสุ่มลองสับเบี้ยในถาดบอทหลายๆ รอบ
+     แล้วตรวจด้วยเครื่องคำนวณเดียวกับที่ใช้ตรวจผู้เล่น ไม่ใช่ AI จริง
+   - บอทวางสมการของตัวเองแบบ "อิสระ" ไม่บังคับให้ต่อกับสมการเดิม
+     บนกระดานเสมอไป (ยกเว้นตาแรกของทั้งเกมต้องทับช่องดาว)
+   ========================================================= */
+
+let currentTurn = 'player';   // 'player' | 'bot'
+let botEnabled = true;
+let botDifficulty = 'medium';
+let botRack = [];
+let botBingoCount = 0;
+
+const DIFFICULTY_CONFIG = {
+  easy:   { sizeRange: [2, 6], scoreRange: [80, 150],  searchIntensity: 0.6, thinkMs: 500 },
+  medium: { sizeRange: [2, 7], scoreRange: [150, 200], searchIntensity: 2.2, thinkMs: 1100 },
+  hard:   { sizeRange: [2, 8], scoreRange: null,       searchIntensity: 6.5, thinkMs: 2000 }, // null = ไม่จำกัดช่วงคะแนน เอาสูงสุดเท่าที่หาได้
+};
+
+const turnIndicatorEl = document.getElementById('turnIndicator');
+const endTurnBtn = document.getElementById('endTurnBtn');
+
+document.querySelectorAll('.diff-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    if(currentTurn !== 'player') return;
+    botDifficulty = btn.dataset.diff;
+    document.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  });
+});
+
+function setTurnIndicator(text, isBot){
+  turnIndicatorEl.textContent = text;
+  turnIndicatorEl.classList.toggle('bot-turn', !!isBot);
+}
+
+function setPlayerControlsEnabled(enabled){
+  document.querySelectorAll('.diff-btn').forEach(b => b.disabled = !enabled);
+  if(enabled){
+    updateSubmitState();
+    exchangeBtn.disabled = false;
+    updateEndTurnState();
+  } else {
+    submitBtn.disabled = true;
+    pullAllBtn.disabled = true;
+    exchangeBtn.disabled = true;
+    endTurnBtn.disabled = true;
+  }
+}
+
+endTurnBtn.addEventListener('click', () => {
+  if(currentTurn !== 'player') return;
+  if(unlockedPlacedCells().length > 0){
+    showErrorToast('มีเบี้ยค้างอยู่บนกระดาน กด "ดึงเบี้ยทั้งหมด" หรือลงสมการก่อน');
+    return;
+  }
+  if(gameMode === 'online'){
+    statsLine.textContent = 'ข้ามตา · ส่งให้คู่ต่อสู้เล่นต่อ';
+    pushOnlineExchange(); // ไม่มีการเปลี่ยนเบี้ย แค่ส่งสถานะเดิม + สลับเทิร์น
+  } else if(botEnabled){
+    noPlacementStreak++;
+    triggerBotTurn();
+  }
+});
+
+function updateEndTurnState(){
+  refreshActionButtons();
+}
+
+/* ---- ค่าที่เป็นไปได้ของเบี้ยแต่ละใบ (บอทลองสุ่มเลือกให้ BLANK / +− / ×÷) ---- */
+function possibleValuesForTile(tile){
+  if(tile.type === 'blank'){
+    // จำกัดตัวเลขที่ลองไว้ไม่เกิน 10 เพื่อความเร็วในการค้นหา (ของเดิม)
+    // แต่ยังเคารพขอบเขตของชุดเบี้ยที่เลือกอยู่ (ประถมตัดเลข 17-19 ออกไปแล้วอยู่แล้ว)
+    const numOptions = activeBlankNumbers.filter(n => Number(n) <= 10);
+    return [...numOptions, '+', '−', '×', '÷', '='];
+  }
+  if(tile.value === '+/−') return ['+','−'];
+  if(tile.value === '×/÷') return ['×','÷'];
+  return [tile.value];
+}
+
+/* ลองทุกความเป็นไปได้ของค่า BLANK / +− / ×÷ สำหรับชุดเบี้ยที่กำหนด (แทนการสุ่มเดา 1 ค่า)
+   ทำให้บอทเจอสมการที่ใช้ได้แม่นยำขึ้นมาก โดยเฉพาะเมื่อมี BLANK ปนอยู่
+   มีเพดานกันคอมโบระเบิด (เผื่อมี BLANK หลายตัวในชุดเดียวกัน) */
+function allSymbolResolutions(tiles){
+  let combos = [[]];
+  for(const t of tiles){
+    const opts = possibleValuesForTile(t);
+    const next = [];
+    for(const prefix of combos){
+      for(const opt of opts){
+        next.push([...prefix, opt]);
+      }
+    }
+    combos = next.length > 4000 ? shuffleArray(next).slice(0, 4000) : next;
+  }
+  return combos;
+}
+
+/* หาชุดย่อยทุกแบบขนาด k จาก array ที่กำหนด (เบี้ยในถาดบอทมีสูงสุด 8 ตัว
+   จำนวนชุดย่อยที่เป็นไปได้จึงน้อยพอจะไล่ดูได้หมดจริงๆ ไม่ต้องสุ่มเดา) */
+function combinations(arr, k){
+  const results = [];
+  const combo = [];
+  function backtrack(start){
+    if(combo.length === k){ results.push([...combo]); return; }
+    for(let i = start; i < arr.length; i++){
+      combo.push(arr[i]);
+      backtrack(i + 1);
+      combo.pop();
+    }
+  }
+  backtrack(0);
+  return results;
+}
+
+/* ---- หาสมการที่ถูกต้องจากเบี้ยในถาดบอท (ไล่ดูทุกชุดย่อยของเบี้ยจริงๆ ไม่สุ่มเดา
+   แล้วลองสลับลำดับ + ไล่ค่า wildcard ครบทุกทางในแต่ละชุด) ---- */
+/* เก็บสมการที่ใช้ได้หลายๆ แบบ (ไม่หยุดที่ตัวแรกที่เจอ) เพื่อเทียบหาคะแนนสูงสุดทีหลัง */
+function findBotEquationCandidates(sizesToTry, ordersPerSubset, maxCandidates){
+  const candidates = [];
+  for(const k of sizesToTry){
+    if(botRack.length < k) continue;
+    const subsets = shuffleArray(combinations(botRack, k));
+    for(const subset of subsets){
+      for(let orderTry = 0; orderTry < ordersPerSubset; orderTry++){
+        const ordered = shuffleArray([...subset]);
+        const resolutions = allSymbolResolutions(ordered);
+        for(const symbols of resolutions){
+          const check = checkEquationSymbols(symbols);
+          if(check.valid){
+            candidates.push({ tiles: ordered, symbols });
+            if(candidates.length >= maxCandidates) return candidates;
+          }
+        }
+      }
+    }
+  }
+  return candidates;
+}
+
+/* ---- หาแนวว่างบนกระดานที่ยาวพอดี k ช่อง (แนวนอน/ตั้ง) ---- */
+function findEmptySpans(k){
+  const spans = [];
+  const boardEmpty = document.querySelector('.placed-tile.locked') === null;
+
+  for(let r = 0; r < SIZE; r++){
+    for(let c = 0; c <= SIZE - k; c++){
+      const cells = [];
+      let ok = true;
+      for(let i = 0; i < k; i++){
+        const cell = cellsByRC[r + '-' + (c + i)];
+        if(!cell || cell.classList.contains('filled')){ ok = false; break; }
+        cells.push(cell);
+      }
+      if(ok) spans.push(cells);
+    }
+  }
+  for(let c = 0; c < SIZE; c++){
+    for(let r = 0; r <= SIZE - k; r++){
+      const cells = [];
+      let ok = true;
+      for(let i = 0; i < k; i++){
+        const cell = cellsByRC[(r + i) + '-' + c];
+        if(!cell || cell.classList.contains('filled')){ ok = false; break; }
+        cells.push(cell);
+      }
+      if(ok) spans.push(cells);
+    }
+  }
+
+  if(boardEmpty){
+    return spans.filter(cells => cells.some(c => c.classList.contains('center')));
+  }
+  // ตาถัดไปต้องวางเบี้ยต่อเนื่อง/ติดกับสมการที่มีอยู่แล้วบนกระดาน ห้ามลงแยกไปที่อื่น
+  return spans.filter(cells => spanTouchesExisting(cells));
+}
+
+function cellHasLockedTile(cell){
+  if(!cell) return false;
+  const t = cell.querySelector('.placed-tile');
+  return !!(t && t.classList.contains('locked'));
+}
+
+/* นับจำนวน "จุดสัมผัส" ระหว่างแนวที่จะลง กับเบี้ยที่ล็อกไว้แล้วบนกระดาน
+   ต้องการให้สัมผัสกันแค่ 1 จุดพอดี (เหมือนครอสเวิร์ดจริง) ไม่ใช่ขนานติดกันทั้งแถว */
+function countTouchContacts(cells){
+  let count = 0;
+  cells.forEach(cell => {
+    const r = Number(cell.dataset.row);
+    const c = Number(cell.dataset.col);
+    [[r-1,c],[r+1,c],[r,c-1],[r,c+1]].forEach(([nr,nc]) => {
+      if(cellHasLockedTile(cellsByRC[nr + '-' + nc])) count++;
+    });
+  });
+  return count;
+}
+
+function spanTouchesExisting(cells){
+  return countTouchContacts(cells) === 1;
+}
+
+function scoreForSpan(cells, tiles){
+  let subtotal = 0, equationMultiplier = 1;
+  cells.forEach((cell, i) => {
+    let tileScore = tiles[i].score;
+    const bonusType = cell.dataset.bonusType;
+    const scope = cell.dataset.multiplierScope;
+    const mult = Number(cell.dataset.multiplier) || 1;
+    if(bonusType && scope === 'tile') tileScore *= mult;
+    subtotal += tileScore;
+    if(bonusType && scope === 'equation') equationMultiplier *= mult;
+  });
+  const isBingo = tiles.length === 8;
+  return subtotal * equationMultiplier + (isBingo ? 40 : 0);
+}
+
+
+
+function fillBotRack(count){
+  let drawn = 0;
+  while(drawn < count && bag.length > 0){
+    botRack.push(bag.shift());
+    drawn++;
+  }
+  updateBagCount();
+}
+
+/* ---- ประเมิน "ความน่าจะเป็นที่จะบิงโกได้" ของเบี้ยแต่ละตัวในถาด ----
+   วิธีคิด: สำหรับเบี้ยตัว t ลองสมมุติว่าเปลี่ยน t ออก แล้วสุ่มจับเบี้ยชนิดต่างๆ
+   จากที่เหลือในถุงมาแทน (ถ่วงน้ำหนักตามจำนวนจริงที่เหลือในถุง) เช็คว่าเบี้ย 7 ตัว
+   ที่เหลือ + เบี้ยที่สุ่มมาแทน สามารถประกอบเป็นสมการ 8 ตัวที่ถูกต้องได้ไหม
+   (สุ่มลองสลับลำดับหลายรอบแทนการไล่ทุก permutation เพื่อความเร็ว)
+   สรุปเป็นความน่าจะเป็น (0-1) ว่าการเปลี่ยน t ออกแล้วจับใหม่ มีโอกาสบิงโกได้แค่ไหน
+   ยิ่งค่าน้อย ยิ่งแปลว่าเบี้ยตัวนั้น "ไม่ใช่ตัวปัญหา" (เปลี่ยนออกไปก็ไม่ค่อยช่วยอะไร) */
+function canFormValidEquationSampled(tiles, orderSamples){
+  for(let s = 0; s < orderSamples; s++){
+    const ordered = shuffleArray([...tiles]);
+    const resolutions = allSymbolResolutions(ordered);
+    for(const symbols of resolutions){
+      if(checkEquationSymbols(symbols).valid) return true;
+    }
+  }
+  return false;
+}
+
+function computeTileBingoProbabilities(){
+  const totalInBag = bag.length;
+  if(totalInBag === 0){
+    return botRack.map(t => ({ tile: t, probability: 0 }));
+  }
+
+  const bagTypeCounts = {};
+  bag.forEach(t => {
+    const key = t.type === 'blank' ? 'BLANK' : t.value;
+    bagTypeCounts[key] = (bagTypeCounts[key] || 0) + 1;
+  });
+
+  return botRack.map(t => {
+    const others = botRack.filter(o => o !== t);
+    let successWeight = 0;
+
+    Object.keys(bagTypeCounts).forEach(key => {
+      const count = bagTypeCounts[key];
+      if(count <= 0) return;
+
+      let hypoTile;
+      if(key === 'BLANK'){
+        hypoTile = { value: 'BLANK', type: 'blank', score: 0 };
+      } else {
+        const def = AMATH_TILE_DEFINITIONS.find(d => d.value === key);
+        if(!def) return;
+        hypoTile = { value: key, type: def.type, score: def.score };
+      }
+
+      const trial = [...others, hypoTile]; // ครบ 8 ตัวสมมุติ
+      if(canFormValidEquationSampled(trial, 15)){
+        successWeight += count; // ถ่วงน้ำหนักตามจำนวนจริงที่เหลือในถุง
+      }
+    });
+
+    return { tile: t, probability: successWeight / totalInBag };
+  });
+}
+
+/* เปลี่ยนเฉพาะเบี้ยที่มีความน่าจะเป็นในการเกิดบิงโกน้อยที่สุด (ใช้ตอนพยายามบังคับบิงโกแล้วไม่เจอ) */
+function botExchangeLowestBingoProbability(){
+  if(bag.length < 5) return false;
+  if(botRack.length === 0) return false;
+
+  const scored = computeTileBingoProbabilities();
+  const VERY_LOW_THRESHOLD = 0.05; // ถือว่า "ต่ำมากๆ" ถ้าโอกาสบิงโก ≤ 5%
+
+  let toExchange = scored.filter(s => s.probability <= VERY_LOW_THRESHOLD).map(s => s.tile);
+
+  if(toExchange.length === 0){
+    // ไม่มีตัวไหนต่ำมากเป็นพิเศษเลย -> เปลี่ยนแค่ตัวที่ต่ำสุดตัวเดียวตามปกติ
+    const minProb = Math.min(...scored.map(s => s.probability));
+    const tiedAtMin = scored.filter(s => s.probability === minProb).map(s => s.tile);
+    const chosen = tiedAtMin.find(t => t.type !== 'blank' && t.value !== '=') || tiedAtMin[0];
+    if(!chosen) return false;
+    toExchange = [chosen];
+  }
+
+  // เปลี่ยนได้สูงสุด 8 ตัว (เท่ากับทั้งถาด)
+  if(toExchange.length > 8) toExchange = toExchange.slice(0, 8);
+
+  toExchange.forEach(t => {
+    const idx = botRack.indexOf(t);
+    if(idx !== -1) botRack.splice(idx, 1);
+  });
+  toExchange.forEach(t => {
+    bag.push({ id: 't' + (tileIdCounter++), value: t.value, type: t.type, score: t.score });
+  });
+  shuffleArray(bag);
+  fillBotRack(toExchange.length);
+  return true;
+}
+
+/* บอทหาสมการ/ที่วางไม่ได้ -> เปลี่ยนเบี้ยทั้งถาดแทน (ถ้าเบี้ยในถุงยังพอ ≥5 ตัวตามกติกา) */
+/* บอทหาสมการ/ที่วางไม่ได้ -> เปลี่ยนเบี้ยตามหลักการ:
+   1) เก็บเบี้ย "=" ไว้อย่างน้อย 1 ตัวเสมอ ถ้ามีมากกว่า 1 ตัวค่อยเปลี่ยนส่วนเกินออก
+   2) ไม่เปลี่ยนเบี้ย BLANK ออกเด็ดขาด (เก็บไว้ทุกตัว)
+   3) เบี้ยตัวอื่นๆ ทั้งหมดเปลี่ยนออกได้ */
+function botExchangeSelected(){
+  if(bag.length < 5) return false;
+
+  const keep = [];
+  const toExchange = [];
+  let eqKept = false;
+
+  botRack.forEach(t => {
+    if(t.type === 'blank'){
+      keep.push(t);
+    } else if(t.value === '='){
+      if(!eqKept){
+        keep.push(t);
+        eqKept = true;
+      } else {
+        toExchange.push(t);
+      }
+    } else {
+      toExchange.push(t);
+    }
+  });
+
+  if(toExchange.length === 0) return false; // ไม่มีอะไรให้เปลี่ยน
+
+  toExchange.forEach(t => {
+    const idx = botRack.indexOf(t);
+    if(idx !== -1) botRack.splice(idx, 1);
+  });
+  toExchange.forEach(t => {
+    bag.push({ id: 't' + (tileIdCounter++), value: t.value, type: t.type, score: t.score });
+  });
+  shuffleArray(bag);
+  fillBotRack(toExchange.length);
+  return true;
+}
+
+/* ---- ค้นหาตำแหน่งวางที่ "ทับ/ใช้ร่วม" กับเบี้ยเดิมบนกระดานแค่ 1 ตัวพอดี (แบบครอสเวิร์ดจริง) ---- */
+function findBotMoveCandidates(newCountsToTry, attemptsPerWindow, maxCandidates, exhaustiveUpTo){
+  const candidates = [];
+  const lockedCells = Array.from(document.querySelectorAll('.placed-tile.locked'))
+    .map(t => t.closest('.cell'))
+    .filter(Boolean);
+  shuffleArray(lockedCells);
+
+  const candidateCells = lockedCells.slice(0, 60); // จำกัดจำนวนจุดยึดที่ลอง กันช้าเกินไป
+
+  for(const L of candidateCells){
+    const r = Number(L.dataset.row);
+    const c = Number(L.dataset.col);
+    const hasHorizNeighbor = cellHasLockedTile(cellsByRC[r + '-' + (c - 1)]) || cellHasLockedTile(cellsByRC[r + '-' + (c + 1)]);
+    const hasVertNeighbor = cellHasLockedTile(cellsByRC[(r - 1) + '-' + c]) || cellHasLockedTile(cellsByRC[(r + 1) + '-' + c]);
+
+    let orientations;
+    if(hasHorizNeighbor && !hasVertNeighbor) orientations = ['col'];
+    else if(hasVertNeighbor && !hasHorizNeighbor) orientations = ['row'];
+    else orientations = ['row', 'col'];
+
+    const Lvalue = actualCellValue(L);
+    if(Lvalue === null) continue;
+
+    for(const orient of orientations){
+      for(const newCount of newCountsToTry){
+        const k = newCount + 1; // รวมช่องที่ใช้ร่วม 1 ช่อง
+        if(newCount > botRack.length) continue;
+
+        for(let i = 0; i < k; i++){
+          const windowCells = [];
+          let ok = true;
+          for(let j = 0; j < k; j++){
+            const cell = orient === 'row'
+              ? cellsByRC[r + '-' + (c - i + j)]
+              : cellsByRC[(r - i + j) + '-' + c];
+            if(!cell){ ok = false; break; }
+            windowCells.push(cell);
+          }
+          if(!ok || windowCells[i] !== L) continue;
+
+          let othersEmpty = true;
+          windowCells.forEach((cell, idx) => {
+            if(idx !== i && cell.classList.contains('filled')) othersEmpty = false;
+          });
+          if(!othersEmpty) continue;
+
+          // ห้ามมีเบี้ยเดิมโผล่ต่อจากปลายทั้งสองข้างของแนวใหม่ (กันไปทับ/ต่อสมการอื่นเงียบๆ โดยไม่รู้ตัว)
+          const beforeStart = orient === 'row'
+            ? cellsByRC[r + '-' + (c - i - 1)]
+            : cellsByRC[(r - i - 1) + '-' + c];
+          const afterEnd = orient === 'row'
+            ? cellsByRC[r + '-' + (c - i + k)]
+            : cellsByRC[(r - i + k) + '-' + c];
+          if(cellHasLockedTile(beforeStart) || cellHasLockedTile(afterEnd)) continue;
+
+          // ห้ามเบี้ยใหม่ (ทุกช่องยกเว้นช่องที่ใช้ร่วม) ไปแตะเบี้ยเดิมตัวอื่นทางด้านข้าง
+          // (กันไม่ให้เกิดจุดตัดเกิน 1 จุดโดยไม่ได้ตั้งใจ จนกลายเป็นก้อนเบี้ยพันกันอ่านไม่ออก)
+          let sideTouchOk = true;
+          windowCells.forEach((cell, idx) => {
+            if(idx === i) return; // ช่องที่ใช้ร่วมไม่ต้องเช็ค เป็นจุดตัดที่ตั้งใจอยู่แล้ว
+            const cr = Number(cell.dataset.row);
+            const cc = Number(cell.dataset.col);
+            const perpNeighbors = orient === 'row'
+              ? [cellsByRC[(cr - 1) + '-' + cc], cellsByRC[(cr + 1) + '-' + cc]]
+              : [cellsByRC[cr + '-' + (cc - 1)], cellsByRC[cr + '-' + (cc + 1)]];
+            if(perpNeighbors.some(n => cellHasLockedTile(n))) sideTouchOk = false;
+          });
+          if(!sideTouchOk) continue;
+
+          // เลือกชุดเบี้ยสำหรับตำแหน่งที่เหลือ (นอกช่องที่ใช้ร่วม): ถ้าจำนวนไม่มากไล่ดูทุกชุดจริงๆ
+          // ถ้าเยอะ (นับรวมกับการวนซ้อนหลายชั้นแล้ว) ค่อยสุ่มหลายรอบแทนกันช้าเกินไป
+          const subsetPool = newCount <= exhaustiveUpTo
+            ? shuffleArray(combinations(botRack, newCount))
+            : Array.from({ length: attemptsPerWindow }, () => shuffleArray([...botRack]).slice(0, newCount));
+
+          for(const subset of subsetPool){
+            if(subset.length < newCount) continue;
+            const orderTries = newCount <= exhaustiveUpTo ? 1 : 2;
+            for(let ot = 0; ot < orderTries; ot++){
+              const ordered = shuffleArray([...subset]);
+              const resolutions = allSymbolResolutions(ordered);
+              for(const partial of resolutions){
+                const symbols = new Array(k);
+                symbols[i] = Lvalue;
+                let si = 0;
+                for(let p = 0; p < k; p++){
+                  if(p === i) continue;
+                  symbols[p] = partial[si++];
+                }
+
+                const check = checkEquationSymbols(symbols);
+                if(check.valid){
+                  candidates.push({ cells: windowCells, symbols, tiles: ordered, sharedIndex: i });
+                  if(candidates.length >= maxCandidates) return candidates;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  return candidates;
+}
+
+/* ---- ฟังก์ชันกลาง: เลือกตัวเลือกที่ดีที่สุดจากลิสต์ {score, ...} ตาม cfg ---- */
+function pickBestByScore(itemsWithScore, cfg){
+  if(itemsWithScore.length === 0) return null;
+  if(cfg.scoreRange){
+    const [lo, hi] = cfg.scoreRange;
+    const inRange = itemsWithScore.filter(s => s.score >= lo && s.score <= hi);
+    if(inRange.length > 0){
+      return inRange[Math.floor(Math.random() * inRange.length)];
+    }
+    const sorted = [...itemsWithScore].sort((a, b) => {
+      const da = a.score < lo ? lo - a.score : (a.score > hi ? a.score - hi : 0);
+      const db = b.score < lo ? lo - b.score : (b.score > hi ? b.score - hi : 0);
+      return da - db;
+    });
+    return sorted[0];
+  }
+  // ไม่มีช่วงคะแนนกำหนด -> เอาคะแนนสูงสุดเท่าที่หาได้
+  const sorted = [...itemsWithScore].sort((a, b) => b.score - a.score);
+  return sorted[0];
+}
+
+/* คิดคะแนนของการลงแบบครอสเวิร์ด (มีช่องที่ใช้ร่วมกับเบี้ยเดิม 1 ช่อง) แบบไม่ต้องมี DOM เบี้ยใหม่จริงก่อน */
+function pureScoreForIntersectionMove(move){
+  let subtotal = 0, equationMultiplier = 1, ti = 0;
+  move.cells.forEach((cell, idx) => {
+    if(idx === move.sharedIndex){
+      const existingTileEl = cell.querySelector('.placed-tile');
+      subtotal += Number(existingTileEl?.dataset.score) || 0;
+    } else {
+      const tile = move.tiles[ti++];
+      let tileScore = tile.score;
+      const bonusType = cell.dataset.bonusType;
+      const scope = cell.dataset.multiplierScope;
+      const mult = Number(cell.dataset.multiplier) || 1;
+      if(bonusType && scope === 'tile') tileScore *= mult;
+      subtotal += tileScore;
+      if(bonusType && scope === 'equation') equationMultiplier *= mult;
+    }
+  });
+  const isBingo = move.tiles.length === 8;
+  return subtotal * equationMultiplier + (isBingo ? 40 : 0);
+}
+
+function executeBotTurn(){
+  const cfg = DIFFICULTY_CONFIG[botDifficulty];
+  const [lo, hi] = cfg.sizeRange;
+
+  let newCountsToTry = [];
+  for(let k = hi; k >= lo; k--) newCountsToTry.push(k);
+  // ถ้าขอบเขตของระดับนี้ไปถึง 8 ตัว (บิงโกได้) ให้ลอง 8 ก่อนเสมอแบบตั้งใจ
+  // (ไม่สุ่มลำดับ) เพื่อให้บอทมีโอกาสเจอบิงโกสูงสุด แทนที่จะสุ่มลำดับแล้วอาจไม่ได้ลองเลย
+  if(hi === 8){
+    newCountsToTry = [8, ...shuffleArray(newCountsToTry.filter(k => k !== 8))];
+  } else {
+    newCountsToTry = shuffleArray(newCountsToTry);
+  }
+
+  const intensity = cfg.searchIntensity;
+  const eqAttempts = Math.max(1, Math.round(3 * intensity));   // จำนวนลำดับที่ลองต่อ "ชุดเบี้ย" หนึ่งชุด (ไล่ดูครบทุกชุดอยู่แล้ว)
+  const eqMaxCandidates = Math.round(40 * intensity);
+  const moveAttempts = Math.round(14 * intensity);             // ใช้เฉพาะตอนชุดเบี้ยใหญ่ (>5 ตัว) ที่ไล่ดูทุกชุดไม่ไหว
+  const moveMaxCandidates = Math.round(35 * intensity);
+
+  const boardEmpty = document.querySelector('.placed-tile.locked') === null;
+
+  if(boardEmpty){
+    // ตาแรกสุดของทั้งเกม: ยังไม่มีอะไรให้ทับ ต้องทับช่องดาวแทน
+    const equationCandidates = findBotEquationCandidates(newCountsToTry, eqAttempts, eqMaxCandidates);
+    if(equationCandidates.length === 0){
+      const exchanged = botExchangeLowestBingoProbability();
+      statsLine.textContent = exchanged
+        ? '🤖 บอทหาสมการเปิดเกมไม่ได้ ขอเปลี่ยนเบี้ยแทน'
+        : '🤖 บอทหาสมการเปิดเกมไม่ได้ และเบี้ยในถุงเหลือน้อยกว่า 5 ตัว ขอผ่าน';
+      noPlacementStreak++;
+      endBotTurn();
+      return;
+    }
+
+    // จับคู่ทุกสมการที่หาได้ กับทุกตำแหน่งที่วางได้ (ทับดาว) แล้วรวมเป็นลิสต์เดียวเพื่อหาคะแนนดีที่สุด
+    const options = [];
+    equationCandidates.forEach(eq => {
+      const spans = findEmptySpans(eq.tiles.length);
+      spans.forEach(cells => {
+        options.push({ cells, tiles: eq.tiles, symbols: eq.symbols, score: scoreForSpan(cells, eq.tiles) });
+      });
+    });
+
+    if(options.length === 0){
+      const exchanged = botExchangeLowestBingoProbability();
+      statsLine.textContent = exchanged
+        ? '🤖 บอทหาที่ทับช่องดาวไม่ได้ ขอเปลี่ยนเบี้ยแทน'
+        : '🤖 บอทหาที่ทับช่องดาวไม่ได้ และเบี้ยในถุงเหลือน้อยกว่า 5 ตัว ขอผ่าน';
+      noPlacementStreak++;
+      endBotTurn();
+      return;
+    }
+
+    // ถ้ามีทางเลือกที่ทำบิงโกได้ (ใช้ครบ 8 ตัว) ให้บอทเลือกเส้นทางนั้นก่อนเสมอ
+    const bingoOptions = options.filter(o => o.tiles.length === 8);
+    const pool = bingoOptions.length > 0 ? bingoOptions : options;
+    const best = pickBestByScore(pool, cfg);
+    placeBotTiles(best.cells, best.symbols, best.tiles, best.cells);
+    best.tiles.forEach(t => {
+      const idx = botRack.indexOf(t);
+      if(idx !== -1) botRack.splice(idx, 1);
+    });
+    fillBotRack(best.tiles.length);
+
+    const result = computeScoreForCells(best.cells, best.cells);
+    result.equationText = best.symbols.join('');
+    if(result.isBingo) botBingoCount++;
+    addScoreEntry(result, 'bot');
+    statsLine.textContent = result.isBingo
+      ? `🤖 บอทบิงโก! ลง ${best.tiles.length} ตัว ได้ ${result.total} แต้ม`
+      : `🤖 บอทลงสมการ ${best.tiles.length} ตัว ได้ ${result.total} แต้ม`;
+    noPlacementStreak = 0;
+    everAnyPlacement = true;
+    endBotTurn();
+    return;
+  }
+
+  // ตาถัดไป: ต้องทับเบี้ยเดิมบนกระดานแค่ 1 ตัวพอดี (ครอสเวิร์ด) — ลองหลายๆ ทางแล้วเลือกคะแนนดีที่สุด
+  const exhaustiveUpTo = botDifficulty === 'hard' ? 8 : (botDifficulty === 'medium' ? 7 : 5);
+  const moveCandidates = findBotMoveCandidates(newCountsToTry, moveAttempts, moveMaxCandidates, exhaustiveUpTo);
+
+  if(moveCandidates.length === 0){
+    const exchanged = botExchangeLowestBingoProbability();
+    statsLine.textContent = exchanged
+      ? '🤖 บอทหาจุดต่อสมการไม่ได้ ขอเปลี่ยนเบี้ยแทน'
+      : '🤖 บอทหาจุดต่อสมการไม่ได้ และเบี้ยในถุงเหลือน้อยกว่า 5 ตัว ขอผ่าน';
+    noPlacementStreak++;
+    endBotTurn();
+    return;
+  }
+
+  const scoredMoves = moveCandidates.map(m => ({ ...m, score: pureScoreForIntersectionMove(m) }));
+  // ถ้ามีทางเลือกที่ทำบิงโกได้ (ใช้ครบ 8 ตัว) ให้บอทเลือกเส้นทางนั้นก่อนเสมอ
+  const bingoMoves = scoredMoves.filter(m => m.tiles.length === 8);
+  const movePool = bingoMoves.length > 0 ? bingoMoves : scoredMoves;
+  const move = pickBestByScore(movePool, cfg);
+
+  const newCells = move.cells.filter((_, idx) => idx !== move.sharedIndex);
+  placeBotTiles(newCells, move.symbols.filter((_, idx) => idx !== move.sharedIndex), move.tiles, move.cells);
+
+  move.tiles.forEach(t => {
+    const idx = botRack.indexOf(t);
+    if(idx !== -1) botRack.splice(idx, 1);
+  });
+  fillBotRack(move.tiles.length);
+
+  const result = computeScoreForCells(newCells, move.cells);
+  result.equationText = move.symbols.join('');
+  if(result.isBingo) botBingoCount++;
+  addScoreEntry(result, 'bot');
+
+  statsLine.textContent = result.isBingo
+    ? `🤖 บอทบิงโก! ลง ${move.tiles.length} ตัว ได้ ${result.total} แต้ม`
+    : `🤖 บอทลงสมการต่อ ${move.tiles.length} ตัว ได้ ${result.total} แต้ม`;
+
+  noPlacementStreak = 0;
+  everAnyPlacement = true;
+  endBotTurn();
+}
+
+/* วางเบี้ยบอทลง DOM จริง (newCells = ช่องที่ต้องสร้างเบี้ยใหม่เท่านั้น ไม่รวมช่องที่ใช้ร่วม/ทับของเดิม) */
+function placeBotTiles(newCells, newSymbols, tiles, allRunCellsForReference){
+  newCells.forEach((cell, i) => {
+    const tile = tiles[i];
+    const symbol = newSymbols[i];
+    const tileData = { value: symbol, type: tile.type, score: tile.score };
+    const tileEl = buildPlacedTileEl(tileData);
+    tileEl.classList.add('bot-tile', 'locked');
+    cell.classList.add('filled');
+    cell.dataset.value = symbol;
+    cell.appendChild(tileEl);
+  });
+}
+
+
+
+function endBotTurn(){
+  if(checkRackEmptyEndBotMode('bot')) return;
+  checkBotModePassStreak();
+  if(gameEnded) return;
+  currentTurn = 'player';
+  setTurnIndicator('🎮 ตาของคุณ', false);
+  setPlayerControlsEnabled(true);
+  updateEndTurnState();
+}
+
+function triggerBotTurn(){
+  currentTurn = 'bot';
+  setTurnIndicator('🤖 บอทกำลังคิด...', true);
+  setPlayerControlsEnabled(false);
+  updateEndTurnState();
+  const thinkMs = DIFFICULTY_CONFIG[botDifficulty].thinkMs || 650;
+  setTimeout(executeBotTurn, thinkMs);
+}
+
+/* ================= HOME BUTTON ================= */
+document.getElementById('homeBtn').addEventListener('click', () => {
+  document.getElementById('homeConfirmModal').classList.add('open');
+});
+document.getElementById('homeConfirmCancel').addEventListener('click', () => {
+  document.getElementById('homeConfirmModal').classList.remove('open');
+});
+document.getElementById('homeConfirmOk').addEventListener('click', () => {
+  location.reload();
+});
+
+/* ================= ONLINE MODE (real-time via Firebase) ================= */
+let onlineRoomId = null;
+let onlineRoomRef = null;
+let myOnlineUid = null;
+let mySlot = null;       // 'p1' | 'p2'
+let opponentSlot = null; // 'p1' | 'p2'
+let lastKnownOnlineTurn = null;
+let onlineEnded = false;
+
+const botSetupPanel = document.getElementById('botSetupPanel');
+const onlinePanel = document.getElementById('onlinePanel');
+const opponentDot = document.getElementById('opponentDot');
+const opponentNameEl = document.getElementById('opponentName');
+const opponentScoreLabel = document.getElementById('opponentScoreLabel');
+const leaveRoomBtn = document.getElementById('leaveRoomBtn');
+
+function beginOnlineRoom(roomId){
+  botSetupPanel.style.display = 'none';
+  onlinePanel.style.display = '';
+  opponentScoreLabel.textContent = '🧑 คู่ต่อสู้';
+  statsLine.textContent = 'เชื่อมต่อห้องออนไลน์แล้ว กำลังรอข้อมูลเกม...';
+  renderedHistoryCount = 0;
+
+  onlineRoomRef = window.AmathOnline.subscribeRoom(roomId, (data, roomRef) => {
+    onlineRoomRef = roomRef;
+    applyOnlineRoomUpdate(data);
+  });
+
+  // เช็คสถานะคู่ต่อสู้ (ยังต่ออยู่ไหม) ทุก 5 วินาที
+  clearInterval(onlinePresenceTimer);
+  onlinePresenceTimer = setInterval(updateOpponentPresenceDot, 5000);
+}
+
+let onlinePresenceTimer = null;
+let lastOnlineData = null;
+let renderedHistoryCount = 0;
+
+function updateOpponentPresenceDot(){
+  if(!lastOnlineData || !opponentSlot) return;
+  const lastSeen = lastOnlineData[opponentSlot]?.lastSeen || 0;
+  const ageSec = (Date.now() - lastSeen) / 1000;
+  opponentDot.classList.remove('stale', 'offline');
+  if(ageSec > 45) opponentDot.classList.add('offline');
+  else if(ageSec > 15) opponentDot.classList.add('stale');
+}
+
+/* =========================================================
+   ONLINE TIME CONTROL: ฝั่งละ 22 นาที (1320 วินาที)
+   ========================================================= */
+const GAME_TIME_SECONDS = 22 * 60;
+const myTimerDisplay = document.getElementById('myTimerDisplay');
+const oppTimerDisplay = document.getElementById('oppTimerDisplay');
+
+let onlineTimerInterval = null;
+
+function formatClock(sec){
+  const negative = sec < 0;
+  const s = Math.ceil(Math.abs(sec));
+  const m = Math.floor(s / 60);
+  const r = s % 60;
+  return (negative ? '-' : '') + `${m}:${String(r).padStart(2, '0')}`;
+}
+
+/* คำนวณเวลาที่เหลือของแต่ละฝั่ง ณ ขณะนี้ (ฝั่งที่กำลังเล่นอยู่จะเดินนาฬิกาลดลงเรื่อยๆ
+   ปล่อยให้ติดลบได้เลยถ้าใช้เวลาเกิน ไม่ตัดที่ 0 — หมดเวลาไม่ทำให้แพ้ทันที) */
+function computeLiveTimes(data){
+  const p1Base = data.p1Time ?? GAME_TIME_SECONDS;
+  const p2Base = data.p2Time ?? GAME_TIME_SECONDS;
+  const turnStartedMs = data.turnStartedAt && data.turnStartedAt.toMillis ? data.turnStartedAt.toMillis() : null;
+
+  if(!turnStartedMs){
+    return { p1: p1Base, p2: p2Base };
+  }
+  const elapsed = (Date.now() - turnStartedMs) / 1000;
+  if(data.turn === 'p1') return { p1: p1Base - elapsed, p2: p2Base };
+  return { p1: p1Base, p2: p2Base - elapsed };
+}
+
+function syncOnlineTimers(data){
+  if(!mySlot || !opponentSlot) return;
+
+  myTimerDisplay.style.display = '';
+  oppTimerDisplay.style.display = '';
+
+  clearInterval(onlineTimerInterval);
+
+  function tick(){
+    const live = computeLiveTimes(data);
+    const myTime = live[mySlot];
+    const oppTime = live[opponentSlot];
+
+    myTimerDisplay.textContent = '⏱️ ' + formatClock(myTime);
+    oppTimerDisplay.textContent = '⏱️ ' + formatClock(oppTime);
+
+    myTimerDisplay.classList.toggle('active', data.turn === mySlot);
+    oppTimerDisplay.classList.toggle('active', data.turn === opponentSlot);
+    myTimerDisplay.classList.toggle('low', myTime <= 60);
+    oppTimerDisplay.classList.toggle('low', oppTime <= 60);
+  }
+
+  tick();
+  onlineTimerInterval = setInterval(tick, 1000);
+}
+
+
+function applyOnlineRoomUpdate(data){
+  lastOnlineData = data;
+
+  if(!mySlot){
+    mySlot = (data.p1 && data.p1.uid === myOnlineUid) ? 'p1' : 'p2';
+    opponentSlot = mySlot === 'p1' ? 'p2' : 'p1';
+    opponentNameEl.textContent = opponentSlot === 'p1' ? 'ผู้เล่น 1' : 'ผู้เล่น 2';
+  }
+
+  if(data.status === 'ended' && !onlineEnded){
+    onlineEnded = true;
+    setPlayerControlsEnabled(false);
+    setTurnIndicator('🔌 คู่ต่อสู้ออกจากห้องแล้ว', true);
+    statsLine.textContent = 'คู่ต่อสู้ออกจากห้อง — กด "🏠 หน้าหลัก" เพื่อเริ่มใหม่';
+    return;
+  }
+
+  if(data.status === 'finished' && !gameEnded){
+    let myScore = data[mySlot]?.score || 0;
+    let oppScore = data[opponentSlot]?.score || 0;
+    const oppLabel = opponentSlot === 'p1' ? 'ผู้เล่น 1' : 'ผู้เล่น 2';
+    let reason;
+
+    if(data.emptiedBy){
+      // กติกา 1: มีฝ่ายหนึ่งลงเบี้ยหมดแป้นก่อน (เบี้ยในถุงหมดแล้วด้วย)
+      // -> เอาคะแนนเบี้ยที่เหลือของอีกฝ่าย คูณ 2 บวกให้ฝ่ายที่หมดก่อน
+      const p1RackSum = sumRackTileData(data.p1?.rack);
+      const p2RackSum = sumRackTileData(data.p2?.rack);
+      if(data.emptiedBy === mySlot){
+        const bonus = (opponentSlot === 'p1' ? p1RackSum : p2RackSum) * 2;
+        myScore += bonus;
+        reason = `คุณลงเบี้ยหมดก่อน ได้คะแนนเบี้ยที่เหลือของ${oppLabel} ×2 เพิ่ม (+${bonus})`;
+      } else {
+        const bonus = (mySlot === 'p1' ? p1RackSum : p2RackSum) * 2;
+        oppScore += bonus;
+        reason = `${oppLabel}ลงเบี้ยหมดก่อน ได้คะแนนเบี้ยที่เหลือของคุณ ×2 เพิ่ม (+${bonus})`;
+      }
+    } else {
+      // กติกา 2: จบเกมเพราะเดินต่อไม่ได้ (ผ่าน/เปลี่ยนเบี้ยครบ 3 ตาทั้งสองฝั่ง)
+      // -> หักคะแนนเบี้ยที่เหลือในแป้นของตัวเอง ออกจากคะแนนของตัวเอง (คนละฝั่ง)
+      const myRackPenalty = sumRackTileData(data[mySlot]?.rack);
+      const oppRackPenalty = sumRackTileData(data[opponentSlot]?.rack);
+      myScore -= myRackPenalty;
+      oppScore -= oppRackPenalty;
+      reason = 'ทั้งสองฝ่ายผ่าน/เปลี่ยนเบี้ยติดต่อกัน 3 ตา';
+      if(myRackPenalty > 0 || oppRackPenalty > 0){
+        reason += ` (หักเบี้ยเหลือในแป้น: คุณ -${myRackPenalty}, ${oppLabel} -${oppRackPenalty})`;
+      }
+    }
+
+    const myTimeFinal = data[mySlot + 'Time'] ?? GAME_TIME_SECONDS;
+    const oppTimeFinal = data[opponentSlot + 'Time'] ?? GAME_TIME_SECONDS;
+    const myPenalty = computeOvertimePenalty(myTimeFinal);
+    const oppPenalty = computeOvertimePenalty(oppTimeFinal);
+    showGameOverModal(myScore, oppScore, oppLabel, undefined, reason, myPenalty, oppPenalty);
+    return;
+  }
+
+  // ตาแรกสุด: ห้องเพิ่งถูกสร้าง ยังไม่มีถุงเบี้ย -> ให้ p1 (ผู้สร้างห้อง) เป็นคนแจกเบี้ยเริ่มต้น
+  // ตั้งค่าชุดเบี้ย/ขอบเขต BLANK ตามที่ห้องนี้กำหนดไว้ (ทั้งสองฝั่งต้องตรงกัน)
+  const roomTileDefs = data.tileSet === 'elementary' ? AMATH_TILE_DEFINITIONS_ELEMENTARY : AMATH_TILE_DEFINITIONS;
+  activeBlankNumbers = data.tileSet === 'elementary' ? BLANK_NUMBERS_ELEMENTARY : BLANK_NUMBERS_SECONDARY;
+
+  if(mySlot === 'p1' && data.bag === null){
+    const freshBag = createTileBag(roomTileDefs);
+    const p1Rack = freshBag.splice(0, RACK_SIZE);
+    const p2Rack = freshBag.splice(0, RACK_SIZE);
+    window.AmathOnline.updateRoom(onlineRoomRef, {
+      bag: freshBag,
+      'p1.rack': p1Rack,
+      'p2.rack': p2Rack,
+    });
+    return; // รอ snapshot รอบถัดไปที่มีข้อมูลครบแล้วค่อยเรนเดอร์
+  }
+  if(!data.bag) return; // ยังไม่พร้อม (ฝั่ง p2 รออยู่)
+
+  bag = data.bag; // ใช้ตัวแปร bag ตัวเดิมที่ระบบส่วนอื่นเรียกใช้อยู่แล้ว
+
+  // sync กระดาน: เติมเบี้ยของฝั่งตรงข้าม (หรือของเราเองที่ยืนยันกลับมา) ที่ยังไม่เคยเรนเดอร์ในเครื่อง
+  Object.entries(data.board || {}).forEach(([key, tile]) => {
+    const cell = cellsByRC[key];
+    if(!cell || cell.classList.contains('filled')) return;
+    const tileEl = buildPlacedTileEl({ value: tile.value, type: tile.type, score: tile.score });
+    tileEl.classList.add('locked');
+    if(tile.owner !== mySlot) tileEl.classList.add('bot-tile'); // ยืมสไตล์เดิมมาบอกว่าเป็นของอีกฝั่ง
+    cell.classList.add('filled');
+    cell.dataset.value = tile.value;
+    cell.appendChild(tileEl);
+  });
+
+  // sync คะแนน
+  scorePlayer = data[mySlot]?.score || 0;
+  scoreBot = data[opponentSlot]?.score || 0;
+  scoreTotalPlayerEl.textContent = scorePlayer;
+  scoreTotalBotEl.textContent = scoreBot;
+  syncFloatScores();
+
+  // sync ประวัติการลงสมการ (ของทั้งสองฝั่ง) — แสดงเฉพาะแถวที่ยังไม่เคยเรนเดอร์
+  const hist = data.scoreHistory || [];
+  if(hist.length > renderedHistoryCount){
+    for(let i = renderedHistoryCount; i < hist.length; i++){
+      const entry = hist[i];
+      const isMine = entry.owner === mySlot;
+      const playerLabel = isMine ? 'คุณ' : (opponentSlot === 'p1' ? 'ผู้เล่น 1' : 'ผู้เล่น 2');
+      let detail = `${entry.tileCount} ตัว`;
+      if(entry.equationMultiplier > 1) detail += ` · ${entry.subtotal}×${entry.equationMultiplier}`;
+      if(entry.isBingo) detail += ` · บิงโก +40`;
+      renderHistoryEntry({
+        isMine,
+        playerLabel,
+        equationText: entry.equationText || null,
+        detail,
+        total: entry.total,
+        isBingo: entry.isBingo,
+      });
+    }
+    renderedHistoryCount = hist.length;
+  }
+
+  // sync เทิร์น
+  const isMyTurn = data.turn === mySlot;
+  lastKnownOnlineTurn = data.turn;
+
+  currentTurn = isMyTurn ? 'player' : 'opponent';
+  setTurnIndicator(isMyTurn ? '🎮 ตาของคุณ' : '⏳ รอคู่ต่อสู้เดินหมาก...', !isMyTurn);
+  setPlayerControlsEnabled(isMyTurn);
+
+  syncOnlineTimers(data);
+
+  updateOpponentPresenceDot();
+
+  // เติมแป้นเบี้ยของเราใหม่เฉพาะตอนที่ยังไม่เคยมีเบี้ยเลย (โหลดครั้งแรก)
+  // หรือชุดเบี้ยที่ Firestore เก็บไว้ไม่ตรงกับที่แสดงอยู่จริง (เพิ่งลง/เปลี่ยนเบี้ยไปแล้วแต่จอยังไม่อัปเดต)
+  // ไม่ยึดจังหวะ "เทิร์นเพิ่งเปลี่ยนมาเป็นของเรา" อีกต่อไป กันไม่ให้การสลับเบี้ยในถาดระหว่างรอคู่ต่อสู้หายไป
+  const currentRackValues = rackSlots
+    .map(s => s.firstElementChild?.dataset.value)
+    .filter(Boolean)
+    .sort()
+    .join(',');
+  const firestoreRackValues = (data[mySlot]?.rack || [])
+    .map(t => t.value)
+    .sort()
+    .join(',');
+  const rackIsEmpty = rackSlots.every(s => s.children.length === 0);
+
+  if(rackIsEmpty || currentRackValues !== firestoreRackValues){
+    rackSlots.forEach(s => s.innerHTML = '');
+    (data[mySlot]?.rack || []).forEach((tileData, idx) => {
+      if(idx < rackSlots.length) rackSlots[idx].appendChild(buildTileEl(tileData));
+    });
+    updateBagCount();
+  }
+}
+
+leaveRoomBtn.addEventListener('click', () => {
+  if(window.AmathOnline) window.AmathOnline.leaveRoom(onlineRoomRef);
+  location.reload();
+});
+
+/* ผลักการเปลี่ยนแปลงจากการ "ลงสมการ" ของเราขึ้น Firestore ให้อีกฝั่งเห็น */
+/* คำนวณเวลาที่เหลือของ "ฉัน" ณ ตอนจบตานี้ (หักเวลาที่ใช้ไปตั้งแต่ turnStartedAt) */
+function computeMyRemainingTime(){
+  const myBase = lastOnlineData?.[mySlot + 'Time'] ?? GAME_TIME_SECONDS;
+  const turnStartedMs = lastOnlineData?.turnStartedAt?.toMillis ? lastOnlineData.turnStartedAt.toMillis() : null;
+  if(!turnStartedMs || lastOnlineData?.turn !== mySlot) return myBase;
+  const elapsed = (Date.now() - turnStartedMs) / 1000;
+  return Math.max(0, myBase - elapsed);
+}
+
+function pushOnlineSubmit(placed, result, equationText){
+  if(gameMode !== 'online' || !onlineRoomRef) return;
+  const boardUpdates = {};
+  placed.forEach(cell => {
+    const key = cell.dataset.row + '-' + cell.dataset.col;
+    const tileEl = cell.querySelector('.placed-tile');
+    const resolvedValue = actualCellValue(cell); // แปลง BLANK/±/×÷ ให้เป็นค่าจริงก่อนส่ง
+    boardUpdates['board.' + key] = {
+      value: resolvedValue,
+      type: tileEl.dataset.type,
+      score: Number(tileEl.dataset.score),
+      owner: mySlot,
+    };
+  });
+  const myNewRack = rackSlots.map(s => {
+    const t = s.firstElementChild;
+    return t ? { value: t.dataset.value, type: t.dataset.type, score: Number(t.dataset.score) } : null;
+  }).filter(Boolean);
+
+  const newScorePlayerTotal = (lastOnlineData?.[mySlot]?.score || 0) + result.total;
+  const historyEntry = {
+    owner: mySlot,
+    equationText: equationText || '',
+    tileCount: result.tileCount,
+    total: result.total,
+    isBingo: !!result.isBingo,
+    equationMultiplier: result.equationMultiplier,
+    subtotal: result.subtotal,
+  };
+  const newHistory = [...(lastOnlineData?.scoreHistory || []), historyEntry];
+
+  const roomUpdate = {
+    ...boardUpdates,
+    bag: bag,
+    [mySlot + '.rack']: myNewRack,
+    [mySlot + '.score']: newScorePlayerTotal,
+    [mySlot + '.lastSeen']: Date.now(),
+    turn: opponentSlot,
+    passStreak: 0,
+    [mySlot + 'Time']: computeMyRemainingTime(),
+    turnStartedAt: window.AmathOnline.getServerTimestamp(),
+    scoreHistory: newHistory,
+  };
+
+  // กติกา: ถ้าลงเบี้ยหมดแป้นพอดี และไม่มีเบี้ยเหลือในถุงให้จั่วแล้ว -> จบเกมทันที
+  // (คะแนนโบนัสจากเบี้ยที่เหลือของอีกฝ่ายจะคำนวณตอนแสดงผลจบเกม ไม่ต้องคำนวณล่วงหน้าตรงนี้)
+  if(bag.length === 0 && myNewRack.length === 0){
+    roomUpdate.status = 'finished';
+    roomUpdate.emptiedBy = mySlot;
+  }
+
+  window.AmathOnline.updateRoom(onlineRoomRef, roomUpdate);
+}
+
+/* ผลักการ "เปลี่ยนเบี้ย"/"ผ่าน" ของเราขึ้น Firestore
+   พร้อมเช็คกติกาจบเกม: ผ่าน/เปลี่ยนเบี้ยติดกัน 3 ตาทั้งสองฝั่ง (รวม 6 ตาติดกัน) */
+function pushOnlineExchange(){
+  if(gameMode !== 'online' || !onlineRoomRef) return;
+  const myNewRack = rackSlots.map(s => {
+    const t = s.firstElementChild;
+    return t ? { value: t.dataset.value, type: t.dataset.type, score: Number(t.dataset.score) } : null;
+  }).filter(Boolean);
+
+  const newStreak = (lastOnlineData?.passStreak || 0) + 1;
+  const boardHasEverBeenPlayed = Object.keys(lastOnlineData?.board || {}).length > 0;
+  const myRemainingTime = computeMyRemainingTime();
+
+  if(newStreak >= 6 && !boardHasEverBeenPlayed){
+    // ยังไม่มีใครลงเบี้ยเลย 3 ตาติดกันทั้งสองฝั่ง -> สุ่มแจกเบี้ยทั้งสองฝั่งใหม่แทนการจบเกม
+    const opponentRack = lastOnlineData?.[opponentSlot]?.rack || [];
+    const combined = [...bag, ...myNewRack, ...opponentRack];
+    shuffleArray(combined);
+    const newMyRack = combined.splice(0, RACK_SIZE);
+    const newOppRack = combined.splice(0, RACK_SIZE);
+    bag = combined;
+
+    statsLine.textContent = 'ยังไม่มีใครลงเบี้ยเลย 3 ตาติดกัน — สุ่มแจกเบี้ยทั้งสองฝั่งใหม่';
+    window.AmathOnline.updateRoom(onlineRoomRef, {
+      bag: bag,
+      [mySlot + '.rack']: newMyRack,
+      [opponentSlot + '.rack']: newOppRack,
+      [mySlot + '.lastSeen']: Date.now(),
+      turn: opponentSlot,
+      passStreak: 0,
+      [mySlot + 'Time']: myRemainingTime,
+      turnStartedAt: window.AmathOnline.getServerTimestamp(),
+    });
+    return;
+  }
+
+  if(newStreak >= 6 && boardHasEverBeenPlayed){
+    window.AmathOnline.updateRoom(onlineRoomRef, {
+      bag: bag,
+      [mySlot + '.rack']: myNewRack,
+      [mySlot + '.lastSeen']: Date.now(),
+      turn: opponentSlot,
+      passStreak: newStreak,
+      status: 'finished',
+      [mySlot + 'Time']: myRemainingTime,
+    });
+    return;
+  }
+
+  window.AmathOnline.updateRoom(onlineRoomRef, {
+    bag: bag,
+    [mySlot + '.rack']: myNewRack,
+    [mySlot + '.lastSeen']: Date.now(),
+    turn: opponentSlot,
+    passStreak: newStreak,
+    [mySlot + 'Time']: myRemainingTime,
+    turnStartedAt: window.AmathOnline.getServerTimestamp(),
+  });
+}
+
+/* ================= START SCREEN ================= */
+const startOverlay = document.getElementById('startOverlay');
+const startModeRow = document.getElementById('startModeRow');
+const startSoloBtn = document.getElementById('startSoloBtn');
+const startOnlineBtn = document.getElementById('startOnlineBtn');
+const startDiffWrap = document.getElementById('startDiffWrap');
+const startOnlineWrap = document.getElementById('startOnlineWrap');
+const startSub = document.getElementById('startSub');
+const startButtonsBox = document.getElementById('startButtonsBox');
+
+const onlineModeChoice = document.getElementById('onlineModeChoice');
+const onlineSearching = document.getElementById('onlineSearching');
+const onlineFriendChoice = document.getElementById('onlineFriendChoice');
+const onlineWaitingRoom = document.getElementById('onlineWaitingRoom');
+const onlineError = document.getElementById('onlineError');
+const onlineWaitTime = document.getElementById('onlineWaitTime');
+const onlineErrorMsg = document.getElementById('onlineErrorMsg');
+const roomCodeDisplay = document.getElementById('roomCodeDisplay');
+const joinCodeInput = document.getElementById('joinCodeInput');
+const joinRoomError = document.getElementById('joinRoomError');
+
+let gameMode = 'bot'; // 'bot' | 'online'
+let pendingFriendRoomRef = null;
+
+startSoloBtn.addEventListener('click', () => {
+  startButtonsBox.style.display = 'none';
+  startSub.style.display = 'none';
+  startDiffWrap.style.display = '';
+});
+
+document.getElementById('soloBackBtn').addEventListener('click', () => {
+  startDiffWrap.style.display = 'none';
+  startButtonsBox.style.display = '';
+  startSub.style.display = '';
+});
+
+let selectedTileSet = 'secondary'; // 'secondary' (มัธยม 100 ตัว) | 'elementary' (ประถม 70 ตัว)
+let selectedOnlineTileSet = 'secondary'; // ใช้ตอนสร้างห้องเล่นกับเพื่อนเท่านั้น (จับคู่สุ่มใช้มัธยมเสมอ)
+
+document.querySelectorAll('#soloTilesetButtons .start-tileset-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    selectedTileSet = btn.dataset.tileset;
+    document.querySelectorAll('#soloTilesetButtons .start-tileset-btn').forEach(b => {
+      b.classList.toggle('active', b.dataset.tileset === selectedTileSet);
+    });
+  });
+});
+
+document.querySelectorAll('.start-diff-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    botDifficulty = btn.dataset.diff;
+    document.querySelectorAll('.diff-btn').forEach(b => {
+      b.classList.toggle('active', b.dataset.diff === botDifficulty);
+    });
+    gameMode = 'bot';
+    activeTileDefinitions = selectedTileSet === 'elementary' ? AMATH_TILE_DEFINITIONS_ELEMENTARY : AMATH_TILE_DEFINITIONS;
+    activeBlankNumbers = selectedTileSet === 'elementary' ? BLANK_NUMBERS_ELEMENTARY : BLANK_NUMBERS_SECONDARY;
+    startOverlay.remove();
+      document.body.classList.remove('pre-game');
+    startGame();
+  });
+});
+
+/* ---- Online UI: shared state machine ---- */
+let onlineWaitTimer = null;
+
+function showOnlineState(state){
+  onlineModeChoice.style.display = state === 'modeChoice' ? '' : 'none';
+  onlineSearching.style.display = state === 'searching' ? '' : 'none';
+  onlineFriendChoice.style.display = state === 'friendChoice' ? '' : 'none';
+  onlineWaitingRoom.style.display = state === 'waitingRoom' ? '' : 'none';
+  onlineError.style.display = state === 'error' ? '' : 'none';
+}
+
+function checkOnlineReady(){
+  if(!window.AmathOnline){
+    onlineErrorMsg.textContent = 'ระบบออนไลน์ยังโหลดไม่เสร็จ ลองรีเฟรชหน้าใหม่';
+    showOnlineState('error');
+    return false;
+  }
+  if(!window.AmathOnline.isConfigured()){
+    onlineErrorMsg.textContent = 'ยังไม่ได้ตั้งค่า Firebase — ดูคอมเมนต์ในซอร์สโค้ด ส่วน "FIREBASE ONLINE MATCHMAKING MODULE" แล้วใส่ค่า config ของโปรเจกต์ตัวเอง';
+    showOnlineState('error');
+    return false;
+  }
+  return true;
+}
+
+startOnlineBtn.addEventListener('click', () => {
+  startButtonsBox.style.display = 'none';
+  startSub.style.display = 'none';
+  startOnlineWrap.style.display = '';
+  showOnlineState('modeChoice');
+});
+
+document.getElementById('onlineBackBtn').addEventListener('click', () => {
+  if(window.AmathOnline) window.AmathOnline.cancelMatchmaking();
+  clearInterval(onlineWaitTimer);
+  startOnlineWrap.style.display = 'none';
+  startButtonsBox.style.display = '';
+  startSub.style.display = '';
+});
+
+
+/* ---- แบบสุ่ม ---- */
+document.getElementById('onlineRandomModeBtn').addEventListener('click', () => {
+  if(!checkOnlineReady()) return;
+
+  showOnlineState('searching');
+  let waitedSec = 0;
+  onlineWaitTime.textContent = 'รอ 0 วินาที';
+  clearInterval(onlineWaitTimer);
+  onlineWaitTimer = setInterval(() => {
+    waitedSec++;
+    onlineWaitTime.textContent = `รอ ${waitedSec} วินาที`;
+  }, 1000);
+
+  window.AmathOnline.startMatchmaking(
+    (roomId, uid) => {
+      clearInterval(onlineWaitTimer);
+      gameMode = 'online';
+      onlineRoomId = roomId;
+      myOnlineUid = uid;
+      startOverlay.remove();
+      document.body.classList.remove('pre-game');
+      beginOnlineRoom(roomId);
+    },
+    (message) => {
+      clearInterval(onlineWaitTimer);
+      onlineErrorMsg.textContent = message;
+      showOnlineState('error');
+    }
+  );
+});
+
+document.getElementById('onlineCancelBtn').addEventListener('click', () => {
+  if(window.AmathOnline) window.AmathOnline.cancelMatchmaking();
+  clearInterval(onlineWaitTimer);
+  showOnlineState('modeChoice');
+});
+
+/* ---- เล่นกับเพื่อน ---- */
+document.getElementById('onlineFriendModeBtn').addEventListener('click', () => {
+  if(!checkOnlineReady()) return;
+  joinRoomError.style.display = 'none';
+  joinCodeInput.value = '';
+  showOnlineState('friendChoice');
+});
+
+document.getElementById('friendChoiceBackBtn').addEventListener('click', () => {
+  showOnlineState('modeChoice');
+});
+
+document.querySelectorAll('#onlineTilesetButtons .start-tileset-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    selectedOnlineTileSet = btn.dataset.tileset;
+    document.querySelectorAll('#onlineTilesetButtons .start-tileset-btn').forEach(b => {
+      b.classList.toggle('active', b.dataset.tileset === selectedOnlineTileSet);
+    });
+  });
+});
+
+document.getElementById('createRoomBtn').addEventListener('click', async () => {
+  if(!checkOnlineReady()) return;
+  try {
+    const { roomId, code } = await window.AmathOnline.createFriendRoom(selectedOnlineTileSet);
+    roomCodeDisplay.textContent = code;
+    showOnlineState('waitingRoom');
+
+    pendingFriendRoomRef = window.AmathOnline.subscribeRoom(roomId, (data, roomRef) => {
+      pendingFriendRoomRef = roomRef;
+      if(data.status === 'active' && data.p2){
+        window.AmathOnline.unsubscribeRoom();
+        gameMode = 'online';
+        onlineRoomId = roomId;
+        myOnlineUid = window.AmathOnline.getMyUid();
+        startOverlay.remove();
+        document.body.classList.remove('pre-game');
+        beginOnlineRoom(roomId);
+      }
+    });
+  } catch(e){
+    onlineErrorMsg.textContent = 'สร้างห้องไม่สำเร็จ ลองใหม่อีกครั้ง';
+    showOnlineState('error');
+  }
+});
+
+document.getElementById('waitingRoomBackBtn').addEventListener('click', () => {
+  if(window.AmathOnline){
+    window.AmathOnline.unsubscribeRoom();
+    window.AmathOnline.cancelFriendRoom(pendingFriendRoomRef);
+  }
+  pendingFriendRoomRef = null;
+  showOnlineState('friendChoice');
+});
+
+document.getElementById('copyCodeBtn').addEventListener('click', () => {
+  const code = roomCodeDisplay.textContent;
+  const btn = document.getElementById('copyCodeBtn');
+  navigator.clipboard.writeText(code).then(() => {
+    btn.textContent = '✅ คัดลอกแล้ว';
+    btn.classList.add('copied');
+    setTimeout(() => {
+      btn.textContent = '📋 คัดลอกรหัส';
+      btn.classList.remove('copied');
+    }, 2000);
+  }).catch(() => {});
+});
+
+joinCodeInput.addEventListener('input', () => {
+  joinCodeInput.value = joinCodeInput.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+});
+
+document.getElementById('joinRoomBtn').addEventListener('click', async () => {
+  if(!checkOnlineReady()) return;
+  const code = joinCodeInput.value.trim();
+  joinRoomError.style.display = 'none';
+  if(code.length !== 6){
+    joinRoomError.textContent = 'กรอกรหัสห้อง 6 ตัวอักษรให้ครบ';
+    joinRoomError.style.display = '';
+    return;
+  }
+  try {
+    const roomId = await window.AmathOnline.joinFriendRoom(code);
+    gameMode = 'online';
+    onlineRoomId = roomId;
+    myOnlineUid = window.AmathOnline.getMyUid();
+    startOverlay.remove();
+    document.body.classList.remove('pre-game');
+    beginOnlineRoom(roomId);
+  } catch(e){
+    joinRoomError.textContent = e.message === 'not-found' || e.message === 'taken'
+      ? 'ไม่พบห้องนี้ หรือมีคนเข้าร่วมไปแล้ว ตรวจสอบรหัสอีกครั้ง'
+      : 'เข้าร่วมห้องไม่สำเร็จ ลองใหม่อีกครั้ง';
+    joinRoomError.style.display = '';
+  }
+});
+
+function startGame(){
+  bag = createTileBag(activeTileDefinitions);
+  fillRackFromBag(RACK_SIZE);
+  fillBotRack(RACK_SIZE);
+  updateSubmitState();
+  updateEndTurnState();
+}
+
+/* ลงทะเบียน Service Worker เพื่อให้ติดตั้งเป็นแอปได้ (PWA) และเล่นโหมดคนเดียวแบบออฟไลน์ได้
+   ถ้าไฟล์ sw.js ไม่ได้อยู่ในโฟลเดอร์เดียวกัน จะแค่ล้มเหลวเงียบๆ ไม่กระทบการเล่นเกมปกติ */
+if('serviceWorker' in navigator){
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch(() => {});
+  });
+}
+
+</script>
+
+</body>
+</html>
