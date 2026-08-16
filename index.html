@@ -4,6 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
 <title>เอแม็ท A-Math | เล่นบนกระดาน</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#2f5d50">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="A-Math">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;600;700&family=Mali:wght@400;600;700&family=Sarabun:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -42,6 +50,177 @@
     --locked-lt: #d8dfc9;
     --locked: #a9b98d;
     --locked-dk: #7c8d63;
+  }
+
+  /* ================= BOARD THEMES ================= */
+  /* ธีม "ทะเลสด" — โทนฟ้าเขียวทะเล กรอบสีทราย */
+  body[data-board-theme="ocean"]{
+    --board-green: #1f6f7a;
+    --board-green-dark: #154e56;
+    --wood: #c9a26a;
+    --wood-dark: #9c7a49;
+    --plain: #f7fbfa;
+    --plain-line: #cfe3e0;
+
+    --red: #f0a89c;
+    --red-ink: #8a3a2c;
+    --yellow: #eed9a0;
+    --yellow-ink: #7c5a12;
+    --blue: #8ecbdd;
+    --blue-ink: #155166;
+    --orange: #f0b98a;
+    --orange-ink: #8a4c14;
+    --star: #74c1a8;
+
+    --blue-tile-lt: #8fc6ef;
+    --blue-tile: #4f97cf;
+    --blue-tile-dk: #366f9e;
+    --slate-lt: #b7c8cc;
+    --slate: #86a0a6;
+    --slate-dk: #5c757a;
+    --blank-lt: #d8ecec;
+    --blank: #a8d6d2;
+    --blank-dk: #6fada7;
+
+    --locked-lt: #cfe6df;
+    --locked: #93c2b3;
+    --locked-dk: #5f8f80;
+  }
+
+  /* ธีม "พาสเทลหวาน" — โทนชมพู-ลาเวนเดอร์สดใส เหมาะกับเด็กประถม */
+  body[data-board-theme="pastel"]{
+    --board-green: #caa0d9;
+    --board-green-dark: #9a6cb0;
+    --wood: #f0a8c0;
+    --wood-dark: #d97a9c;
+    --plain: #fffafd;
+    --plain-line: #f0d5e4;
+
+    --red: #f7b3c2;
+    --red-ink: #a13a5c;
+    --yellow: #fbe3a3;
+    --yellow-ink: #8a6512;
+    --blue: #b3d4f7;
+    --blue-ink: #2c5c8a;
+    --orange: #ffc9a3;
+    --orange-ink: #a1611a;
+    --star: #b8e3a0;
+
+    --blue-tile-lt: #c9e4fb;
+    --blue-tile: #8fbdee;
+    --blue-tile-dk: #5f8fc4;
+    --slate-lt: #e3cbe8;
+    --slate: #c79fd0;
+    --slate-dk: #9c72a8;
+    --blank-lt: #f5e0f5;
+    --blank: #e0b8e8;
+    --blank-dk: #b585c2;
+
+    --locked-lt: #e8f0c9;
+    --locked: #c8dba0;
+    --locked-dk: #9cb571;
+  }
+
+  /* ธีม "สงกรานต์" — สาดน้ำสงกรานต์ ฟ้าสดใส กรอบดอกดาวเรือง */
+  body[data-board-theme="songkran"]{
+    --board-green: #2f9bd6;
+    --board-green-dark: #1f6f9c;
+    --wood: #ffd166;
+    --wood-dark: #d9a83e;
+    --plain: #f2fbff;
+    --plain-line: #cbe8f5;
+
+    --red: #ff8fa3;
+    --red-ink: #a1264a;
+    --yellow: #ffd97d;
+    --yellow-ink: #8a5a12;
+    --blue: #7ec8e3;
+    --blue-ink: #155166;
+    --orange: #ffb26b;
+    --orange-ink: #8a4c14;
+    --star: #8fd6a8;
+
+    --blue-tile-lt: #a8dcf0;
+    --blue-tile: #63b8e0;
+    --blue-tile-dk: #2f86ad;
+    --slate-lt: #c3dbe6;
+    --slate: #a8c4d4;
+    --slate-dk: #7ea3b8;
+    --blank-lt: #fce4ee;
+    --blank: #f3d1e0;
+    --blank-dk: #c17a9c;
+
+    --locked-lt: #e2f2d9;
+    --locked: #d7ecd0;
+    --locked-dk: #79ab68;
+  }
+
+  /* ธีม "ลอยกระทง" — ค่ำคืนใต้แสงเทียนและแสงจันทร์ */
+  body[data-board-theme="loykrathong"]{
+    --board-green: #16324a;
+    --board-green-dark: #0d2233;
+    --wood: #8a5a2c;
+    --wood-dark: #5f3c1a;
+    --plain: #fff8ec;
+    --plain-line: #e8d9b8;
+
+    --red: #ff9d6c;
+    --red-ink: #8a3a12;
+    --yellow: #ffd97d;
+    --yellow-ink: #7c5a12;
+    --blue: #7fa8c9;
+    --blue-ink: #1f4a72;
+    --orange: #ffb347;
+    --orange-ink: #8a4c14;
+    --star: #e0b84f;
+
+    --blue-tile-lt: #a8c8e0;
+    --blue-tile: #7fb0d9;
+    --blue-tile-dk: #4f86b8;
+    --slate-lt: #b8c4ac;
+    --slate: #9cae94;
+    --slate-dk: #7c9070;
+    --blank-lt: #f5ddea;
+    --blank: #f0c9d9;
+    --blank-dk: #b06f8c;
+
+    --locked-lt: #f0e8c9;
+    --locked: #dcc47a;
+    --locked-dk: #b89a4e;
+  }
+
+  /* ธีม "ปีใหม่" — เทศกาลแดง-ทอง-เขียว บรรยากาศส่งท้ายปี */
+  body[data-board-theme="newyear"]{
+    --board-green: #1f5c3d;
+    --board-green-dark: #123d28;
+    --wood: #d4a017;
+    --wood-dark: #a67c0a;
+    --plain: #fff6e8;
+    --plain-line: #e8d4a8;
+
+    --red: #f2685c;
+    --red-ink: #8a1f16;
+    --yellow: #ffd45e;
+    --yellow-ink: #7c5a12;
+    --blue: #8fc6e8;
+    --blue-ink: #1f5872;
+    --orange: #ffab5e;
+    --orange-ink: #8a4c14;
+    --star: #f4c95d;
+
+    --blue-tile-lt: #c3e5f5;
+    --blue-tile: #9fd3f0;
+    --blue-tile-dk: #5fa8d9;
+    --slate-lt: #e2e8ea;
+    --slate: #cfd6d9;
+    --slate-dk: #a3aeb3;
+    --blank-lt: #f8d3d6;
+    --blank: #f5b8bd;
+    --blank-dk: #b8515c;
+
+    --locked-lt: #d8ecd2;
+    --locked: #b8d9b0;
+    --locked-dk: #5c8a4e;
   }
 
   *{ box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -556,6 +735,19 @@
   }
   .online-dot.stale{ background: #d9a63b; box-shadow: 0 0 0 3px rgba(217,166,59,0.15); }
   .online-dot.offline{ background: #c0392b; box-shadow: 0 0 0 3px rgba(192,57,43,0.15); }
+  .disconnect-warning{
+    display: none;
+    margin: -2px 0 8px;
+    padding: 6px 8px;
+    background: #fdecea;
+    border: 1px solid #f3c2bc;
+    border-radius: 8px;
+    font-family: 'Kanit', sans-serif;
+    font-size: 11.5px;
+    color: #a13a2c;
+    text-align: center;
+    line-height: 1.4;
+  }
   .leave-room-btn{
     width: 100%;
     font-family: 'Kanit', sans-serif;
@@ -834,6 +1026,35 @@
     color: #8a7c63;
     flex-wrap: wrap;
   }
+  .bag-bar-wrap{
+    position: relative;
+    width: 170px;
+    max-width: 60vw;
+    height: 18px;
+    background: #f1ead8;
+    border: 1px solid #e4d8ba;
+    border-radius: 999px;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+  .bag-bar-fill{
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 100%;
+    background: linear-gradient(90deg, #eeb98d, #d9924f);
+    transition: width 0.3s ease;
+  }
+  .bag-bar-text{
+    position: relative;
+    z-index: 1;
+    display: block;
+    text-align: center;
+    line-height: 18px;
+    font-size: 10.5px;
+    font-weight: 600;
+    color: #5a4c33;
+    text-shadow: 0 1px 0 rgba(255,255,255,0.4);
+  }
 
   /* ================= ACTION BUTTONS (ลอยมุมขวา ใต้กล่องคะแนน) ================= */
   .action-float-stack{
@@ -975,6 +1196,31 @@
   }
   .confirm-btn.ok:active{ transform: translateY(2px); box-shadow: 0 1px 0 var(--red-ink); }
 
+  .rematch-row{ margin-top: 10px; }
+  .confirm-btn.rematch{
+    width: 100%;
+    font-family: 'Kanit', sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    border-radius: 10px;
+    padding: 11px 8px;
+    cursor: pointer;
+    border: none;
+    background: linear-gradient(150deg, #7fcf9e, #2f8f63);
+    color: #fff;
+    box-shadow: 0 3px 0 #24714d;
+  }
+  .confirm-btn.rematch:active{ transform: translateY(2px); box-shadow: 0 1px 0 #24714d; }
+  .confirm-btn.rematch:disabled{ opacity: 0.6; cursor: not-allowed; transform: none; }
+  .rematch-status{
+    margin-top: 6px;
+    font-family: 'Kanit', sans-serif;
+    font-size: 12px;
+    color: #8a7c63;
+    text-align: center;
+    min-height: 14px;
+  }
+
   /* ---- game over modal ---- */
   .gameover-panel{ width: min(90vw, 340px); }
   .gameover-emoji{ font-size: 46px; margin-bottom: 6px; }
@@ -1086,6 +1332,132 @@
     z-index: 2000;
     padding: 16px;
   }
+
+  .lang-gear-btn{
+    position: fixed;
+    top: 14px;
+    right: 14px;
+    z-index: 2010;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #fff;
+    border: 1.5px solid var(--cream-deep);
+    font-size: 18px;
+    cursor: pointer;
+    box-shadow: 0 3px 10px -3px rgba(60,45,20,0.25);
+  }
+  .lang-gear-btn:active{ transform: rotate(20deg); }
+
+  .lang-menu{
+    position: fixed;
+    top: 60px;
+    right: 14px;
+    z-index: 2010;
+    background: #fff;
+    border: 1.5px solid var(--cream-deep);
+    border-radius: 14px;
+    padding: 8px;
+    display: none;
+    flex-direction: column;
+    gap: 4px;
+    box-shadow: 0 8px 20px -6px rgba(60,45,20,0.3);
+    min-width: 150px;
+  }
+  .lang-menu.open{ display: flex; }
+  .lang-option{
+    font-family: 'Kanit', sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    text-align: left;
+    color: #8a7c63;
+    background: var(--cream);
+    border: none;
+    border-radius: 9px;
+    padding: 9px 12px;
+    cursor: pointer;
+  }
+  .lang-option.active{
+    background: #eef6fc;
+    color: var(--blue-tile-dk);
+  }
+
+  .theme-btn{
+    position: fixed;
+    top: 14px;
+    right: 62px;
+    z-index: 2010;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #fff;
+    border: 1.5px solid var(--cream-deep);
+    font-size: 18px;
+    cursor: pointer;
+    box-shadow: 0 3px 10px -3px rgba(60,45,20,0.25);
+  }
+  .theme-btn:active{ transform: scale(0.92); }
+
+  .theme-menu{
+    position: fixed;
+    top: 60px;
+    right: 62px;
+    z-index: 2010;
+    background: #fff;
+    border: 1.5px solid var(--cream-deep);
+    border-radius: 14px;
+    padding: 8px;
+    display: none;
+    flex-direction: column;
+    gap: 4px;
+    box-shadow: 0 8px 20px -6px rgba(60,45,20,0.3);
+    min-width: 190px;
+  }
+  .theme-menu.open{ display: flex; }
+  .theme-option{
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'Kanit', sans-serif;
+    font-weight: 600;
+    font-size: 12.5px;
+    text-align: left;
+    color: #8a7c63;
+    background: #faf6ec;
+    border: none;
+    border-radius: 9px;
+    padding: 8px 10px;
+    cursor: pointer;
+  }
+  .theme-option.active{
+    background: #eef6fc;
+    color: var(--blue-tile-dk);
+  }
+  .theme-swatch{
+    display: inline-flex;
+    gap: 2px;
+    flex-shrink: 0;
+  }
+  .theme-swatch i{
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: block;
+    box-shadow: 0 0 0 1px rgba(0,0,0,0.08);
+  }
+  .theme-menu-divider{
+    font-family: 'Kanit', sans-serif;
+    font-size: 10.5px;
+    font-weight: 600;
+    color: #b3a688;
+    padding: 4px 6px 2px;
+  }
+
+  @media (max-width: 480px){
+    .theme-btn{ top: 10px; right: 56px; width: 36px; height: 36px; font-size: 16px; }
+    .theme-menu{ top: 52px; right: 10px; min-width: 170px; }
+  }
+
   .start-panel{
     background: transparent;
     border-radius: 22px;
@@ -1350,6 +1722,157 @@
   }
   .join-code-input:focus{ outline: none; border-color: #5b4fb3; }
 
+  /* ================= ACCOUNT / AUTH ================= */
+  .account-btn{
+    position: fixed;
+    top: 14px;
+    right: 110px;
+    z-index: 2010;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #fff;
+    border: 1.5px solid var(--cream-deep);
+    font-size: 17px;
+    cursor: pointer;
+    box-shadow: 0 3px 10px -3px rgba(60,45,20,0.25);
+  }
+  .account-btn:active{ transform: scale(0.92); }
+  .account-btn.logged-in{ border-color: #b9e0c9; }
+
+  .account-menu{
+    position: fixed;
+    top: 60px;
+    right: 14px;
+    z-index: 2010;
+    background: #fff;
+    border: 1.5px solid var(--cream-deep);
+    border-radius: 14px;
+    padding: 14px;
+    display: none;
+    flex-direction: column;
+    gap: 8px;
+    box-shadow: 0 8px 20px -6px rgba(60,45,20,0.3);
+    min-width: 210px;
+    text-align: left;
+  }
+  .account-menu.open{ display: flex; }
+  .account-menu-name{
+    font-family: 'Kanit', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--board-green-dark);
+  }
+  .account-menu-sub{
+    font-family: 'Sarabun', sans-serif;
+    font-size: 12px;
+    color: #8a7c63;
+    margin-top: -4px;
+  }
+  .account-menu-btn{
+    font-family: 'Kanit', sans-serif;
+    font-weight: 600;
+    font-size: 12.5px;
+    color: #8a7c63;
+    background: var(--cream);
+    border: none;
+    border-radius: 9px;
+    padding: 9px 12px;
+    cursor: pointer;
+    text-align: center;
+  }
+  .account-menu-btn.danger{ color: #a1264a; background: #fdecea; }
+
+  .auth-panel{
+    background: #fff;
+    border-radius: 18px;
+    padding: 26px 22px 22px;
+    width: min(90vw, 340px);
+    text-align: center;
+    box-shadow: 0 20px 44px -12px rgba(30,20,10,0.4);
+    position: relative;
+  }
+  .auth-title{
+    font-family: 'Kanit', sans-serif;
+    font-weight: 700;
+    font-size: 17px;
+    color: var(--board-green-dark);
+    margin-bottom: 6px;
+  }
+  .auth-subtitle{
+    font-family: 'Sarabun', sans-serif;
+    font-size: 12.5px;
+    color: #8a7c63;
+    line-height: 1.5;
+    margin-bottom: 20px;
+  }
+  .google-signin-btn{
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    font-family: 'Kanit', sans-serif;
+    font-weight: 600;
+    font-size: 13.5px;
+    color: #3c342a;
+    background: #fff;
+    border: 1.5px solid #dcd0b4;
+    border-radius: 10px;
+    padding: 11px 12px;
+    cursor: pointer;
+    box-shadow: 0 2px 6px -2px rgba(0,0,0,0.12);
+  }
+  .google-signin-btn:active{ transform: translateY(1px); }
+  .google-signin-btn:disabled{ opacity: 0.6; cursor: not-allowed; }
+  .google-icon{ flex-shrink: 0; }
+  .auth-error{
+    font-family: 'Sarabun', sans-serif;
+    font-size: 12.5px;
+    color: #a1264a;
+    background: #fdecea;
+    border-radius: 8px;
+    padding: 8px 10px;
+    margin-top: 14px;
+    display: none;
+    line-height: 1.4;
+    text-align: left;
+  }
+  .auth-error.show{ display: block; }
+  .auth-guest-row{
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px dashed var(--plain-line);
+    text-align: center;
+  }
+  .auth-guest-btn{
+    width: 100%;
+    font-family: 'Kanit', sans-serif;
+    font-weight: 600;
+    font-size: 12.5px;
+    color: #8a7c63;
+    background: var(--cream);
+    border: none;
+    border-radius: 9px;
+    padding: 10px;
+    cursor: pointer;
+  }
+  .auth-close-btn{
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    background: none;
+    border: none;
+    font-size: 18px;
+    color: #b3a688;
+    cursor: pointer;
+  }
+
+  @media (max-width: 480px){
+    .account-btn{ top: 10px; right: 100px; width: 36px; height: 36px; font-size: 15px; }
+    .account-menu{ top: 52px; right: 10px; }
+  }
+
   .room-code-display{
     font-family: 'Kanit', sans-serif;
     font-weight: 700;
@@ -1427,6 +1950,9 @@
     z-index: 1000;
   }
   .modal-backdrop.open{ display: block; }
+
+  /* modal ล็อกอิน/สมัครสมาชิก ต้องลอยอยู่บนสุดเสมอ แม้ตอนยังอยู่หน้าจอเริ่มต้น (start-overlay z-index 2000) */
+  #authModal{ z-index: 2600; }
 
   .modal-panel{
     position: fixed;
@@ -1530,95 +2056,101 @@
 <body class="pre-game">
 
 <div class="start-overlay" id="startOverlay">
+  <button class="lang-gear-btn" id="langGearBtn" title="Language / ภาษา">⚙️</button>
+  <div class="lang-menu" id="langMenu">
+    <button class="lang-option active" data-lang="th">🇹🇭 ภาษาไทย</button>
+    <button class="lang-option" data-lang="en">🇬🇧 English</button>
+  </div>
+
   <div class="start-panel">
     <div class="start-header-box" id="startHeaderBox">
       <div class="start-title">A-Math Online</div>
-      <div class="start-sub" id="startSub">เลือกโหมดการเล่น</div>
+      <div class="start-sub" id="startSub" data-i18n="chooseMode">เลือกโหมดการเล่น</div>
     </div>
 
     <div class="start-buttons-box" id="startButtonsBox">
       <div class="start-mode-row" id="startModeRow">
-        <button class="start-solo-btn" id="startSoloBtn">🎮 เล่นคนเดียว<br><small>แข่งกับบอท</small></button>
-        <button class="start-solo-btn online-btn" id="startOnlineBtn">🌐 จับคู่ออนไลน์<br><small>แข่งกับคนแปลกหน้า</small></button>
+        <button class="start-solo-btn" id="startSoloBtn">🎮 <span data-i18n="soloMode">เล่นคนเดียว</span><br><small data-i18n="soloModeSub">แข่งกับบอท</small></button>
+        <button class="start-solo-btn online-btn" id="startOnlineBtn">🌐 <span data-i18n="onlineMode">จับคู่ออนไลน์</span><br><small data-i18n="onlineModeSub">แข่งกับคนแปลกหน้า</small></button>
       </div>
     </div>
 
     <div class="start-diff-wrap" id="startDiffWrap" style="display:none;">
-      <button class="start-back-btn" id="soloBackBtn">← กลับ</button>
+      <button class="start-back-btn" id="soloBackBtn" data-i18n="back">← กลับ</button>
 
-      <div class="start-diff-title">เลือกชุดเบี้ย</div>
+      <div class="start-diff-title" data-i18n="chooseTileset">เลือกชุดเบี้ย</div>
       <div class="start-tileset-buttons" id="soloTilesetButtons">
         <button class="start-tileset-btn active" data-tileset="secondary">
-          <span class="sdb-emoji">🎓</span>มัธยม<br><small>100 ตัว</small>
+          <span class="sdb-emoji">🎓</span><span data-i18n="secondary">มัธยม</span><br><small data-i18n="secondaryCount">100 ตัว</small>
         </button>
         <button class="start-tileset-btn" data-tileset="elementary">
-          <span class="sdb-emoji">✏️</span>ประถม<br><small>70 ตัว</small>
+          <span class="sdb-emoji">✏️</span><span data-i18n="elementary">ประถม</span><br><small data-i18n="elementaryCount">70 ตัว</small>
         </button>
       </div>
 
-      <div class="start-diff-title">เลือกระดับความยากของบอท</div>
+      <div class="start-diff-title" data-i18n="chooseDifficulty">เลือกระดับความยากของบอท</div>
       <div class="start-diff-buttons">
-        <button class="start-diff-btn" data-diff="easy">
+        <button class="start-diff-btn" data-diff="easy" data-i18n="easy">
           ง่าย
         </button>
-        <button class="start-diff-btn" data-diff="medium">
+        <button class="start-diff-btn" data-diff="medium" data-i18n="medium">
           ปานกลาง
         </button>
-        <button class="start-diff-btn" data-diff="hard">
+        <button class="start-diff-btn" data-diff="hard" data-i18n="hard">
           ยาก
         </button>
       </div>
     </div>
 
     <div class="start-online-wrap" id="startOnlineWrap" style="display:none;">
-      <button class="start-back-btn" id="onlineBackBtn">← กลับ</button>
+      <button class="start-back-btn" id="onlineBackBtn" data-i18n="back">← กลับ</button>
 
       <div id="onlineModeChoice">
-        <div class="online-status-text">เลือกวิธีเล่นออนไลน์</div>
-        <button class="online-find-btn" id="onlineRandomModeBtn">🔍 จับคู่แบบสุ่ม</button>
-        <button class="online-find-btn friend-btn" id="onlineFriendModeBtn">👥 เล่นกับเพื่อน</button>
+        <div class="online-status-text" data-i18n="chooseOnlineWay">เลือกวิธีเล่นออนไลน์</div>
+        <button class="online-find-btn" id="onlineRandomModeBtn">🔍 <span data-i18n="randomMatch">จับคู่แบบสุ่ม</span></button>
+        <button class="online-find-btn friend-btn" id="onlineFriendModeBtn">👥 <span data-i18n="playWithFriend">เล่นกับเพื่อน</span></button>
       </div>
 
       <div id="onlineSearching" style="display:none;">
         <div class="online-spinner"></div>
-        <div class="online-status-text">กำลังหาคู่ต่อสู้...</div>
-        <div class="online-status-sub" id="onlineWaitTime">รอ 0 วินาที</div>
-        <button class="online-cancel-btn" id="onlineCancelBtn">ยกเลิก</button>
+        <div class="online-status-text" data-i18n="findingOpponent">กำลังหาคู่ต่อสู้...</div>
+        <div class="online-status-sub" id="onlineWaitTime" data-i18n="waitSeconds0">รอ 0 วินาที</div>
+        <button class="online-cancel-btn" id="onlineCancelBtn" data-i18n="cancel">ยกเลิก</button>
       </div>
 
       <div id="onlineFriendChoice" style="display:none;">
-        <button class="start-back-btn" id="friendChoiceBackBtn">← กลับ</button>
+        <button class="start-back-btn" id="friendChoiceBackBtn" data-i18n="back">← กลับ</button>
 
-        <div class="start-diff-title" style="margin-top:0;">ชุดเบี้ย (สำหรับห้องที่จะสร้าง)</div>
+        <div class="start-diff-title" style="margin-top:0;" data-i18n="tilesetForRoom">ชุดเบี้ย (สำหรับห้องที่จะสร้าง)</div>
         <div class="start-tileset-buttons" id="onlineTilesetButtons">
           <button class="start-tileset-btn active" data-tileset="secondary">
-            <span class="sdb-emoji">🎓</span>มัธยม<br><small>100 ตัว</small>
+            <span class="sdb-emoji">🎓</span><span data-i18n="secondary">มัธยม</span><br><small data-i18n="secondaryCount">100 ตัว</small>
           </button>
           <button class="start-tileset-btn" data-tileset="elementary">
-            <span class="sdb-emoji">✏️</span>ประถม<br><small>70 ตัว</small>
+            <span class="sdb-emoji">✏️</span><span data-i18n="elementary">ประถม</span><br><small data-i18n="elementaryCount">70 ตัว</small>
           </button>
         </div>
 
-        <button class="online-find-btn" id="createRoomBtn">🎲 สร้างห้องใหม่</button>
-        <div class="friend-divider">หรือ</div>
-        <input type="text" id="joinCodeInput" class="join-code-input" placeholder="กรอกรหัสห้อง" maxlength="6" autocomplete="off" autocapitalize="characters">
-        <button class="online-find-btn friend-btn" id="joinRoomBtn">🚪 เข้าร่วมห้อง</button>
-        <div class="online-status-sub">*เข้าร่วมห้องจะใช้ชุดเบี้ยเดียวกับที่เจ้าของห้องเลือกไว้</div>
+        <button class="online-find-btn" id="createRoomBtn">🎲 <span data-i18n="createRoom">สร้างห้องใหม่</span></button>
+        <div class="friend-divider" data-i18n="or">หรือ</div>
+        <input type="text" id="joinCodeInput" class="join-code-input" placeholder="กรอกรหัสห้อง" maxlength="6" autocomplete="off" autocapitalize="characters" data-i18n-placeholder="enterCode">
+        <button class="online-find-btn friend-btn" id="joinRoomBtn">🚪 <span data-i18n="joinRoom">เข้าร่วมห้อง</span></button>
+        <div class="online-status-sub" data-i18n="joinRoomNote">*เข้าร่วมห้องจะใช้ชุดเบี้ยเดียวกับที่เจ้าของห้องเลือกไว้</div>
         <div class="online-status-sub" id="joinRoomError" style="display:none;"></div>
       </div>
 
       <div id="onlineWaitingRoom" style="display:none;">
-        <button class="start-back-btn" id="waitingRoomBackBtn">← ยกเลิกห้อง</button>
-        <div class="online-status-text">รหัสห้องของคุณ</div>
+        <button class="start-back-btn" id="waitingRoomBackBtn" data-i18n="cancelRoom">← ยกเลิกห้อง</button>
+        <div class="online-status-text" data-i18n="yourRoomCode">รหัสห้องของคุณ</div>
         <div class="room-code-display" id="roomCodeDisplay">------</div>
-        <button class="copy-code-btn" id="copyCodeBtn">📋 คัดลอกรหัส</button>
-        <div class="online-status-sub">ส่งรหัสนี้ให้เพื่อน แล้วรอเพื่อนกดเข้าร่วม...</div>
+        <button class="copy-code-btn" id="copyCodeBtn">📋 <span data-i18n="copyCode">คัดลอกรหัส</span></button>
+        <div class="online-status-sub" data-i18n="sendCodeToFriend">ส่งรหัสนี้ให้เพื่อน แล้วรอเพื่อนกดเข้าร่วม...</div>
         <div class="online-spinner"></div>
       </div>
 
       <div id="onlineError" style="display:none;">
-        <div class="online-status-text error">⚠️ เชื่อมต่อไม่ได้</div>
-        <div class="online-status-sub" id="onlineErrorMsg">ตรวจสอบการตั้งค่า Firebase</div>
+        <div class="online-status-text error">⚠️ <span data-i18n="connectFailed">เชื่อมต่อไม่ได้</span></div>
+        <div class="online-status-sub" id="onlineErrorMsg" data-i18n="checkFirebase">ตรวจสอบการตั้งค่า Firebase</div>
       </div>
     </div>
   </div>
@@ -1631,11 +2163,11 @@
 
 <div class="modal-backdrop confirm-backdrop" id="homeConfirmModal">
   <div class="confirm-panel">
-    <div class="confirm-title">กลับหน้าหลัก?</div>
-    <div class="confirm-message">คุณต้องการกลับหน้าหลักหรือไม่ ความคืบหน้าของเกมตานี้จะหายไปทั้งหมด</div>
+    <div class="confirm-title" data-i18n="backHomeQ">กลับหน้าหลัก?</div>
+    <div class="confirm-message" data-i18n="backHomeMsg">คุณต้องการกลับหน้าหลักหรือไม่ ความคืบหน้าของเกมตานี้จะหายไปทั้งหมด</div>
     <div class="confirm-buttons">
-      <button class="confirm-btn cancel" id="homeConfirmCancel">ยกเลิก</button>
-      <button class="confirm-btn ok" id="homeConfirmOk">กลับหน้าหลัก</button>
+      <button class="confirm-btn cancel" id="homeConfirmCancel" data-i18n="cancel">ยกเลิก</button>
+      <button class="confirm-btn ok" id="homeConfirmOk" data-i18n="backHome">กลับหน้าหลัก</button>
     </div>
   </div>
 </div>
@@ -1647,7 +2179,7 @@
     <div class="gameover-reason" id="gameOverReason">ทั้งสองฝ่ายผ่าน/เปลี่ยนเบี้ยติดต่อกัน 3 ตา</div>
     <div class="gameover-score-row">
       <div class="gameover-score-box">
-        <div class="gameover-score-label">คุณ</div>
+        <div class="gameover-score-label" data-i18n="you">คุณ</div>
         <div class="gameover-score-value" id="gameOverMyScore">0</div>
         <div class="gameover-penalty" id="gameOverMyPenalty" style="display:none;"></div>
       </div>
@@ -1659,7 +2191,11 @@
       </div>
     </div>
     <div class="confirm-buttons">
-      <button class="confirm-btn ok" id="gameOverHomeBtn">🏠 กลับหน้าหลัก</button>
+      <button class="confirm-btn ok" id="gameOverHomeBtn">🏠 <span data-i18n="backHome">กลับหน้าหลัก</span></button>
+    </div>
+    <div class="rematch-row" id="rematchRow" style="display:none;">
+      <button class="confirm-btn rematch" id="rematchBtn">🔄 <span data-i18n="rematch">เล่นอีกครั้ง</span></button>
+      <div class="rematch-status" id="rematchStatus"></div>
     </div>
   </div>
 </div>
@@ -1667,25 +2203,86 @@
 <div class="modal-backdrop" id="blankModal">
   <div class="modal-panel" id="modalPanel">
     <div class="modal-header">
-      <div class="modal-title" id="modalTitle">เบี้ยว่าง — เลือกประเภท</div>
+      <div class="modal-title" id="modalTitle" data-i18n="blankChooseType">เบี้ยว่าง — เลือกประเภท</div>
       <button class="modal-close" id="modalCloseBtn">✕</button>
     </div>
 
     <div id="modalStepCategory">
       <div class="modal-choice-row">
-        <button class="modal-choice-btn number-choice" id="chooseNumberBtn">🔢<br>ตัวเลข</button>
-        <button class="modal-choice-btn operator-choice" id="chooseOperatorBtn">➗<br>เครื่องหมาย</button>
+        <button class="modal-choice-btn number-choice" id="chooseNumberBtn">🔢<br><span data-i18n="number">ตัวเลข</span></button>
+        <button class="modal-choice-btn operator-choice" id="chooseOperatorBtn">➗<br><span data-i18n="operator">เครื่องหมาย</span></button>
       </div>
     </div>
 
     <div id="modalStepValue" style="display:none;">
-      <button class="modal-back" id="modalBackBtn">← ย้อนกลับ</button>
+      <button class="modal-back" id="modalBackBtn" data-i18n="goBack">← ย้อนกลับ</button>
       <div class="value-grid" id="valueGrid"></div>
     </div>
   </div>
 </div>
 
-<button class="home-btn" id="homeBtn" title="กลับหน้าหลัก">🏠 หน้าหลัก</button>
+<button class="theme-btn" id="themeBtn" title="ธีมกระดาน">🎨</button>
+<div class="theme-menu" id="themeMenu">
+  <button class="theme-option" data-theme="classic">
+    <span class="theme-swatch"><i style="background:#2f5d50"></i><i style="background:#b98a5a"></i><i style="background:#5b9fd8"></i></span>
+    <span data-i18n="themeClassic">คลาสสิก (ไม้-เขียว)</span>
+  </button>
+  <button class="theme-option" data-theme="ocean">
+    <span class="theme-swatch"><i style="background:#1f6f7a"></i><i style="background:#c9a26a"></i><i style="background:#4f97cf"></i></span>
+    <span data-i18n="themeOcean">ทะเลสด</span>
+  </button>
+  <button class="theme-option" data-theme="pastel">
+    <span class="theme-swatch"><i style="background:#caa0d9"></i><i style="background:#f0a8c0"></i><i style="background:#8fbdee"></i></span>
+    <span data-i18n="themePastel">พาสเทลหวาน</span>
+  </button>
+  <div class="theme-menu-divider" data-i18n="themeHolidayLabel">🎉 ธีมพิเศษวันหยุด</div>
+  <button class="theme-option" data-theme="songkran">
+    <span class="theme-swatch"><i style="background:#2f9bd6"></i><i style="background:#ffd166"></i><i style="background:#ff8fa3"></i></span>
+    <span data-i18n="themeSongkran">🌊 สงกรานต์</span>
+  </button>
+  <button class="theme-option" data-theme="loykrathong">
+    <span class="theme-swatch"><i style="background:#16324a"></i><i style="background:#e0b84f"></i><i style="background:#f0c9d9"></i></span>
+    <span data-i18n="themeLoyKrathong">🏮 ลอยกระทง</span>
+  </button>
+  <button class="theme-option" data-theme="newyear">
+    <span class="theme-swatch"><i style="background:#1f5c3d"></i><i style="background:#d4a017"></i><i style="background:#f2685c"></i></span>
+    <span data-i18n="themeNewYear">🎆 ปีใหม่</span>
+  </button>
+</div>
+
+<button class="account-btn" id="accountBtn" title="บัญชีผู้เล่น">👤</button>
+<div class="account-menu" id="accountMenu">
+  <div class="account-menu-name" id="accountMenuName">ยังไม่ได้เข้าสู่ระบบ</div>
+  <div class="account-menu-sub" id="accountMenuSub">เล่นบอทได้เลย ไม่ต้องมีบัญชี</div>
+  <button class="account-menu-btn" id="accountLoginOpenBtn">เข้าสู่ระบบ / สมัครสมาชิก</button>
+  <button class="account-menu-btn danger" id="accountLogoutBtn" style="display:none;">ออกจากระบบ</button>
+</div>
+
+<div class="modal-backdrop confirm-backdrop" id="authModal">
+  <div class="auth-panel">
+    <button class="auth-close-btn" id="authCloseBtn">✕</button>
+    <div class="auth-title">เข้าสู่ระบบเพื่อเล่นออนไลน์</div>
+    <div class="auth-subtitle">คู่ต่อสู้จะเห็นชื่อ Google ของคุณระหว่างเล่น</div>
+
+    <button class="google-signin-btn" id="googleSignInBtn">
+      <svg class="google-icon" viewBox="0 0 48 48" width="20" height="20">
+        <path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12s5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24s8.955,20,20,20s20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"/>
+        <path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"/>
+        <path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"/>
+        <path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z"/>
+      </svg>
+      <span>เข้าสู่ระบบด้วย Google</span>
+    </button>
+
+    <div class="auth-error" id="authErrorEl"></div>
+
+    <div class="auth-guest-row">
+      <button class="auth-guest-btn" id="authGuestBtn">เล่นแบบผู้เล่นรับเชิญ (ไม่บันทึกบัญชี)</button>
+    </div>
+  </div>
+</div>
+
+<button class="home-btn" id="homeBtn" title="กลับหน้าหลัก">🏠 <span data-i18n="home">หน้าหลัก</span></button>
 
 <header>
   <h1>A-Math Online</h1>
@@ -1698,13 +2295,13 @@
         <div class="board" id="board"></div>
       </div>
     </div>
-    <button class="reset-zoom-btn" id="resetZoomBtn" style="display:none;">↺ กลับขนาดเดิม</button>
+    <button class="reset-zoom-btn" id="resetZoomBtn" style="display:none;">↺ <span data-i18n="resetZoom">กลับขนาดเดิม</span></button>
     <div class="stats" id="statsLine"></div>
   </div>
 
   <button class="score-float-widget" id="scoreFloatWidget">
     <div class="score-float-item">
-      <span class="score-float-label">คุณ</span>
+      <span class="score-float-label" data-i18n="you">คุณ</span>
       <span class="score-float-value" id="floatScorePlayer">0</span>
     </div>
     <div class="score-float-divider"></div>
@@ -1720,28 +2317,29 @@
     <button class="score-panel-close" id="scorePanelClose">✕</button>
 
     <div class="bot-setup" id="botSetupPanel">
-      <div class="bot-setup-title">🤖 โหมดบอท</div>
+      <div class="bot-setup-title">🤖 <span data-i18n="botMode">โหมดบอท</span></div>
       <div class="diff-buttons">
-        <button class="diff-btn" data-diff="easy">ง่าย</button>
-        <button class="diff-btn active" data-diff="medium">ปานกลาง</button>
-        <button class="diff-btn" data-diff="hard">ยาก</button>
+        <button class="diff-btn" data-diff="easy" data-i18n="easy">ง่าย</button>
+        <button class="diff-btn active" data-diff="medium" data-i18n="medium">ปานกลาง</button>
+        <button class="diff-btn" data-diff="hard" data-i18n="hard">ยาก</button>
       </div>
     </div>
 
     <div class="online-panel" id="onlinePanel" style="display:none;">
-      <div class="bot-setup-title">🌐 โหมดออนไลน์</div>
+      <div class="bot-setup-title">🌐 <span data-i18n="onlineModeTitle">โหมดออนไลน์</span></div>
       <div class="online-opponent-row">
         <span class="online-dot" id="opponentDot"></span>
         <span id="opponentName">คู่ต่อสู้</span>
       </div>
-      <button class="leave-room-btn" id="leaveRoomBtn">ออกจากห้อง</button>
+      <div class="disconnect-warning" id="disconnectWarning"></div>
+      <button class="leave-room-btn" id="leaveRoomBtn" data-i18n="leaveRoom">ออกจากห้อง</button>
     </div>
 
     <div class="turn-indicator" id="turnIndicator">🎮 ตาของคุณ</div>
 
     <div class="score-row">
       <div class="score-box you">
-        <div class="score-box-label">คุณ</div>
+        <div class="score-box-label" data-i18n="you">คุณ</div>
         <div class="score-box-total" id="scoreTotalPlayer">0</div>
         <div class="score-box-timer" id="myTimerDisplay" style="display:none;">22:00</div>
       </div>
@@ -1753,25 +2351,28 @@
     </div>
 
     <div class="score-history" id="scoreHistory">
-      <div class="score-empty" id="scoreEmpty">ยังไม่มีการลงสมการ</div>
+      <div class="score-empty" id="scoreEmpty" data-i18n="noEquationsYet">ยังไม่มีการลงสมการ</div>
     </div>
   </div>
 </div>
 
 <div class="rack-area">
-  <div class="rack-title">แป้นวางเบี้ยของคุณ <small>· ลากเบี้ยไปวางบนกระดาน หรือสลับตำแหน่งในแป้นได้อิสระ</small></div>
+  <div class="rack-title"><span data-i18n="yourRack">แป้นวางเบี้ยของคุณ</span> <small data-i18n="rackHint">· ลากเบี้ยไปวางบนกระดาน หรือสลับตำแหน่งในแป้นได้อิสระ</small></div>
   <div class="rack" id="rack"></div>
   <div class="rack-footer">
-    <span id="bagCount"></span>
-    <button id="cancelExchangeBtn" style="display:none;">ยกเลิก</button>
+    <div class="bag-bar-wrap" id="bagBarWrap" title="เบี้ยที่เหลือในถุง">
+      <div class="bag-bar-fill" id="bagBarFill"></div>
+      <span class="bag-bar-text" id="bagCount"></span>
+    </div>
+    <button id="cancelExchangeBtn" style="display:none;" data-i18n="cancel">ยกเลิก</button>
   </div>
 </div>
 
 <div class="action-float-stack" id="actionFloatStack">
-  <button id="pullAllBtn" class="action-float-btn">⬆️ <span class="action-label">ดึงเบี้ย<br>ทั้งหมด</span></button>
-  <button id="exchangeBtn" class="action-float-btn">🔁 <span class="action-label">เปลี่ยนเบี้ย</span></button>
-  <button id="endTurnBtn" class="action-float-btn">⏭️ <span class="action-label">จบตา</span></button>
-  <button id="submitBtn" class="action-float-btn">✅ <span class="action-label">ลงสมการ</span></button>
+  <button id="pullAllBtn" class="action-float-btn">⬆️ <span class="action-label" data-i18n="pullAll">ดึงเบี้ย<br>ทั้งหมด</span></button>
+  <button id="exchangeBtn" class="action-float-btn">🔁 <span class="action-label" data-i18n="exchange">เปลี่ยนเบี้ย</span></button>
+  <button id="endTurnBtn" class="action-float-btn">⏭️ <span class="action-label" data-i18n="endTurn">จบตา</span></button>
+  <button id="submitBtn" class="action-float-btn">✅ <span class="action-label" data-i18n="submit">ลงสมการ</span></button>
 </div>
 
 <script type="module">
@@ -1811,14 +2412,15 @@ const firebaseConfig = {
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
 import {
-  getAuth, signInAnonymously, onAuthStateChanged
+  getAuth, signInAnonymously, onAuthStateChanged,
+  GoogleAuthProvider, signInWithPopup, signOut
 } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
 import {
   getFirestore, doc, setDoc, updateDoc, deleteDoc, onSnapshot, getDocs,
   collection, query, where, orderBy, limit, runTransaction, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
 
-let app, auth, db, myUid = null;
+let app, auth, db, myUid = null, myDisplayName = null, myIsGuest = true;
 let configValid = !!(firebaseConfig.apiKey && firebaseConfig.apiKey !== "YOUR_API_KEY");
 
 if(configValid){
@@ -1832,19 +2434,60 @@ if(configValid){
   }
 }
 
+function applyAuthUser(user){
+  if(!user) return;
+  myUid = user.uid;
+  myIsGuest = !!user.isAnonymous;
+  myDisplayName = user.isAnonymous
+    ? 'ผู้เล่นรับเชิญ'
+    : (user.displayName || (user.email ? user.email.split('@')[0] : 'ผู้เล่น'));
+}
+
+// รอผลของ session ที่มีอยู่แล้ว (ถ้ามี) โดยไม่บังคับ sign-in ใหม่ — ใช้เช็คว่ามีบัญชีค้างอยู่ไหมตอนเปิดแอป
+function checkExistingSession(){
+  return new Promise((resolve) => {
+    if(!configValid){ resolve(null); return; }
+    const unsub = onAuthStateChanged(auth, user => {
+      unsub();
+      if(user) applyAuthUser(user);
+      resolve(user);
+    }, () => { unsub(); resolve(null); });
+  });
+}
+
 function ensureAuth(){
   return new Promise((resolve, reject) => {
     if(!configValid){ reject(new Error('no-config')); return; }
     const unsub = onAuthStateChanged(auth, user => {
       if(user){
-        myUid = user.uid;
+        applyAuthUser(user);
         unsub();
         resolve(user.uid);
       } else {
-        signInAnonymously(auth).catch(err => { unsub(); reject(err); });
+        signInAnonymously(auth).then(cred => applyAuthUser(cred.user)).catch(err => { unsub(); reject(err); });
       }
     }, err => { unsub(); reject(err); });
   });
+}
+
+async function signInWithGoogle(){
+  if(!configValid) throw new Error('no-config');
+  const provider = new GoogleAuthProvider();
+  const cred = await signInWithPopup(auth, provider);
+  applyAuthUser(cred.user);
+  return { uid: myUid, displayName: myDisplayName };
+}
+
+async function continueAsGuest(){
+  if(!configValid) throw new Error('no-config');
+  const cred = await signInAnonymously(auth);
+  applyAuthUser(cred.user);
+  return { uid: myUid, displayName: myDisplayName };
+}
+
+async function signOutUser(){
+  if(auth) await signOut(auth);
+  myUid = null; myDisplayName = null; myIsGuest = true;
 }
 
 /* ---- Matchmaking ---- */
@@ -1866,7 +2509,7 @@ async function startMatchmaking(onMatched, onError){
 
   try {
     const myQueueRef = doc(db, 'amathQueue', myUid);
-    await setDoc(myQueueRef, { status: 'waiting', createdAt: serverTimestamp(), roomId: null });
+    await setDoc(myQueueRef, { status: 'waiting', name: myDisplayName || 'ผู้เล่น', createdAt: serverTimestamp(), roomId: null });
 
     myQueueUnsub = onSnapshot(myQueueRef, snap => {
       const data = snap.data();
@@ -1897,6 +2540,7 @@ async function startMatchmaking(onMatched, onError){
             const candSnap = await tx.get(candRef);
             if(!meSnap.exists() || meSnap.data().status !== 'waiting') return false;
             if(!candSnap.exists() || candSnap.data().status !== 'waiting') return false;
+            const candidateName = candSnap.data().name || 'ผู้เล่น';
 
             const roomRef = doc(db, 'amathRooms', roomId);
             tx.set(roomRef, {
@@ -1909,8 +2553,8 @@ async function startMatchmaking(onMatched, onError){
               turnStartedAt: serverTimestamp(),
               createdAt: serverTimestamp(),
               lastActivity: serverTimestamp(),
-              p1: { uid: myUid, score: 0, lastSeen: Date.now() },
-              p2: { uid: candidateUid, score: 0, lastSeen: Date.now() },
+              p1: { uid: myUid, name: myDisplayName || 'ผู้เล่น', score: 0, lastSeen: Date.now() },
+              p2: { uid: candidateUid, name: candidateName, score: 0, lastSeen: Date.now() },
               board: {},
               bag: null,
               scoreHistory: [],
@@ -1974,7 +2618,7 @@ async function createFriendRoom(tileSet){
     turnStartedAt: null, // เริ่มจับเวลาจริงตอนเพื่อนเข้าร่วมห้องแล้วเท่านั้น
     createdAt: serverTimestamp(),
     lastActivity: serverTimestamp(),
-    p1: { uid: myUid, score: 0, lastSeen: Date.now() },
+    p1: { uid: myUid, name: myDisplayName || 'ผู้เล่น', score: 0, lastSeen: Date.now() },
     p2: null,
     board: {},
     bag: null,
@@ -2004,7 +2648,7 @@ async function joinFriendRoom(code){
     const s = await tx.get(roomRef);
     if(!s.exists() || s.data().status !== 'waiting' || s.data().p2) return false;
     tx.update(roomRef, {
-      p2: { uid: myUid, score: 0, lastSeen: Date.now() },
+      p2: { uid: myUid, name: myDisplayName || 'ผู้เล่น', score: 0, lastSeen: Date.now() },
       status: 'active',
       turnStartedAt: serverTimestamp(),
       lastActivity: serverTimestamp(),
@@ -2058,7 +2702,14 @@ async function leaveRoom(roomRef){
 window.AmathOnline = {
   isConfigured: () => configValid,
   getMyUid: () => myUid,
+  getDisplayName: () => myDisplayName,
+  isGuest: () => myIsGuest,
   getServerTimestamp: () => serverTimestamp(),
+  ensureAuth,
+  checkExistingSession,
+  signInWithGoogle,
+  continueAsGuest,
+  signOutUser,
   startMatchmaking,
   cancelMatchmaking,
   createFriendRoom,
@@ -2072,6 +2723,157 @@ window.AmathOnline = {
 </script>
 
 <script>
+/* =========================================================
+   ภาษา / LANGUAGE (i18n)
+   ========================================================= */
+const I18N = {
+  th: {
+    chooseMode: 'เลือกโหมดการเล่น', soloMode: 'เล่นคนเดียว', soloModeSub: 'แข่งกับบอท',
+    onlineMode: 'จับคู่ออนไลน์', onlineModeSub: 'แข่งกับคนแปลกหน้า',
+    back: '← กลับ', chooseTileset: 'เลือกชุดเบี้ย', secondary: 'มัธยม', secondaryCount: '100 ตัว',
+    elementary: 'ประถม', elementaryCount: '70 ตัว', chooseDifficulty: 'เลือกระดับความยากของบอท',
+    easy: 'ง่าย', medium: 'ปานกลาง', hard: 'ยาก',
+    chooseOnlineWay: 'เลือกวิธีเล่นออนไลน์', randomMatch: 'จับคู่แบบสุ่ม', playWithFriend: 'เล่นกับเพื่อน',
+    findingOpponent: 'กำลังหาคู่ต่อสู้...', waitSeconds0: 'รอ 0 วินาที', cancel: 'ยกเลิก',
+    tilesetForRoom: 'ชุดเบี้ย (สำหรับห้องที่จะสร้าง)', createRoom: 'สร้างห้องใหม่', or: 'หรือ',
+    enterCode: 'กรอกรหัสห้อง', joinRoom: 'เข้าร่วมห้อง',
+    joinRoomNote: '*เข้าร่วมห้องจะใช้ชุดเบี้ยเดียวกับที่เจ้าของห้องเลือกไว้',
+    cancelRoom: '← ยกเลิกห้อง', yourRoomCode: 'รหัสห้องของคุณ', copyCode: 'คัดลอกรหัส',
+    sendCodeToFriend: 'ส่งรหัสนี้ให้เพื่อน แล้วรอเพื่อนกดเข้าร่วม...',
+    connectFailed: 'เชื่อมต่อไม่ได้', checkFirebase: 'ตรวจสอบการตั้งค่า Firebase',
+    backHomeQ: 'กลับหน้าหลัก?', backHomeMsg: 'คุณต้องการกลับหน้าหลักหรือไม่ ความคืบหน้าของเกมตานี้จะหายไปทั้งหมด',
+    backHome: 'กลับหน้าหลัก', you: 'คุณ',
+    blankChooseType: 'เบี้ยว่าง — เลือกประเภท', number: 'ตัวเลข', operator: 'เครื่องหมาย', goBack: '← ย้อนกลับ',
+    home: 'หน้าหลัก', resetZoom: 'กลับขนาดเดิม',
+    botMode: 'โหมดบอท', onlineModeTitle: 'โหมดออนไลน์', leaveRoom: 'ออกจากห้อง',
+    noEquationsYet: 'ยังไม่มีการลงสมการ', yourRack: 'แป้นวางเบี้ยของคุณ',
+    rackHint: '· ลากเบี้ยไปวางบนกระดาน หรือสลับตำแหน่งในแป้นได้อิสระ',
+    pullAll: 'ดึงเบี้ย<br>ทั้งหมด', exchange: 'เปลี่ยนเบี้ย', endTurn: 'จบตา', submit: 'ลงสมการ',
+    confirmExchange: 'ยืนยันเปลี่ยน', confirmExchangeCount: 'ยืนยันเปลี่ยน ({n} ตัว)',
+    bonusRed: '3xสมการ', bonusYellow: '2xสมการ', bonusBlue: '3xตัว', bonusOrange: '2xตัว',
+    rematch: 'เล่นอีกครั้ง',
+    themeClassic: 'คลาสสิก (ไม้-เขียว)', themeOcean: 'ทะเลสด', themePastel: 'พาสเทลหวาน',
+    themeHolidayLabel: '🎉 ธีมพิเศษวันหยุด', themeSongkran: '🌊 สงกรานต์', themeLoyKrathong: '🏮 ลอยกระทง', themeNewYear: '🎆 ปีใหม่',
+  },
+  en: {
+    chooseMode: 'Choose Game Mode', soloMode: 'Solo Play', soloModeSub: 'vs Bot',
+    onlineMode: 'Play Online', onlineModeSub: 'vs a stranger',
+    back: '← Back', chooseTileset: 'Choose Tile Set', secondary: 'Secondary', secondaryCount: '100 tiles',
+    elementary: 'Elementary', elementaryCount: '70 tiles', chooseDifficulty: 'Choose Bot Difficulty',
+    easy: 'Easy', medium: 'Medium', hard: 'Hard',
+    chooseOnlineWay: 'Choose Online Method', randomMatch: 'Random Match', playWithFriend: 'Play with Friend',
+    findingOpponent: 'Finding opponent...', waitSeconds0: 'Waiting 0 sec', cancel: 'Cancel',
+    tilesetForRoom: 'Tile Set (for this room)', createRoom: 'Create New Room', or: 'or',
+    enterCode: 'Enter room code', joinRoom: 'Join Room',
+    joinRoomNote: '*Joining uses the same tile set the host chose',
+    cancelRoom: '← Cancel Room', yourRoomCode: 'Your Room Code', copyCode: 'Copy Code',
+    sendCodeToFriend: 'Send this code to your friend and wait for them to join...',
+    connectFailed: 'Connection Failed', checkFirebase: 'Please check your Firebase setup',
+    backHomeQ: 'Back to Home?', backHomeMsg: 'Are you sure you want to go back to home? Progress this turn will be lost.',
+    backHome: 'Back to Home', you: 'You',
+    blankChooseType: 'Blank Tile — Choose Type', number: 'Number', operator: 'Operator', goBack: '← Back',
+    home: 'Home', resetZoom: 'Reset Zoom',
+    botMode: 'Bot Mode', onlineModeTitle: 'Online Mode', leaveRoom: 'Leave Room',
+    noEquationsYet: 'No equations played yet', yourRack: 'Your Tile Rack',
+    rackHint: '· Drag tiles onto the board, or reorder them freely in the rack',
+    pullAll: 'Pull All<br>Tiles', exchange: 'Exchange', endTurn: 'End Turn', submit: 'Submit',
+    confirmExchange: 'Confirm Exchange', confirmExchangeCount: 'Confirm ({n})',
+    bonusRed: '3x WORD', bonusYellow: '2x WORD', bonusBlue: '3x TILE', bonusOrange: '2x TILE',
+    rematch: 'Rematch',
+    themeClassic: 'Classic (Wood & Green)', themeOcean: 'Ocean Breeze', themePastel: 'Pastel Candy',
+    themeHolidayLabel: '🎉 Holiday Themes', themeSongkran: '🌊 Songkran', themeLoyKrathong: '🏮 Loy Krathong', themeNewYear: '🎆 New Year',
+  },
+};
+
+let currentLang = localStorage.getItem('amathLang') || 'th';
+
+/* =========================================================
+   BOARD THEME: เปลี่ยนชุดสีกระดาน/เบี้ย ผ่าน CSS variable ตาม data-board-theme
+   จำค่าไว้ใน localStorage ใช้ได้ทั้งก่อนเริ่มและระหว่างเล่น
+   ========================================================= */
+const BOARD_THEME_IDS = ['classic', 'ocean', 'pastel', 'songkran', 'loykrathong', 'newyear'];
+let currentBoardTheme = localStorage.getItem('amathBoardTheme') || 'classic';
+
+function applyBoardTheme(theme){
+  currentBoardTheme = BOARD_THEME_IDS.includes(theme) ? theme : 'classic';
+  if(currentBoardTheme === 'classic'){
+    delete document.body.dataset.boardTheme;
+  } else {
+    document.body.dataset.boardTheme = currentBoardTheme;
+  }
+  localStorage.setItem('amathBoardTheme', currentBoardTheme);
+  document.querySelectorAll('.theme-option').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.theme === currentBoardTheme);
+  });
+}
+applyBoardTheme(currentBoardTheme);
+
+function t(key){
+  return (I18N[currentLang] && I18N[currentLang][key]) || I18N.th[key] || key;
+}
+
+function applyLanguage(lang){
+  currentLang = (lang === 'en') ? 'en' : 'th';
+  localStorage.setItem('amathLang', currentLang);
+
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    el.innerHTML = t(el.getAttribute('data-i18n'));
+  });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    el.setAttribute('placeholder', t(el.getAttribute('data-i18n-placeholder')));
+  });
+  document.querySelectorAll('.lang-option').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.lang === currentLang);
+  });
+  document.documentElement.lang = currentLang === 'en' ? 'en' : 'th';
+
+  // ถ้าตัวกระดานถูกสร้างไปแล้ว (แสดงเป็นพื้นหลังหน้าเริ่มต้นอยู่) ให้รีเฟรชป้ายโบนัสบนกระดานด้วย
+  try{
+    const freshLabels = { red: t('bonusRed'), yellow: t('bonusYellow'), blue: t('bonusBlue'), orange: t('bonusOrange') };
+    Object.keys(bonusMap).forEach(key => {
+      const cell = cellsByRC[key];
+      const labelEl = cell && cell.querySelector('.bonus-label');
+      if(labelEl) labelEl.textContent = freshLabels[bonusMap[key]];
+    });
+  } catch(e){ /* กระดานยังไม่ถูกสร้าง (เรียกครั้งแรกตอนโหลดหน้า) ข้ามไปได้ */ }
+}
+
+document.getElementById('langGearBtn').addEventListener('click', (e) => {
+  e.stopPropagation();
+  document.getElementById('langMenu').classList.toggle('open');
+});
+document.querySelectorAll('.lang-option').forEach(btn => {
+  btn.addEventListener('click', () => {
+    applyLanguage(btn.dataset.lang);
+    document.getElementById('langMenu').classList.remove('open');
+  });
+});
+document.addEventListener('click', (e) => {
+  const menu = document.getElementById('langMenu');
+  if(!menu) return; // เมนูภาษาอยู่ในหน้าจอเริ่มต้นเท่านั้น ถูกลบไปแล้วตอนเริ่มเกมจริง
+  if(menu.classList.contains('open') && !menu.contains(e.target) && e.target.id !== 'langGearBtn'){
+    menu.classList.remove('open');
+  }
+});
+applyLanguage(currentLang);
+
+document.getElementById('themeBtn').addEventListener('click', (e) => {
+  e.stopPropagation();
+  document.getElementById('themeMenu').classList.toggle('open');
+});
+document.querySelectorAll('.theme-option').forEach(btn => {
+  btn.addEventListener('click', () => {
+    applyBoardTheme(btn.dataset.theme);
+    document.getElementById('themeMenu').classList.remove('open');
+  });
+});
+document.addEventListener('click', (e) => {
+  const menu = document.getElementById('themeMenu');
+  if(menu.classList.contains('open') && !menu.contains(e.target) && e.target.id !== 'themeBtn'){
+    menu.classList.remove('open');
+  }
+});
+
 /* =========================================================
    BOARD SETUP
    ========================================================= */
@@ -2100,7 +2902,10 @@ yellowCoords.forEach(([r,c]) => bonusMap[toKey(r,c)] = 'yellow');
 blueCoords.forEach(([r,c]) => bonusMap[toKey(r,c)] = 'blue');
 orangeCoords.forEach(([r,c]) => bonusMap[toKey(r,c)] = 'orange');
 
-const labels = { red: '3xสมการ', yellow: '2xสมการ', blue: '3xตัว', orange: '2xตัว' };
+function getBonusLabels(){
+  return { red: t('bonusRed'), yellow: t('bonusYellow'), blue: t('bonusBlue'), orange: t('bonusOrange') };
+}
+const labels = getBonusLabels();
 
 const boardEl = document.getElementById('board');
 const cellsByRC = {}; // 'r-c' -> cell element, used for line/run detection
@@ -2234,8 +3039,14 @@ const RACK_SIZE = 8;
 let bag = createTileBag();
 const rackEl = document.getElementById('rack');
 const bagCountEl = document.getElementById('bagCount');
+const bagBarFillEl = document.getElementById('bagBarFill');
 const statsLine = document.getElementById('statsLine');
 const submitBtn = document.getElementById('submitBtn');
+
+function sumDefsCount(defs){
+  return (defs || []).reduce((sum, d) => sum + (d.count || 0), 0);
+}
+let bagTotalForBar = sumDefsCount(AMATH_TILE_DEFINITIONS);
 
 const rackSlots = [];
 for(let i=0;i<RACK_SIZE;i++){
@@ -2254,6 +3065,10 @@ function tileClass(type){
 
 function updateBagCount(){
   bagCountEl.textContent = `เหลือในถุง: ${bag.length} ตัว`;
+  if(bagBarFillEl){
+    const pct = bagTotalForBar > 0 ? Math.max(0, Math.min(100, (bag.length / bagTotalForBar) * 100)) : 0;
+    bagBarFillEl.style.width = pct + '%';
+  }
 }
 
 const DUAL_OP_OPTIONS = {
@@ -3098,8 +3913,11 @@ function computeOvertimePenalty(timeValue){
 function showGameOverModal(myScore, oppScore, oppLabel, forcedResult, reasonText, myPenalty = 0, oppPenalty = 0){
   gameEnded = true;
   clearInterval(onlineTimerInterval);
+  clearInterval(onlinePresenceTimer);
+  stopHeartbeat();
   setPlayerControlsEnabled(false);
   submitBtn.disabled = true;
+  if(disconnectWarningEl) disconnectWarningEl.style.display = 'none';
 
   const emojiEl = document.getElementById('gameOverEmoji');
   const titleEl = document.getElementById('gameOverTitle');
@@ -3134,10 +3952,25 @@ function showGameOverModal(myScore, oppScore, oppLabel, forcedResult, reasonText
   else if(result === 'lose'){ emojiEl.textContent = '😢'; titleEl.textContent = 'คุณแพ้'; }
   else { emojiEl.textContent = '🤝'; titleEl.textContent = 'เสมอกัน'; }
 
+  // ปุ่มเล่นอีกครั้ง — แสดงเฉพาะโหมดออนไลน์ (ทั้งจับคู่สุ่มและห้องเพื่อน) และห้องยังไม่ถูกปิด
+  if(rematchRow){
+    const canRematch = gameMode === 'online' && !onlineEnded && onlineRoomRef;
+    rematchRow.style.display = canRematch ? '' : 'none';
+    if(canRematch){
+      rematchBtn.disabled = false;
+      rematchBtn.style.display = '';
+      rematchStatusEl.textContent = '';
+      rematchWantsRematch = false;
+    }
+  }
+
   gameOverModal.classList.add('open');
 }
 
 document.getElementById('gameOverHomeBtn').addEventListener('click', () => {
+  if(gameMode === 'online' && window.AmathOnline && onlineRoomRef){
+    window.AmathOnline.leaveRoom(onlineRoomRef);
+  }
   location.reload();
 });
 
@@ -3309,7 +4142,7 @@ function toggleExchangeSelection(tileEl){
 
 function updateExchangeBtnLabel(){
   const n = selectedForExchange.size;
-  exchangeBtn.textContent = n > 0 ? `✅ ยืนยันเปลี่ยน (${n} ตัว)` : '✅ ยืนยันเปลี่ยน';
+  exchangeBtn.textContent = n > 0 ? `✅ ${t('confirmExchangeCount').replace('{n}', n)}` : `✅ ${t('confirmExchange')}`;
   exchangeBtn.disabled = n === 0;
 }
 
@@ -3335,7 +4168,7 @@ function exitExchangeMode(){
   selectedForExchange.clear();
   rackEl.classList.remove('exchange-mode');
   exchangeBtn.classList.remove('selecting');
-  exchangeBtn.textContent = '🔁 เปลี่ยนเบี้ย';
+  exchangeBtn.textContent = `🔁 ${t('exchange')}`;
   exchangeBtn.disabled = false;
   cancelExchangeBtn.style.display = 'none';
   submitBtn.style.display = '';
@@ -4194,6 +5027,10 @@ document.getElementById('homeConfirmCancel').addEventListener('click', () => {
   document.getElementById('homeConfirmModal').classList.remove('open');
 });
 document.getElementById('homeConfirmOk').addEventListener('click', () => {
+  if(gameMode === 'online' && window.AmathOnline && onlineRoomRef){
+    stopHeartbeat();
+    window.AmathOnline.leaveRoom(onlineRoomRef);
+  }
   location.reload();
 });
 
@@ -4212,6 +5049,7 @@ const opponentDot = document.getElementById('opponentDot');
 const opponentNameEl = document.getElementById('opponentName');
 const opponentScoreLabel = document.getElementById('opponentScoreLabel');
 const leaveRoomBtn = document.getElementById('leaveRoomBtn');
+const disconnectWarningEl = document.getElementById('disconnectWarning');
 
 function beginOnlineRoom(roomId){
   botSetupPanel.style.display = 'none';
@@ -4219,6 +5057,8 @@ function beginOnlineRoom(roomId){
   opponentScoreLabel.textContent = '🧑 คู่ต่อสู้';
   statsLine.textContent = 'เชื่อมต่อห้องออนไลน์แล้ว กำลังรอข้อมูลเกม...';
   renderedHistoryCount = 0;
+  forfeitTriggered = false;
+  if(disconnectWarningEl) disconnectWarningEl.style.display = 'none';
 
   onlineRoomRef = window.AmathOnline.subscribeRoom(roomId, (data, roomRef) => {
     onlineRoomRef = roomRef;
@@ -4228,19 +5068,158 @@ function beginOnlineRoom(roomId){
   // เช็คสถานะคู่ต่อสู้ (ยังต่ออยู่ไหม) ทุก 5 วินาที
   clearInterval(onlinePresenceTimer);
   onlinePresenceTimer = setInterval(updateOpponentPresenceDot, 5000);
+
+  startHeartbeat();
 }
 
 let onlinePresenceTimer = null;
 let lastOnlineData = null;
 let renderedHistoryCount = 0;
 
+/* =========================================================
+   HEARTBEAT: อัปเดต lastSeen ของฝั่งเราเป็นระยะ (ไม่พึ่งแค่ตอนลงเบี้ย)
+   เพื่อให้อีกฝ่ายตรวจจับได้แม่นยำว่าเรายังอยู่จริงหรือหลุดการเชื่อมต่อไปแล้ว
+   ========================================================= */
+let heartbeatInterval = null;
+
+function sendHeartbeat(){
+  if(onlineRoomRef && mySlot && !gameEnded){
+    window.AmathOnline.updateRoom(onlineRoomRef, { [mySlot + '.lastSeen']: Date.now() }).catch(() => {});
+  }
+}
+function onVisibilityHeartbeat(){
+  if(document.visibilityState === 'visible') sendHeartbeat();
+}
+function startHeartbeat(){
+  clearInterval(heartbeatInterval);
+  heartbeatInterval = setInterval(sendHeartbeat, 12000);
+  document.addEventListener('visibilitychange', onVisibilityHeartbeat);
+}
+function stopHeartbeat(){
+  clearInterval(heartbeatInterval);
+  heartbeatInterval = null;
+  document.removeEventListener('visibilitychange', onVisibilityHeartbeat);
+}
+
+/* =========================================================
+   AUTO-FORFEIT: ถ้าคู่ต่อสู้ไม่ส่ง heartbeat มา > 45 วิ ถือว่าออฟไลน์
+   แล้วนับถอยหลังอีก 30 วิ ถ้ายังไม่กลับมา ให้อีกฝ่ายเป็นผู้ชนะโดยปริยาย
+   ========================================================= */
+const FORFEIT_STALE_SEC = 45;
+const FORFEIT_COUNTDOWN_SEC = 30;
+let forfeitTriggered = false;
+
 function updateOpponentPresenceDot(){
   if(!lastOnlineData || !opponentSlot) return;
   const lastSeen = lastOnlineData[opponentSlot]?.lastSeen || 0;
   const ageSec = (Date.now() - lastSeen) / 1000;
   opponentDot.classList.remove('stale', 'offline');
-  if(ageSec > 45) opponentDot.classList.add('offline');
+  if(ageSec > FORFEIT_STALE_SEC) opponentDot.classList.add('offline');
   else if(ageSec > 15) opponentDot.classList.add('stale');
+
+  if(gameEnded || onlineEnded || lastOnlineData.status !== 'active'){
+    if(disconnectWarningEl) disconnectWarningEl.style.display = 'none';
+    return;
+  }
+
+  if(ageSec > FORFEIT_STALE_SEC){
+    const remain = Math.max(0, Math.ceil(FORFEIT_STALE_SEC + FORFEIT_COUNTDOWN_SEC - ageSec));
+    if(disconnectWarningEl){
+      disconnectWarningEl.style.display = '';
+      disconnectWarningEl.textContent = remain > 0
+        ? `⚠️ คู่ต่อสู้ขาดการเชื่อมต่อ — จะตัดสินให้คุณชนะใน ${remain} วิ ถ้าไม่กลับมา`
+        : `⚠️ กำลังตัดสินผล...`;
+    }
+    if(remain <= 0 && !forfeitTriggered && mySlot && onlineRoomRef){
+      forfeitTriggered = true;
+      window.AmathOnline.updateRoom(onlineRoomRef, {
+        status: 'finished',
+        forfeitBy: opponentSlot,
+      }).catch(() => { forfeitTriggered = false; });
+    }
+  } else if(disconnectWarningEl){
+    disconnectWarningEl.style.display = 'none';
+  }
+}
+
+/* =========================================================
+   REMATCH: เล่นอีกครั้งกับคู่ต่อสู้เดิมในห้องเดิม โดยไม่ต้องจับคู่ใหม่
+   ========================================================= */
+const rematchRow = document.getElementById('rematchRow');
+const rematchBtn = document.getElementById('rematchBtn');
+const rematchStatusEl = document.getElementById('rematchStatus');
+let rematchWantsRematch = false; // เรากดขอเล่นอีกครั้งแล้วหรือยัง
+let rematchResetting = false;    // กำลังรีเซ็ตห้อง/กำลังจะรีโหลดหน้าแล้ว (กันยิงซ้ำ)
+
+function updateRematchUI(rematchData){
+  if(!rematchRow || rematchRow.style.display === 'none') return;
+  const oppReady = !!(rematchData && rematchData[opponentSlot]);
+  if(rematchWantsRematch){
+    rematchBtn.disabled = true;
+    rematchStatusEl.textContent = oppReady
+      ? 'คู่ต่อสู้พร้อมแล้ว กำลังเริ่มเกมใหม่...'
+      : 'รอคู่ต่อสู้กด "เล่นอีกครั้ง"...';
+  } else if(oppReady){
+    rematchStatusEl.textContent = 'คู่ต่อสู้อยากเล่นอีกครั้ง! กดปุ่มเพื่อเริ่มเกมใหม่';
+  }
+}
+
+rematchBtn?.addEventListener('click', () => {
+  if(!onlineRoomRef || !mySlot || rematchWantsRematch) return;
+  rematchWantsRematch = true;
+  rematchBtn.disabled = true;
+  rematchStatusEl.textContent = 'รอคู่ต่อสู้กด "เล่นอีกครั้ง"...';
+  window.AmathOnline.updateRoom(onlineRoomRef, { ['rematch.' + mySlot]: true }).catch(() => {
+    rematchWantsRematch = false;
+    rematchBtn.disabled = false;
+    rematchStatusEl.textContent = 'ส่งคำขอไม่สำเร็จ ลองใหม่อีกครั้ง';
+  });
+});
+
+async function triggerRematchReset(){
+  if(rematchStatusEl) rematchStatusEl.textContent = 'กำลังเริ่มเกมใหม่...';
+  sessionStorage.setItem('amathRematchRoom', onlineRoomId || '');
+  if(mySlot === 'p1' && onlineRoomRef){
+    try {
+      await window.AmathOnline.updateRoom(onlineRoomRef, {
+        status: 'active',
+        board: {},
+        bag: null,
+        turn: 'p1',
+        passStreak: 0,
+        p1Time: GAME_TIME_SECONDS,
+        p2Time: GAME_TIME_SECONDS,
+        turnStartedAt: window.AmathOnline.getServerTimestamp(),
+        'p1.score': 0,
+        'p2.score': 0,
+        'p1.rack': [],
+        'p2.rack': [],
+        'p1.lastSeen': Date.now(),
+        'p2.lastSeen': Date.now(),
+        scoreHistory: [],
+        emptiedBy: null,
+        forfeitBy: null,
+        rematch: null,
+      });
+    } catch(e){ /* ถ้าเขียนไม่สำเร็จ อีกฝ่ายจะยังเห็นห้องเดิมค้างอยู่ ต้องกดเล่นอีกครั้งใหม่ */ }
+  }
+  location.reload();
+}
+
+/* หลังรีโหลดหน้าเพื่อเริ่ม rematch ให้กลับเข้าห้องเดิมทันที ไม่ต้องผ่านหน้าเลือกโหมดใหม่ */
+async function tryResumeRematch(){
+  const pendingRoomId = sessionStorage.getItem('amathRematchRoom');
+  if(!pendingRoomId) return;
+  sessionStorage.removeItem('amathRematchRoom');
+  if(!window.AmathOnline || !window.AmathOnline.isConfigured()) return;
+  try {
+    myOnlineUid = await window.AmathOnline.ensureAuth();
+  } catch(e){ return; }
+  gameMode = 'online';
+  onlineRoomId = pendingRoomId;
+  startOverlay.remove();
+  document.body.classList.remove('pre-game');
+  beginOnlineRoom(onlineRoomId);
 }
 
 /* =========================================================
@@ -4308,8 +5287,9 @@ function applyOnlineRoomUpdate(data){
   if(!mySlot){
     mySlot = (data.p1 && data.p1.uid === myOnlineUid) ? 'p1' : 'p2';
     opponentSlot = mySlot === 'p1' ? 'p2' : 'p1';
-    opponentNameEl.textContent = opponentSlot === 'p1' ? 'ผู้เล่น 1' : 'ผู้เล่น 2';
   }
+  // อัปเดตชื่อคู่ต่อสู้ทุกครั้งที่มีข้อมูลใหม่ (เผื่อเพิ่งเข้าร่วมห้องทีหลัง เช่น โหมดห้องเพื่อน)
+  opponentNameEl.textContent = data[opponentSlot]?.name || (opponentSlot === 'p1' ? 'ผู้เล่น 1' : 'ผู้เล่น 2');
 
   if(data.status === 'ended' && !onlineEnded){
     onlineEnded = true;
@@ -4322,8 +5302,18 @@ function applyOnlineRoomUpdate(data){
   if(data.status === 'finished' && !gameEnded){
     let myScore = data[mySlot]?.score || 0;
     let oppScore = data[opponentSlot]?.score || 0;
-    const oppLabel = opponentSlot === 'p1' ? 'ผู้เล่น 1' : 'ผู้เล่น 2';
+    const oppLabel = data[opponentSlot]?.name || (opponentSlot === 'p1' ? 'ผู้เล่น 1' : 'ผู้เล่น 2');
     let reason;
+
+    if(data.forfeitBy){
+      // กติกา 0: ฝ่ายหนึ่งขาดการเชื่อมต่อนานเกินไป -> อีกฝ่ายชนะโดยปริยาย (auto-forfeit)
+      const forcedResult = data.forfeitBy === mySlot ? 'lose' : 'win';
+      reason = data.forfeitBy === mySlot
+        ? 'คุณขาดการเชื่อมต่อนานเกินไป ถูกตัดสินแพ้โดยปริยาย'
+        : `${oppLabel}ขาดการเชื่อมต่อนานเกินไป คุณเป็นฝ่ายชนะโดยปริยาย`;
+      showGameOverModal(myScore, oppScore, oppLabel, forcedResult, reason, 0, 0);
+      return;
+    }
 
     if(data.emptiedBy){
       // กติกา 1: มีฝ่ายหนึ่งลงเบี้ยหมดแป้นก่อน (เบี้ยในถุงหมดแล้วด้วย)
@@ -4360,10 +5350,21 @@ function applyOnlineRoomUpdate(data){
     return;
   }
 
+  // เกมจบไปแล้วและกำลังรอ/ประมวลผลการ "เล่นอีกครั้ง" (rematch) — ไม่ต้อง sync ส่วนอื่นของเกมต่อ
+  if(data.status === 'finished' && gameEnded){
+    updateRematchUI(data.rematch);
+    if(data.rematch && data.rematch.p1 && data.rematch.p2 && !rematchResetting){
+      rematchResetting = true;
+      triggerRematchReset();
+    }
+    return;
+  }
+
   // ตาแรกสุด: ห้องเพิ่งถูกสร้าง ยังไม่มีถุงเบี้ย -> ให้ p1 (ผู้สร้างห้อง) เป็นคนแจกเบี้ยเริ่มต้น
   // ตั้งค่าชุดเบี้ย/ขอบเขต BLANK ตามที่ห้องนี้กำหนดไว้ (ทั้งสองฝั่งต้องตรงกัน)
   const roomTileDefs = data.tileSet === 'elementary' ? AMATH_TILE_DEFINITIONS_ELEMENTARY : AMATH_TILE_DEFINITIONS;
   activeBlankNumbers = data.tileSet === 'elementary' ? BLANK_NUMBERS_ELEMENTARY : BLANK_NUMBERS_SECONDARY;
+  bagTotalForBar = sumDefsCount(roomTileDefs);
 
   if(mySlot === 'p1' && data.bag === null){
     const freshBag = createTileBag(roomTileDefs);
@@ -4457,6 +5458,7 @@ function applyOnlineRoomUpdate(data){
 }
 
 leaveRoomBtn.addEventListener('click', () => {
+  stopHeartbeat();
   if(window.AmathOnline) window.AmathOnline.leaveRoom(onlineRoomRef);
   location.reload();
 });
@@ -4642,6 +5644,7 @@ document.querySelectorAll('.start-diff-btn').forEach(btn => {
     gameMode = 'bot';
     activeTileDefinitions = selectedTileSet === 'elementary' ? AMATH_TILE_DEFINITIONS_ELEMENTARY : AMATH_TILE_DEFINITIONS;
     activeBlankNumbers = selectedTileSet === 'elementary' ? BLANK_NUMBERS_ELEMENTARY : BLANK_NUMBERS_SECONDARY;
+    bagTotalForBar = sumDefsCount(activeTileDefinitions);
     startOverlay.remove();
       document.body.classList.remove('pre-game');
     startGame();
@@ -4689,9 +5692,160 @@ document.getElementById('onlineBackBtn').addEventListener('click', () => {
 });
 
 
+/* =========================================================
+   ACCOUNT / เข้าสู่ระบบ-สมัครสมาชิก
+   ========================================================= */
+let myOnlineDisplayName = null;
+let myOnlineIsGuest = true;
+let authModalResolve = null;
+let authModalReject = null;
+
+const accountBtn = document.getElementById('accountBtn');
+const accountMenu = document.getElementById('accountMenu');
+const accountMenuName = document.getElementById('accountMenuName');
+const accountMenuSub = document.getElementById('accountMenuSub');
+const accountLoginOpenBtn = document.getElementById('accountLoginOpenBtn');
+const accountLogoutBtn = document.getElementById('accountLogoutBtn');
+const authModal = document.getElementById('authModal');
+const authErrorEl = document.getElementById('authErrorEl');
+
+function updateAccountUI(user){
+  if(user && !user.isAnonymous){
+    myOnlineDisplayName = user.displayName || (user.email ? user.email.split('@')[0] : 'ผู้เล่น');
+    myOnlineIsGuest = false;
+    accountBtn.textContent = '😀';
+    accountBtn.classList.add('logged-in');
+    accountMenuName.textContent = myOnlineDisplayName;
+    accountMenuSub.textContent = user.email || 'เข้าสู่ระบบแล้ว';
+    accountLoginOpenBtn.style.display = 'none';
+    accountLogoutBtn.style.display = '';
+  } else if(user && user.isAnonymous){
+    myOnlineDisplayName = 'ผู้เล่นรับเชิญ';
+    myOnlineIsGuest = true;
+    accountBtn.textContent = '👤';
+    accountBtn.classList.remove('logged-in');
+    accountMenuName.textContent = 'ผู้เล่นรับเชิญ';
+    accountMenuSub.textContent = 'สมัครสมาชิกเพื่อให้คู่ต่อสู้เห็นชื่อจริงของคุณ';
+    accountLoginOpenBtn.style.display = '';
+    accountLogoutBtn.style.display = 'none';
+  } else {
+    myOnlineDisplayName = null;
+    myOnlineIsGuest = true;
+    accountBtn.textContent = '👤';
+    accountBtn.classList.remove('logged-in');
+    accountMenuName.textContent = 'ยังไม่ได้เข้าสู่ระบบ';
+    accountMenuSub.textContent = 'เล่นบอทได้เลย ไม่ต้องมีบัญชี';
+    accountLoginOpenBtn.style.display = '';
+    accountLogoutBtn.style.display = 'none';
+  }
+}
+
+// เช็ค session ที่ค้างไว้ (ถ้ามี) ตอนเปิดแอป โดยไม่บังคับให้ล็อกอิน/สมัครใหม่
+if(window.AmathOnline && window.AmathOnline.isConfigured()){
+  window.AmathOnline.checkExistingSession().then(user => updateAccountUI(user)).catch(() => {});
+}
+
+function showAuthError(err){
+  const map = {
+    'auth/popup-closed-by-user': '', // ผู้ใช้ปิดหน้าต่าง Google เอง ไม่ต้องขึ้น error
+    'auth/cancelled-popup-request': '',
+    'auth/popup-blocked': 'เบราว์เซอร์บล็อกหน้าต่างเข้าสู่ระบบ กรุณาอนุญาต pop-up แล้วลองใหม่',
+    'auth/network-request-failed': 'เชื่อมต่ออินเทอร์เน็ตไม่ได้ ลองใหม่อีกครั้ง',
+    'auth/too-many-requests': 'ลองผิดหลายครั้งเกินไป กรุณารอสักครู่แล้วลองใหม่',
+    'no-config': 'ยังไม่ได้ตั้งค่า Firebase',
+  };
+  const msg = map[err?.code];
+  if(msg === '') return; // เคสที่ผู้ใช้ยกเลิกเอง ไม่ต้องแจ้ง error
+  authErrorEl.textContent = msg || map[err?.message] || 'เข้าสู่ระบบไม่สำเร็จ ลองใหม่อีกครั้ง';
+  authErrorEl.classList.add('show');
+}
+
+function openAuthModal(){
+  authErrorEl.classList.remove('show');
+  authErrorEl.textContent = '';
+  authModal.classList.add('open');
+}
+function closeAuthModal(){
+  authModal.classList.remove('open');
+}
+
+// เปิด modal และรอผลลัพธ์ (ใช้ตอนต้องมีตัวตนก่อนเข้าโหมดออนไลน์)
+function openAuthModalAndWait(){
+  return new Promise((resolve, reject) => {
+    authModalResolve = resolve;
+    authModalReject = reject;
+    openAuthModal();
+  });
+}
+
+// ให้แน่ใจว่ามีบัญชี/ผู้เล่นรับเชิญพร้อมแล้วก่อนเข้าสู่โหมดออนไลน์ ถ้ายังไม่มีจะเปิด modal ให้เลือก
+async function ensureOnlineIdentity(){
+  if(!window.AmathOnline || !window.AmathOnline.isConfigured()) return true; // ให้ checkOnlineReady() จัดการ error ต่อ
+  const existing = await window.AmathOnline.checkExistingSession().catch(() => null);
+  if(existing){
+    updateAccountUI(existing);
+    return true;
+  }
+  try {
+    await openAuthModalAndWait();
+    return true;
+  } catch(e){
+    return false; // ผู้ใช้ปิด modal เอง ยกเลิกการเข้าโหมดออนไลน์
+  }
+}
+
+accountBtn.addEventListener('click', (e) => {
+  e.stopPropagation();
+  accountMenu.classList.toggle('open');
+});
+accountLoginOpenBtn.addEventListener('click', () => {
+  accountMenu.classList.remove('open');
+  openAuthModal(); // เปิดแบบ proactive ไม่ได้ผูก promise กับโหมดออนไลน์
+});
+accountLogoutBtn.addEventListener('click', async () => {
+  accountMenu.classList.remove('open');
+  if(window.AmathOnline) await window.AmathOnline.signOutUser().catch(() => {});
+  updateAccountUI(null);
+});
+document.addEventListener('click', (e) => {
+  if(accountMenu.classList.contains('open') && !accountMenu.contains(e.target) && e.target !== accountBtn){
+    accountMenu.classList.remove('open');
+  }
+});
+
+document.getElementById('authCloseBtn').addEventListener('click', () => {
+  closeAuthModal();
+  if(authModalReject) authModalReject(new Error('cancelled'));
+  authModalResolve = null; authModalReject = null;
+});
+
+document.getElementById('googleSignInBtn').addEventListener('click', async () => {
+  const btn = document.getElementById('googleSignInBtn');
+  btn.disabled = true;
+  authErrorEl.classList.remove('show');
+  try {
+    const user = await window.AmathOnline.signInWithGoogle();
+    updateAccountUI({ isAnonymous: false, displayName: user.displayName });
+    closeAuthModal();
+    if(authModalResolve) authModalResolve(true);
+    authModalResolve = null; authModalReject = null;
+  } catch(e){ showAuthError(e); } finally { btn.disabled = false; }
+});
+
+document.getElementById('authGuestBtn').addEventListener('click', async () => {
+  try {
+    const user = await window.AmathOnline.continueAsGuest();
+    updateAccountUI({ isAnonymous: true });
+    closeAuthModal();
+    if(authModalResolve) authModalResolve(true);
+    authModalResolve = null; authModalReject = null;
+  } catch(e){ showAuthError(e); }
+});
+
 /* ---- แบบสุ่ม ---- */
-document.getElementById('onlineRandomModeBtn').addEventListener('click', () => {
+document.getElementById('onlineRandomModeBtn').addEventListener('click', async () => {
   if(!checkOnlineReady()) return;
+  if(!(await ensureOnlineIdentity())) return;
 
   showOnlineState('searching');
   let waitedSec = 0;
@@ -4749,6 +5903,7 @@ document.querySelectorAll('#onlineTilesetButtons .start-tileset-btn').forEach(bt
 
 document.getElementById('createRoomBtn').addEventListener('click', async () => {
   if(!checkOnlineReady()) return;
+  if(!(await ensureOnlineIdentity())) return;
   try {
     const { roomId, code } = await window.AmathOnline.createFriendRoom(selectedOnlineTileSet);
     roomCodeDisplay.textContent = code;
@@ -4800,6 +5955,7 @@ joinCodeInput.addEventListener('input', () => {
 
 document.getElementById('joinRoomBtn').addEventListener('click', async () => {
   if(!checkOnlineReady()) return;
+  if(!(await ensureOnlineIdentity())) return;
   const code = joinCodeInput.value.trim();
   joinRoomError.style.display = 'none';
   if(code.length !== 6){
@@ -4829,6 +5985,17 @@ function startGame(){
   fillBotRack(RACK_SIZE);
   updateSubmitState();
   updateEndTurnState();
+}
+
+// ถ้าเพิ่งรีโหลดหน้ามาจากการกด "เล่นอีกครั้ง" (rematch) ให้กลับเข้าห้องเดิมทันที
+tryResumeRematch();
+
+/* ลงทะเบียน Service Worker เพื่อให้ติดตั้งเป็นแอปได้ (PWA) และเล่นโหมดคนเดียวแบบออฟไลน์ได้
+   ถ้าไฟล์ sw.js ไม่ได้อยู่ในโฟลเดอร์เดียวกัน จะแค่ล้มเหลวเงียบๆ ไม่กระทบการเล่นเกมปกติ */
+if('serviceWorker' in navigator){
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch(() => {});
+  });
 }
 
 </script>
