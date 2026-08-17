@@ -5437,6 +5437,9 @@ function applyOnlineRoomUpdate(data){
   // เติมแป้นเบี้ยของเราใหม่เฉพาะตอนที่ยังไม่เคยมีเบี้ยเลย (โหลดครั้งแรก)
   // หรือชุดเบี้ยที่ Firestore เก็บไว้ไม่ตรงกับที่แสดงอยู่จริง (เพิ่งลง/เปลี่ยนเบี้ยไปแล้วแต่จอยังไม่อัปเดต)
   // ไม่ยึดจังหวะ "เทิร์นเพิ่งเปลี่ยนมาเป็นของเรา" อีกต่อไป กันไม่ให้การสลับเบี้ยในถาดระหว่างรอคู่ต่อสู้หายไป
+  // ห้าม sync ถ้ายังมีเบี้ยที่ลงบนกระดานแบบยังไม่ได้กด "ลงสมการ" ค้างอยู่ (ไม่งั้น heartbeat ทุก 12 วิ
+  // จะไปกระตุ้นให้ดึงแป้นเบี้ยเต็มชุดจาก Firestore มาซ้ำกับเบี้ยที่ค้างอยู่บนกระดาน กลายเป็นเบี้ยโผล่ซ้ำ)
+  const hasPendingPlacement = unlockedPlacedCells().length > 0;
   const currentRackValues = rackSlots
     .map(s => s.firstElementChild?.dataset.value)
     .filter(Boolean)
@@ -5448,7 +5451,7 @@ function applyOnlineRoomUpdate(data){
     .join(',');
   const rackIsEmpty = rackSlots.every(s => s.children.length === 0);
 
-  if(rackIsEmpty || currentRackValues !== firestoreRackValues){
+  if(!hasPendingPlacement && (rackIsEmpty || currentRackValues !== firestoreRackValues)){
     rackSlots.forEach(s => s.innerHTML = '');
     (data[mySlot]?.rack || []).forEach((tileData, idx) => {
       if(idx < rackSlots.length) rackSlots[idx].appendChild(buildTileEl(tileData));
