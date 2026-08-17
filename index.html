@@ -1312,6 +1312,11 @@
   body.pre-game .rack-area{
     display: none;
   }
+  /* ปุ่มบัญชี/ธีมกระดาน ให้โชว์แค่หน้าจอเริ่มต้น พอเข้าเกมจริงแล้วซ่อน กันบังจอ */
+  body:not(.pre-game) .account-btn,
+  body:not(.pre-game) .theme-btn{
+    display: none;
+  }
   body.pre-game .play-area{
     height: 100vh;
     width: 100%;
@@ -3249,6 +3254,7 @@ function onPointerDown(e){
 
   window.addEventListener('pointermove', onPointerMove);
   window.addEventListener('pointerup', onPointerUp);
+  window.addEventListener('pointercancel', onPointerCancel);
 }
 
 function onPointerMove(e){
@@ -3286,6 +3292,7 @@ function onPointerMove(e){
 function onPointerUp(e){
   window.removeEventListener('pointermove', onPointerMove);
   window.removeEventListener('pointerup', onPointerUp);
+  window.removeEventListener('pointercancel', onPointerCancel);
 
   if(dragOverTarget) dragOverTarget.classList.remove('drag-over');
   if(dragGhost){ dragGhost.remove(); dragGhost = null; }
@@ -3398,6 +3405,12 @@ function resetDrag(){
   dragSource = null;
 }
 
+// เกิดเวลาการลากถูกขัดจังหวะกลางทาง (นิ้วหลุด, แจ้งเตือนขึ้น, เบราว์เซอร์ยกเลิก touch เอง ฯลฯ)
+// ต้องคืนเบี้ยตัวจริงกลับมาโชว์ทันที ไม่งั้นจะค้างเป็นเบี้ยล่องหนแตะไม่ได้ค้างอยู่ในช่องเดิม
+function onPointerCancel(e){
+  cancelInProgressTileDrag();
+}
+
 /* =========================================================
    PINCH-ZOOM เฉพาะกระดาน (ไม่ซูมถาดเบี้ย/ปุ่มอื่นๆ)
    ใช้สองนิ้วบีบ/ขยายบน .board-zoom-wrap เพื่อซูมเฉพาะ .board-frame
@@ -3449,8 +3462,14 @@ function cancelInProgressTileDrag(){
   if(dragGhost){ dragGhost.remove(); dragGhost = null; }
   window.removeEventListener('pointermove', onPointerMove);
   window.removeEventListener('pointerup', onPointerUp);
+  window.removeEventListener('pointercancel', onPointerCancel);
+  if(dragOverTarget){ dragOverTarget.classList.remove('drag-over'); dragOverTarget = null; }
   resetDrag();
 }
+
+// เผื่อไว้อีกชั้น: ถ้าหน้าต่างเสียโฟกัสกลางที่กำลังลากเบี้ย (สลับแอป, มีการแจ้งเตือนขึ้นมาบัง ฯลฯ)
+// ให้คืนเบี้ยกลับที่เดิมทันทีเช่นกัน กันเบี้ยค้างล่องหน
+window.addEventListener('blur', () => cancelInProgressTileDrag());
 
 /* ใช้ Touch Events ตรงๆ (แทน Pointer Events) สำหรับท่าบีบ/ขยายสองนิ้วโดยเฉพาะ
    เพราะ Touch Events อ่านค่านิ้วทั้งหมดพร้อมกันได้ตรงไปตรงมากว่า และกันเบราว์เซอร์
