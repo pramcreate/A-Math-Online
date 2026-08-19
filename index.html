@@ -3666,6 +3666,31 @@ function detectLineAndRun(newCells){
   return finalize(run);
 }
 
+/* ---- หาแนว "ตัดผ่าน" (แนวตั้งฉากกับสมการหลักที่กำลังลง) ผ่านเบี้ยตัวหนึ่งที่เพิ่งวาง
+   ใช้ตรวจว่าการวางเบี้ยใหม่ไปชนกับเบี้ยเดิมแล้วเกิดเป็น "สมการใหม่โดยไม่ตั้งใจ" หรือไม่
+   คืนค่า null ถ้าไม่มีเบี้ยติดกันในแนวตั้งฉากเลย (ไม่ได้เกิดสมการใหม่ ไม่ต้องเช็ค) ---- */
+function getPerpendicularRun(cell, mainOrientation){
+  const row = Number(cell.dataset.row);
+  const col = Number(cell.dataset.col);
+  let cellAt, centerV;
+  if(mainOrientation === 'row'){
+    // สมการหลักเป็นแนวนอน -> แนวตัดผ่านคือแนวตั้ง (ไล่ตามแถว คงที่ที่คอลัมน์เดิม)
+    cellAt = v => cellsByRC[v + '-' + col];
+    centerV = row;
+  } else {
+    // สมการหลักเป็นแนวตั้ง -> แนวตัดผ่านคือแนวนอน (ไล่ตามคอลัมน์ คงที่ที่แถวเดิม)
+    cellAt = v => cellsByRC[row + '-' + v];
+    centerV = col;
+  }
+  let minV = centerV, maxV = centerV;
+  while(cellAt(minV - 1) && cellAt(minV - 1).classList.contains('filled')) minV--;
+  while(cellAt(maxV + 1) && cellAt(maxV + 1).classList.contains('filled')) maxV++;
+  if(minV === maxV) return null; // ไม่มีเบี้ยติดกันในแนวตั้งฉาก ไม่ได้เกิดสมการใหม่
+  const run = [];
+  for(let v = minV; v <= maxV; v++) run.push(cellAt(v));
+  return run;
+}
+
 /* ---- ตรวจความถูกต้องทางคณิตศาสตร์ของสมการที่เรียงเป็นแนวเดียวกัน ---- */
 function validateEquation(runCells){
   const symbols = [];
@@ -4089,6 +4114,29 @@ submitBtn.addEventListener('click', () => {
     highlightInvalid(lineResult.run);
     showErrorToast(eqResult.message);
     return;
+  }
+
+  // เช็คสมการ "ที่ตัดผ่าน" ด้วย — ถ้าเบี้ยที่วางใหม่ตัวไหนไปชนกับเบี้ยเดิมในแนวตั้งฉาก
+  // (เกิดเป็นสมการใหม่ในแนวนั้น) สมการนั้นต้องถูกต้องด้วยเช่นกัน ไม่งั้นลงไม่ได้
+  const mainOrientation = (new Set(lineResult.run.map(c => Number(c.dataset.row)))).size === 1 ? 'row' : 'col';
+  const crossRuns = [];
+  const seenCrossKeys = new Set();
+  for(const cell of placed){
+    const perpRun = getPerpendicularRun(cell, mainOrientation);
+    if(!perpRun) continue;
+    const key = perpRun.map(c => c.dataset.row + ',' + c.dataset.col).join('|');
+    if(seenCrossKeys.has(key)) continue;
+    seenCrossKeys.add(key);
+    crossRuns.push(perpRun);
+  }
+  for(const crossRun of crossRuns){
+    const crossResult = validateEquation(crossRun);
+    if(!crossResult.valid){
+      highlightInvalid(crossRun);
+      const dir = mainOrientation === 'row' ? 'แนวตั้ง' : 'แนวนอน';
+      showErrorToast(`สมการ${dir}ที่ตัดผ่านไม่ถูกต้อง: ${crossResult.message}`);
+      return;
+    }
   }
 
   clearInvalidHighlights();
